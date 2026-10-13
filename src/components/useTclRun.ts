@@ -33,3 +33,18 @@ export function useTclRun() {
 
 export const TIMEOUT_MESSAGE =
     'This took longer than 5 seconds, so we stopped it. Is there an infinite loop? Check that every while loop changes the thing it tests.';
+
+export const OUTPUT_LIMIT_MESSAGE =
+    'Your script printed far too much, so we stopped it. Does your loop ever stop? Check that every while loop changes the thing it tests. The start of the output is below.';
+
+export const CRASH_MESSAGE =
+    'Your script used up all the memory that Tcl has in this page, so we stopped it and started a fresh Tcl. Does your loop ever stop? Fix the script and press Run again: no need to reload the page.';
+
+/** The friendly message for a run that was stopped, or '' for a normal run (shared by every component). */
+export function runProblem(result: TclRunResult | null): string {
+    if (!result) return '';
+    if (result.timedOut) return TIMEOUT_MESSAGE;
+    if (result.crashed) return CRASH_MESSAGE;
+    if (result.outputLimit) return OUTPUT_LIMIT_MESSAGE;
+    return '';
+}

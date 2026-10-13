@@ -1,5 +1,8 @@
 // The TclRuntime interface hides which Tcl-in-the-browser engine is used (PRD §16):
 // swap WaclRuntime for another implementation without touching any component.
+// Every component that runs learner code (TclPlayground, PredictOutput, the LayoutCanvas of P5) must
+// go through this runtime, usually via useTclRun, so that the timeout, the output limit and the
+// restart after an out-of-memory crash protect it too.
 
 export interface TclRunResult {
     ok: boolean;
@@ -7,6 +10,10 @@ export interface TclRunResult {
     stderr: string;
     error: string;
     timedOut: boolean;
+    /** The script printed more than the worker's limit and was stopped (stdout holds the start). */
+    outputLimit: boolean;
+    /** The engine ran out of memory. It has been thrown away; the next run starts a fresh one. */
+    crashed: boolean;
 }
 
 export interface TclRunOptions {
@@ -33,6 +40,8 @@ interface WorkerReply {
     stdout?: string;
     stderr?: string;
     error?: string;
+    outputLimit?: boolean;
+    crashed?: boolean;
 }
 
 function cleanLines(text: string | undefined): string {
@@ -69,7 +78,11 @@ export class WaclRuntime implements TclRuntime {
                 }
             };
             worker.onerror = (event) => {
-                this.ready = null;
+                if (this.worker !== worker) return;   // an old worker that was already replaced
+                // Before ready: the engine could not start. After ready: the worker itself died
+                // (for example out of memory outside Wacl), so finish every waiting run as crashed.
+                for (const done of this.pending.values()) done({ ok: false, crashed: true });
+                this.kill();
                 reject(new Error(event.message || 'The Tcl engine failed to start.'));
             };
         });
@@ -102,7 +115,13 @@ export class WaclRuntime implements TclRuntime {
         const outcome = await Promise.race([this.send(script), timeout]);
         if (outcome === 'timeout') {
             this.kill(); // a runaway script can only be stopped by killing the worker
-            return { ok: false, stdout: '', stderr: '', error: '', timedOut: true };
+            return { ok: false, stdout: '', stderr: '', error: '', timedOut: true, outputLimit: false, crashed: false };
+        }
+        if (outcome.crashed) {
+            // Out of memory: that interpreter can never run again. Drop it; the next run() starts a
+            // fresh worker through init(), so the learner does not have to reload the page.
+            this.kill();
+            return { ok: false, stdout: '', stderr: '', error: '', timedOut: false, outputLimit: false, crashed: true };
         }
         return {
             ok: outcome.ok ?? false,
@@ -110,6 +129,8 @@ export class WaclRuntime implements TclRuntime {
             stderr: cleanLines(outcome.stderr),
             error: cleanLines(outcome.error),
             timedOut: false,
+            outputLimit: outcome.outputLimit ?? false,
+            crashed: false,
         };
     }
 }

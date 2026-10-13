@@ -35,6 +35,8 @@
 24. A lab self-test may build a passing program only for a small weekly lab. Capstone and exam graders are tested against the private solutions repository.
 25. **From Week 4, a lab checker guards against loops that never end:** `interp limit $child commands`, plus a cap on captured output (Wacl has a fixed 16 MB heap). A runaway script gets a FAIL that says so; the checker never hangs or crashes the browser interpreter. The self-test covers both a silent and a printing endless loop.
 
+28. **Every component that runs learner code in the browser goes through `src/lib/tclRuntime.ts`** (usually via `useTclRun`, showing `runProblem(result)`). That is what gives it the 5 s timeout, the output limit and the restart after an out-of-memory crash. The LayoutCanvas of P5 must do the same; `npm run test:browser` covers the guards.
+
 ## Scripts that read MDX (learned in P3)
 
 26. **Never write a component tag such as `<Trap>` in an MDX comment or in prose.** `scripts/lib/mdx-scan.mjs` reads it as a real tag with no props, and snippet extraction crashes. Write "Trap component" instead.

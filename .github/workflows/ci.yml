@@ -83,3 +83,9 @@ jobs:
         run: |
           export CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
           npm run snippets:wacl
+      - name: Build the site for the browser test
+        run: npm run build
+      - name: Playground guards in the built site (output limit, restart after out of memory)
+        run: |
+          export CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
+          npm run test:browser

@@ -67,6 +67,9 @@ for (const job of jobs) {
     const reply = await page.evaluate((code, t) => window.__run(code, t), job.code, TIMEOUT_MS);
     let problem = null;
     if (reply.timedOut) { problem = `timed out after ${TIMEOUT_MS} ms`; await page.evaluate(() => window.__start()); }
+    // Out of memory kills that Wacl instance (the site restarts it the same way, src/lib/tclRuntime.ts).
+    else if (reply.crashed) { problem = 'Wacl ran out of memory (16 MB heap)'; await page.evaluate(() => { window.__w.terminate(); return window.__start(); }); }
+    else if (reply.outputLimit) problem = 'printed more than the playground output limit';
     else if (job.error !== undefined) {
         if (reply.ok || !reply.error.includes(job.error.trim())) problem = `expected an error containing ${JSON.stringify(job.error.trim())} but Wacl gave ${reply.ok ? 'no error' : JSON.stringify(reply.error.split('\n')[0])}`;
     }

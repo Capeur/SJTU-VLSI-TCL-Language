@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { useTclRun, TIMEOUT_MESSAGE } from './useTclRun';
+import { useTclRun, runProblem } from './useTclRun';
 import { tclQuote } from '../lib/tclRuntime';
 import { recordQuiz } from '../lib/progress';
 
@@ -17,13 +17,15 @@ interface Props {
 }
 
 export function Output({ phase, result, failure }: ReturnType<typeof useTclRun>) {
+    const problem = runProblem(result);
+    const showOutput = result && !result.timedOut && !result.crashed;
     return (
         <div aria-live="polite">
             {phase === 'loading' && <p class="tc-out">Loading the Tcl engine (first run only)…</p>}
             {phase === 'running' && <p class="tc-out">Running…</p>}
             {failure && <p class="tc-out err">{failure}</p>}
-            {result?.timedOut && <p class="tc-out err">{TIMEOUT_MESSAGE}</p>}
-            {result && !result.timedOut && (
+            {problem && <p class="tc-out err" data-run-problem>{problem}</p>}
+            {showOutput && (
                 <>
                     <pre class="tc-out" aria-label="Output">{result.stdout || (result.ok ? '(no output)' : '')}</pre>
                     {result.stderr && <pre class="tc-out err" aria-label="Error output">{result.stderr}</pre>}

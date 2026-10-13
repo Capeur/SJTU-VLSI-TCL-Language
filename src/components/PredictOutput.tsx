@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { useTclRun, TIMEOUT_MESSAGE } from './useTclRun';
+import { useTclRun, runProblem } from './useTclRun';
 import { normaliseOutput } from '../lib/tclRuntime';
 import { useUid } from './useUid';
 
@@ -12,7 +12,8 @@ export default function PredictOutput({ code, expected, explanation }: Props) {
     const state = useTclRun();
     const busy = state.phase === 'loading' || state.phase === 'running';
     const { result } = state;
-    const matches = result && !result.timedOut && normaliseOutput(guess) === normaliseOutput(result.stdout);
+    const problem = runProblem(result);
+    const matches = result && !problem && normaliseOutput(guess) === normaliseOutput(result.stdout);
 
     return (
         <section class="tc-box" aria-label="Predict, run, explain">
@@ -29,8 +30,8 @@ export default function PredictOutput({ code, expected, explanation }: Props) {
             <div aria-live="polite">
                 {busy && <p class="tc-out">{state.phase === 'loading' ? 'Loading the Tcl engine (first run only)…' : 'Running…'}</p>}
                 {state.failure && <p class="tc-out err">{state.failure}</p>}
-                {result?.timedOut && <p class="tc-out err">{TIMEOUT_MESSAGE}</p>}
-                {result && !result.timedOut && (
+                {problem && <p class="tc-out err" data-run-problem>{problem}</p>}
+                {result && !problem && (
                     <>
                         <p>Tcl printed:</p>
                         <pre class="tc-out">{result.stdout || '(no output)'}</pre>
