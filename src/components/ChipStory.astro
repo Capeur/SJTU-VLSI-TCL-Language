@@ -1,0 +1,11 @@
+---
+// One paragraph + one image tying the topic to the imaginary chip (PRD §6.3 #1).
+interface Props { image?: string; alt?: string; }
+const { image, alt = '' } = Astro.props;
+if (image && !alt) console.warn('[ChipStory] image given without alt text (PRD §12.10)');
+---
+<aside class="tc-box tc-note-aside" aria-label="Chip story">
+  <p class="tc-title">🏙️ Chip story</p>
+  <slot />
+  {image && <img src={image} alt={alt} loading="lazy" />}
+</aside>

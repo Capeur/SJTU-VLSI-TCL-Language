@@ -1,0 +1,172 @@
+---
+title: "Component demo"
+description: "Every course component on one page, for testing. Not part of the course."
+sidebar:
+  hidden: true
+pagefind: false
+head:
+  - tag: meta
+    attrs: { name: robots, content: noindex }
+---
+
+import LessonMeta from '../../components/LessonMeta.astro';
+import ChipStory from '../../components/ChipStory.astro';
+import Goals from '../../components/Goals.astro';
+import Quiz from '../../components/Quiz.astro';
+import Flashcards from '../../components/Flashcards.astro';
+import WorkedExample from '../../components/WorkedExample.astro';
+import Trap from '../../components/Trap.astro';
+import CheatCard from '../../components/CheatCard.astro';
+import FurtherReading from '../../components/FurtherReading.astro';
+import GlossaryTerm from '../../components/GlossaryTerm.astro';
+import VersionNote from '../../components/VersionNote.astro';
+import TclPlayground from '../../components/TclPlayground.tsx';
+import PredictOutput from '../../components/PredictOutput.tsx';
+import FadedExample from '../../components/FadedExample.tsx';
+import Hints from '../../components/Hints.tsx';
+import RunWhere from '../../components/RunWhere.tsx';
+import ProgressTracker from '../../components/ProgressTracker.tsx';
+
+This page shows every component once, so you can try each one in the browser. It is a test page and is not part of the course. Use only the keyboard (Tab, Shift+Tab, Enter, Space, arrow keys) to check that everything works without a mouse.
+
+## 1. LessonMeta
+
+<LessonMeta milestone="m10" week={3} lesson="a" minutes={40} />
+
+## 2. ChipStory
+
+<ChipStory>
+A chip is a city map drawn in layers. Before a city can get a new road, someone has to describe the road to the machine. Tcl is the language you will use to describe it.
+</ChipStory>
+
+## 3. Goals
+
+<Goals items={['Predict what puts prints for braces and quotes', 'Explain why the first word is the command', 'Choose quotes or braces for a task']} />
+
+## 4. Quiz — warm-up and exit modes
+
+Each quiz draws questions in the browser. Try every question type by clicking *Try again with new questions*.
+
+<Quiz bank="demo" earlier={['demo']} mode="warmup" />
+
+<Quiz bank="demo" lesson="a" mode="exit" count={4} />
+
+All eight questions (weekly mode, to see all six question types):
+
+<Quiz bank="demo" mode="weekly" count={8} mix={1} />
+
+## 5. GlossaryTerm
+
+When Tcl does a <GlossaryTerm term="substitution" /> it first splits the line into <GlossaryTerm term="word">words</GlossaryTerm>, then runs one <GlossaryTerm term="command" />. In a layout, each <GlossaryTerm term="layer" /> is a separate sheet of the map. Tab to a term to see its tooltip.
+
+## 6. WorkedExample
+
+<WorkedExample
+  code={`set width 4
+set height 3
+set area [expr {$width * $height}]
+puts "Area is $area"`}
+  notes={{
+    1: 'set creates a variable named width and gives it the value 4.',
+    2: 'The same for height.',
+    3: 'Square brackets run expr first. The braces keep expr safe and fast.',
+    4: 'Double quotes allow $area to be replaced by its value.'
+  }}
+/>
+
+## 7. FadedExample
+
+<FadedExample
+  template={`set total ___1___
+set count 4
+set average [expr {$total / ___2___}]
+puts $average`}
+  answers={[['20', '/^\\d+$/'], ['$count', '4']]}
+  hints={['Any whole number works.', 'You can divide by the variable or by its value.']}
+/>
+
+## 8. PredictOutput with the TclPlayground
+
+<PredictOutput
+  client:visible
+  code={`set x 5
+puts {x is $x}
+puts "x is $x"`}
+  expected={`x is $x
+x is 5`}
+  explanation="Braces stop substitution, so the first line prints $x literally. Double quotes still substitute, so the second line prints 5."
+/>
+
+<TclPlayground client:visible code={`set names {metal1 poly active}
+foreach name $names {
+    puts "layer: $name"
+}`} />
+
+Runaway code test: replace the code with `while {1} {}` and press Run. After 5 seconds you should see a friendly message, and the playground should still work afterwards.
+
+## 9. Trap
+
+<Trap
+  wrong={`set a 3
+puts [expr $a +]`}
+  error={`syntax error in expression "3 +": premature end of expression`}
+  fix={`set a 3
+puts [expr {$a + 1}]`}
+  why="The expression was cut short. Brace the expression and check that every operator has two sides."
+/>
+
+## 10. Hints
+
+<Hints client:visible hints={['Think about which word comes first.', 'The first word is the command name.', 'puts is the command; the other words are its arguments.']} />
+
+## 11. VersionNote
+
+<VersionNote
+  since="9.0"
+  code86={`puts [expr {010}]`}
+  expect86="8"
+  code90={`puts [expr {010}]`}
+  expect90="10"
+>
+A number that starts with a zero used to be read as octal. In Tcl 9 it is read as ordinary decimal. To write octal on both versions, use the `0o` prefix, as in `0o10`.
+</VersionNote>
+
+## 12. RunWhere
+
+This code runs in the browser:
+
+<RunWhere client:visible code={`puts "Hello from Tcl"`} filename="hello.tcl" />
+
+This code uses `exec`, so the Playground tab is disabled:
+
+<RunWhere client:visible code={`puts [exec echo hello]`} filename="hosttool.tcl" />
+
+## 13. CheatCard
+
+<CheatCard title="Quotes vs braces" lines={['set x 5', 'puts "x=$x"   ;# x=5', 'puts {x=$x}   ;# x=$x', '[cmd]  runs cmd inside quotes']} />
+
+## 14. ProgressTracker
+
+<ProgressTracker client:visible />
+
+## 15. Flashcards
+
+Answer some quiz questions wrongly above, then reload this page to see them here.
+
+<Flashcards banks={['demo']} />
+
+## 16. FurtherReading
+
+<FurtherReading links={[
+  { title: 'Tcl dodekalogue (the 12 rules)', url: 'https://wiki.tcl-lang.org/10259', kind: 'tutorial' },
+  { title: 'Tcl man page: puts', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/puts.htm', kind: 'tcl-man' },
+]} />
+
+## 17. A runnable snippet block
+
+This block is tested in CI on Tcl 8.6 and 9.0:
+
+```tcl run expect="x is $x"
+set x 5
+puts {x is $x}
+```

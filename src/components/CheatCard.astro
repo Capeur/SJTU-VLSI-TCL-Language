@@ -1,0 +1,10 @@
+---
+// Summary card, at most 8 lines (PRD §6.3 #10). Aggregated into /reference/cheatsheets/.
+interface Props { title: string; lines: string[]; }
+const { title, lines } = Astro.props;
+if (lines.length > 8) console.warn(`[CheatCard] "${title}" has ${lines.length} lines; the limit is 8`);
+---
+<aside class="tc-box" aria-label={`Cheat card: ${title}`}>
+  <p class="tc-title">📌 Cheat card — {title}</p>
+  <ul style="list-style:none;padding:0;margin:0">{lines.map((l) => <li><code>{l}</code></li>)}</ul>
+</aside>

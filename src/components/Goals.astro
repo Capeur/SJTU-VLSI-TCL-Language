@@ -1,0 +1,10 @@
+---
+// "You will be able to…" — at most 3 goals (PRD §7).
+interface Props { items: string[]; }
+const { items } = Astro.props;
+if (items.length > 3) console.warn(`[Goals] ${items.length} goals given; the limit is 3 (PRD §7)`);
+---
+<section class="tc-box" aria-labelledby="goals-title">
+  <p class="tc-title" id="goals-title">You will be able to…</p>
+  <ul>{items.map((goal) => <li>{goal}</li>)}</ul>
+</section>

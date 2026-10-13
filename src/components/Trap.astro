@@ -1,0 +1,15 @@
+---
+// Common mistake: wrong code, the real error message, the fix, and why (PRD §7).
+interface Props { wrong: string; error: string; fix: string; why: string; }
+const { wrong, error, fix, why } = Astro.props;
+---
+<aside class="tc-box tc-trap" aria-label="Common trap">
+  <p class="tc-title"><span class="tc-badge tc-warn">Trap</span> Watch out for this</p>
+  <p>This code looks fine, but it goes wrong:</p>
+  <pre class="tc-code" tabindex="0">{wrong}</pre>
+  <p>Tcl says:</p>
+  <pre class="tc-code" tabindex="0">{error}</pre>
+  <p>The fix:</p>
+  <pre class="tc-code" tabindex="0">{fix}</pre>
+  <p><strong>Why:</strong> {why}</p>
+</aside>

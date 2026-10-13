@@ -1,0 +1,10 @@
+---
+// Spaced-review deck. `banks` lists quiz files whose questions may appear (default: all).
+import FlashcardsApp from './FlashcardsApp';
+import { loadQuizBanks } from '../lib/content.mjs';
+interface Props { banks?: string[]; }
+const { banks } = Astro.props;
+const questions = loadQuizBanks().filter((b) => !banks || banks.includes(b.name)).flatMap((b) => b.questions);
+---
+<FlashcardsApp client:visible questions={questions} />
+<noscript><p>Spaced review needs JavaScript.</p></noscript>

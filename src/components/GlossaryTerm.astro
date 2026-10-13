@@ -1,0 +1,13 @@
+---
+// Inline definition: tooltip on hover/focus, link to the glossary (PRD §7).
+// A missing term fails the build, so every term used is defined (PRD §17 P9).
+import { loadGlossary } from '../lib/content.mjs';
+interface Props { term: string; }
+const { term } = Astro.props;
+const glossary = loadGlossary();
+const entry = glossary[term];
+if (!entry) throw new Error(`<GlossaryTerm term="${term}">: no src/content/glossary/${term}.yaml`);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const tipId = `tip-${term}-${Math.random().toString(36).slice(2, 7)}`;
+---
+<a class="tc-term" href={`${base}/reference/glossary/#${term}`} aria-describedby={tipId}><slot>{entry.term}</slot><span class="tc-tip" role="tooltip" id={tipId}>{entry.short}</span></a>

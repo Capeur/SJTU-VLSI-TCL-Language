@@ -1,0 +1,34 @@
+---
+// Header bar (PRD §6.3 #0). Marks the lesson "visited" in local progress.
+interface Props { milestone: 'm10' | 'm20' | 'm30' | 'm40'; week: number; lesson: 'a' | 'b' | 'lab' | 'quiz'; minutes: number; }
+const { milestone, week, lesson, minutes } = Astro.props;
+const pad = String(week).padStart(2, '0');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const steps = ['a', 'b', 'lab', 'quiz'];
+const names: Record<string, string> = { a: 'Lesson A', b: 'Lesson B', lab: 'Lab', quiz: 'Quiz' };
+const id = `${milestone}-w${pad}-${lesson}`;
+---
+<header class="tc-box tc-meta" style={`--ms: var(--${milestone})`} data-lesson-meta data-lesson-id={id} data-week-id={`${milestone}-w${pad}`}>
+  <p style="margin:0">
+    <a href={`${base}/${milestone}/`}>{milestone.toUpperCase()}</a> ›
+    <a href={`${base}/${milestone}/week-${pad}/`}>Week {week}</a> › <strong>{names[lesson]}</strong>
+    · about {minutes} min
+  </p>
+  <p class="tc-dots" style="margin:0" role="img" aria-label="Progress this week: visited pages are filled in">
+    {steps.map((s) => <span class="tc-dot" data-step={s} title={names[s]}></span>)}
+  </p>
+</header>
+<script>
+  import { load, markVisited } from '../lib/progress';
+  const meta = document.querySelector<HTMLElement>('[data-lesson-meta]');
+  if (meta) {
+    markVisited(meta.dataset.lessonId!);
+    const state = load();
+    const week = meta.dataset.weekId!;
+    meta.querySelectorAll<HTMLElement>('.tc-dot').forEach((dot) => {
+      if (state.visited[`${week}-${dot.dataset.step}`]) dot.setAttribute('data-done', '');
+    });
+    const done = meta.querySelectorAll('.tc-dot[data-done]').length;
+    meta.querySelector('.tc-dots')?.setAttribute('aria-label', `${done} of 4 pages visited this week`);
+  }
+</script>

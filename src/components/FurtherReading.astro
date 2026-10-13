@@ -1,0 +1,11 @@
+---
+interface Props { links: { title: string; url: string; kind: 'tcl-man' | 'klayout' | 'siemens-kb' | 'tutorial' | 'other' }[]; }
+const { links } = Astro.props;
+const kindLabel: Record<string, string> = { 'tcl-man': 'Tcl man page', klayout: 'KLayout doc', 'siemens-kb': 'Siemens public KB', tutorial: 'Tutorial', other: 'Link' };
+---
+<section class="tc-box" aria-labelledby="further-title">
+  <p class="tc-title" id="further-title">Further reading</p>
+  <ul>
+    {links.map((l) => <li><a href={l.url} rel="noopener">{l.title}</a> <span class="tc-badge tc-info">{kindLabel[l.kind] ?? l.kind}</span></li>)}
+  </ul>
+</section>

@@ -1,0 +1,32 @@
+---
+// Annotated code (PRD §7). `notes` maps line number -> explanation. Hover or focus a note to
+// highlight its line. Without JavaScript the notes simply stay listed under the code.
+interface Props { code: string; notes: Record<string, string> | { line: number; text: string }[]; }
+const { code, notes } = Astro.props;
+const lines = code.replace(/\n$/, '').split('\n');
+const noteList = Array.isArray(notes) ? notes : Object.entries(notes).map(([line, text]) => ({ line: Number(line), text }));
+---
+<section class="tc-box" aria-label="Worked example" data-worked>
+  <p class="tc-title">Worked example</p>
+  <div class="tc-code" tabindex="0" role="group" aria-label="Code with numbered lines"><ol class="tc-lines">{lines.map((l, i) => <li data-line={i + 1}>{l || ' '}</li>)}</ol></div>
+  <ol class="tc-notes">
+    {noteList.map((n) => <li tabindex="0" data-note-line={n.line}><strong>Line {n.line}:</strong> {n.text}</li>)}
+  </ol>
+</section>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-worked]').forEach((box) => {
+    const setLine = (line: string | null) => {
+      box.querySelectorAll('li[data-line]').forEach((el) => {
+        if (line !== null && (el as HTMLElement).dataset.line === line) el.setAttribute('data-hl', '');
+        else el.removeAttribute('data-hl');
+      });
+    };
+    box.querySelectorAll<HTMLElement>('li[data-note-line]').forEach((note) => {
+      const line = note.dataset.noteLine!;
+      note.addEventListener('mouseenter', () => setLine(line));
+      note.addEventListener('focus', () => setLine(line));
+      note.addEventListener('mouseleave', () => setLine(null));
+      note.addEventListener('blur', () => setLine(null));
+    });
+  });
+</script>

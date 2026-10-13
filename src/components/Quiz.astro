@@ -1,0 +1,29 @@
+---
+// Retrieval practice (PRD §7). `bank` = quiz file id(s) for the current lesson; `earlier` = banks
+// from earlier weeks. Questions are drawn in the browser; the pool is validated at build time.
+import QuizApp from './QuizApp';
+import { loadQuizBanks } from '../lib/content.mjs';
+interface Props {
+    bank: string | string[];
+    mode: 'warmup' | 'exit' | 'weekly' | 'exam';
+    lesson?: string;
+    earlier?: string[];
+    count?: number;
+    mix?: number;
+}
+const defaults = { warmup: { count: 3, mix: 0 }, exit: { count: 4, mix: 1 }, weekly: { count: 10, mix: 0.8 }, exam: { count: 20, mix: 0.5 } };
+const { bank, mode, lesson, earlier = [], count = defaults[mode].count, mix = defaults[mode].mix } = Astro.props;
+const banks = loadQuizBanks();
+const names = [bank].flat();
+const find = (ids: string[]) => ids.flatMap((id) => {
+    const b = banks.find((x) => x.name === id);
+    if (!b) throw new Error(`<Quiz>: quiz bank "${id}" not found in src/content/quizzes/`);
+    return b.questions;
+});
+const currentAll = find(names);
+const current = lesson ? currentAll.filter((q) => q.lesson === lesson) : currentAll;
+const earlierPool = find(earlier);
+const quizId = `${names.join('+')}${lesson ? `-${lesson}` : ''}-${mode}`;
+---
+<QuizApp client:visible quizId={quizId} mode={mode} count={count} mix={mix} current={current} earlier={earlierPool} />
+<noscript><p>The quiz needs JavaScript. The questions are practice only; nothing is sent anywhere.</p></noscript>
