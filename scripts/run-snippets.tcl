@@ -3,6 +3,8 @@
 #   <n>.only     "8.6" or "9.0": run only on that Tcl version (used by <VersionNote>)
 #   <n>.drvlite  preload drvlite/drvlite.tcl (arrives in P5)
 #   <n>.error    the script must FAIL, and its error output must contain this text (used by <Trap>)
+#   <n>.maxdecimals  N: a successful run must not print a decimal number with more than N places
+#                (M10 snippets; learners cannot round numbers before Week 8)
 # Usage: tclsh scripts/run-snippets.tcl ?snippetsDir? ?timeoutMs?
 set here [file dirname [file normalize [info script]]]
 set root [file dirname $here]
@@ -90,6 +92,15 @@ foreach file $files {
         }
     } elseif {$status ne "ok"} {
         incr fail; puts "FAIL $name: script raised an error\n  [list [trimLines $output]]"; continue
+    }
+    if {$status eq "ok" && [file exists $base.maxdecimals]} {
+        set places [string trim [readFile $base.maxdecimals]]
+        set long [regexp -all -inline "\\d\\.\\d{[expr {$places + 1}],}" $output]
+        if {[llength $long] > 0} {
+            incr fail
+            puts "FAIL $name: prints a decimal with more than $places places: [lindex $long 0]\n  Choose friendlier numbers, or mark the snippet as intentional (longdecimal)"
+            continue
+        }
     }
     incr pass
     puts "ok   $name"

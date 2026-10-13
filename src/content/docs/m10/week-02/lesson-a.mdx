@@ -1,14 +1,21 @@
 ---
-title: "Week 2 Lesson A"
+title: "expr: Tcl as a calculator"
+description: "Week 2, Lesson A: doing maths with expr, the order of operations, whole numbers and decimals, and the integer-division trap."
 milestone: "m10"
 week: 2
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Calculate with expr using + - * / and parentheses
+  - Predict whether expr gives a whole number or a decimal
+  - Avoid the integer-division trap
+prerequisites: ["m10-w01-b"]
+glossary: [wafer, square-micrometre, expression, operator, order-of-operations, integer, decimal-number, integer-division, remainder]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Results of a command, Math 101", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl6.html" }
+  - { title: "Tcl tutorial: Computers and numbers", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl6a.html" }
+  - { title: "Tcl manual page: expr", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/expr.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,188 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 2 (Tcl as a calculator) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · expr recipe + first run 4 · order of operations +
+    worked example 1 7 · whole numbers and decimals + worked example 2 7 · faded 4 · predict ×2 4 ·
+    traps 3 · exit quiz 4 · cheat card 1 */}
+
+<LessonMeta milestone="m10" week={2} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+How much does one {chip.name} cost to make? A factory builds many chips at once, side by side, on a thin slice of silicon called a <GlossaryTerm term="wafer" />, and it charges for the whole wafer. So the price of one chip depends on two sums: how big one chip is, and how many fit. The first sum is the chip's area: {chip.width_um} × {chip.height_um} = {chip.width_um * chip.height_um} <GlossaryTerm term="square-micrometre">µm²</GlossaryTerm>. Today Tcl becomes your calculator.
+
+<Diagram name="w02-chip-area" alt="Lumen-1 drawn as a rectangle, 400 micrometres wide and 300 micrometres high. Next to it: area is width times height, 400 times 300, which is 120000 square micrometres; perimeter, the distance around, is 2 times width plus height in parentheses, which is 1400 micrometres." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Calculate with expr using + - * / and parentheses', 'Predict whether expr gives a whole number or a decimal', 'Avoid the integer-division trap']} />
+
+## Warm-up
+
+Three quick questions from Week 1. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w02" earlier={['m10-w01']} mode="warmup" />
+
+## A calculator command: expr
+
+The command `expr` works out a sum, called an <GlossaryTerm term="expression" />. To see the answer, write it like this:
+
+`puts [expr {400 * 300}]`
+
+Read it as "print the result of this maths". The square brackets mean "do this first, then use the answer": Lesson B explains them. The braces hold the maths: Week 3 explains why. Until then, always write both, exactly like this.
+
+Computers use `*` for times and `/` for divide, because × and ÷ are hard to type. These symbols are <GlossaryTerm term="operator">operators</GlossaryTerm>. Run the sum, then change the numbers and try `+` and `-`.
+
+<TclPlayground client:visible code={`puts [expr {400 * 300}]`} />
+
+## The order of operations
+
+expr follows the same <GlossaryTerm term="order-of-operations" /> as school maths: `*` and `/` come before `+` and `-`, and anything in parentheses `( )` comes first of all.
+
+expr can also read variables. Inside the braces, `$chipWidth` gives the value of `chipWidth`, so you can write the sum with names instead of numbers.
+
+<WorkedExample
+  code={`set chipWidth 400
+set chipHeight 300
+puts [expr {$chipWidth * $chipHeight}]
+puts [expr {2 * ($chipWidth + $chipHeight)}]
+puts [expr {2 * $chipWidth + $chipHeight}]`}
+  notes={{
+    1: 'The chip is 400 µm wide.',
+    2: 'And 300 µm high.',
+    3: 'The area: width times height. expr looks up both variables itself. Output: 120000',
+    4: 'The perimeter, the distance all the way round. The parentheses make expr add first: 2 * 700. Output: 1400',
+    5: 'The same numbers without parentheses. Now * comes first: 2 * 400 is 800, plus 300. Output: 1100. A different answer, so parentheses matter.'
+  }}
+/>
+
+<TclPlayground client:visible code={`set chipWidth 400
+set chipHeight 300
+puts [expr {$chipWidth * $chipHeight}]
+puts [expr {2 * ($chipWidth + $chipHeight)}]
+puts [expr {2 * $chipWidth + $chipHeight}]`} />
+
+## Whole numbers and decimals
+
+expr knows two kinds of numbers. An <GlossaryTerm term="integer" /> is a whole number, like 400. A <GlossaryTerm term="decimal-number" /> has a point, like 2.5 or 400.0.
+
+The rule: if both numbers in a division are integers, the answer is an integer too, and the part after the point is dropped. This is <GlossaryTerm term="integer-division" />. If at least one number has a point, the answer is a decimal. The `%` operator gives the <GlossaryTerm term="remainder" />: what is left over after an integer division.
+
+<Diagram name="w02-strip" alt="A strip of silicon 1000 micrometres long holds two Lumen-1 chips, each 400 micrometres wide, with 200 micrometres left over at the end. Below: 1000 divided by 400 gives 2, because whole numbers in give a whole number out; 1000 remainder 400 gives 200, the part left over; 1000 divided by 400.0 gives 2.5, a decimal, but half a chip is useless." />
+
+<WorkedExample
+  code={`set stripLength 1000
+set chipWidth 400
+puts [expr {$stripLength / $chipWidth}]
+puts [expr {$stripLength % $chipWidth}]
+puts [expr {$stripLength / 400.0}]`}
+  notes={{
+    1: 'A strip of silicon 1000 µm long.',
+    2: 'Each chip is 400 µm wide.',
+    3: 'Two integers, so integer division: 2.5 becomes 2. Here that is exactly what you want, because only whole chips count. Output: 2',
+    4: 'The remainder: 2 chips use 800 µm, and 200 µm is left over. Output: 200',
+    5: '400.0 has a point, so the answer is a decimal. Output: 2.5. Good maths, but you cannot sell half a chip.'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that each line prints what its comment asks for.
+
+<FadedExample
+  client:visible
+  template={`# The area of Lumen-1. Must print 120000
+puts [expr {400 ___1___ 300}]
+# Half the width, as a decimal. Must print 200.0
+puts [expr {400 / 2___2___}]
+# The perimeter. Must print 1400
+puts [expr {2 * ___3___400 + 300)}]`}
+  answers={[['*'], ['.0'], ['(']]}
+  hints={['Which operator multiplies?', 'Turn the 2 into a decimal number.', 'The closing parenthesis needs a partner, so that expr adds before it multiplies.']}
+/>
+
+## Predict → Run → Explain
+
+Type your prediction first. A wrong prediction is useful: it shows you exactly which rule to fix.
+
+<PredictOutput
+  client:visible
+  code={`puts [expr {300 / 400}]
+puts [expr {300 / 400.0}]`}
+  expected={`0
+0.75`}
+  explanation="Line 1 divides two integers, so the answer is an integer: 0.75 loses everything after the point and becomes 0. In line 2, 400.0 is a decimal, so you get the real answer, 0.75."
+/>
+
+<PredictOutput
+  client:visible
+  code={`puts [expr {100 - 20 * 2}]
+puts [expr {(100 - 20) * 2}]`}
+  expected={`60
+160`}
+  explanation="In line 1, * comes before -, so expr works out 20 * 2 = 40 first, then 100 - 40 = 60. In line 2 the parentheses come first: 100 - 20 = 80, then 80 * 2 = 160."
+/>
+
+## Common traps
+
+<Trap
+  wrong={`puts [expr {900 / 400}]`}
+  output={`2`}
+  fix={`puts [expr {900 / 400.0}]`}
+  why="This is the cost of one chip: a small test wafer costs 900 dollars and holds 400 chips. Both numbers are integers, so expr drops the .25 without any warning. The real cost is 2.25 dollars, and over a million chips that missing .25 is 250000 dollars. Make one of the numbers a decimal."
+/>
+
+<Trap
+  wrong={`puts [expr {400 x 300}]`}
+  error={`invalid bareword "x"`}
+  fix={`puts [expr {400 * 300}]`}
+  why="x is a letter, not an operator. expr does not know a word called x, and says so: a bareword is a plain word that expr does not understand. Use * for times."
+/>
+
+<Trap
+  wrong={`puts [expr {120,000 / 1000}]`}
+  error={`unexpected "," outside function argument list`}
+  fix={`puts [expr {120000 / 1000}]`}
+  why="Write big numbers without commas or spaces: 120000, not 120,000 or 120 000. To expr, a comma means something else, so it stops."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w02" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="expr: Tcl as a calculator" lines={[
+  'puts [expr {400 * 300}]     print the result of a sum',
+  '+ add   - subtract   * multiply   / divide   % remainder',
+  '* / % come before + -;  ( ) come first of all',
+  'expr reads variables itself:  expr {$chipWidth * $chipHeight}',
+  'integer / integer gives an integer:  7 / 2 is 3',
+  'Need a decimal? Add .0:  7 / 2.0 is 3.5',
+  'No commas in numbers: 120000, not 120,000',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Results of a command, Math 101', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl6.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Computers and numbers (integers and decimals)', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl6a.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: expr (all the operators, and their order)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/expr.htm', kind: 'tcl-man' },
+]} />

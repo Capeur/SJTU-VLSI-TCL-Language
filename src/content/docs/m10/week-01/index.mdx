@@ -1,9 +1,13 @@
 ---
 title: "Week 1: Hello, chip"
+description: "Week 1 overview: meet Lumen-1, run your first Tcl script, and print the chip's passport, in about 3 hours."
 milestone: "m10"
 week: 1
-minutes: 0
-goals: []
+minutes: 180
+goals:
+  - Run a script and read its output
+  - Print text with puts and explain it with comments
+  - Store values in variables with set and use them with $
 prerequisites: []
 glossary: []
 tcl_min: "8.6"
@@ -15,6 +19,26 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+Welcome to the course! This week you meet {chip.name}, the imaginary chip you will work on all year, and you write your very first scripts. You need no programming experience: every word is explained the first time it appears.
+
+## This week you will
+
+<Goals items={['Run a script and read its output', 'Print text with puts and explain it with comments', 'Store values in variables with set and use them with $']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: Your first script](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-a/) | 40 min | Run code in the playground; print text with `puts`; write comments |
+| [Lesson B: Commands are words](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-b/) | 40 min | Split a command into words; store and read values with `set` and `$` |
+| [Lab: Chip passport](/SJTU-VLSI-TCL-Language/m10/week-01/lab/) | 60 min | Print Lumen-1's passport, then check it automatically |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-01/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Before you start
+
+There is nothing to review yet. If you have not done so, read [Start here](/SJTU-VLSI-TCL-Language/start-here/) first: it explains how each lesson works and why the course asks you to predict before you run. Everything runs in your browser, so there is nothing to install.

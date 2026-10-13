@@ -1,0 +1,3 @@
+set chipName Lumen-1
+set chipWidth 400
+set chipHeight 300

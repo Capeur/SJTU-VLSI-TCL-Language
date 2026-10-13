@@ -25,3 +25,11 @@
 17. **A `<TclPlayground>` that is meant to fail declares it:** ``fails={`can not find channel named "Hello"`}``. Every other playground and every `<WorkedExample>` must run without an error.
 18. **Error text that differs between Tcl 8.6 and 9.0 goes in a `<VersionNote>`** with `fails86` / `fails90`.
 19. **Use the chip's facts from `src/data/lumen-1.json`.** In prose write `{chip.name}`. In Tcl code, use the same numbers; `npm run validate` checks `chipName`, `chipWidth`, `chipHeight` and `{NAME x y w h}` blocks.
+20. **M10 output never shows a decimal with more than 4 places** (rounding comes in Week 8). Pick friendlier numbers. If a long decimal is the point of the example, mark it: ```` ```tcl run longdecimal ````, `longDecimal` on a component, or `long_decimal: true` on a quiz item. `run-snippets` enforces this.
+21. **Lessons, traps and quizzes must not reuse a lab's numbers**, so that they never give away a lab answer.
+
+## Code-writing labs (from Week 1)
+
+22. The lab page shows the target output from the lab's data file (`import x from '…/data/expected.txt?raw'`), never a hand-copied block.
+23. Values the checker swaps live in `data/*.txt` as `set name value` lines and appear unchanged in `starter.tcl`; the self-test checks both. Tell learners to keep those lines exactly as given.
+24. A lab self-test may build a passing program only for a small weekly lab. Capstone and exam graders are tested against the private solutions repository.

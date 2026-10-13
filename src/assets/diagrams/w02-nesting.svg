@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300">
+  <text class="d-txt d-mono d-bold" x="10" y="24">puts [set area [expr {400 * 300}]]</text>
+  <rect class="d-box-info" x="10" y="38" width="620" height="74" rx="8"/>
+  <text class="d-txt d-small d-fg-info" x="22" y="58">Outer brackets: Tcl starts a new command</text>
+  <text class="d-txt d-mono" x="22" y="86">set area</text>
+  <rect class="d-box-warn" x="108" y="66" width="230" height="30" rx="5"/>
+  <text class="d-txt d-mono" x="118" y="87">[expr {400 * 300}]</text>
+  <text class="d-txt d-small d-fg-warn" x="352" y="80">Inner brackets, met while reading</text>
+  <text class="d-txt d-small d-fg-warn" x="352" y="97">the words of set</text>
+
+  <text class="d-txt d-bold" x="10" y="134">The order things finish in</text>
+  <rect class="d-box-warn" x="10" y="146" width="28" height="28" rx="14"/>
+  <text class="d-txt d-bold" x="24" y="166" text-anchor="middle">1</text>
+  <text class="d-txt" x="50" y="166">expr {400 * 300} runs and gives 120000</text>
+  <rect class="d-box-info" x="10" y="184" width="28" height="28" rx="14"/>
+  <text class="d-txt d-bold" x="24" y="204" text-anchor="middle">2</text>
+  <text class="d-txt" x="50" y="204">set area 120000 stores the number and gives back 120000</text>
+  <rect class="d-box-ok" x="10" y="222" width="28" height="28" rx="14"/>
+  <text class="d-txt d-bold" x="24" y="242" text-anchor="middle">3</text>
+  <text class="d-txt" x="50" y="242">puts 120000 prints it</text>
+  <text class="d-txt d-small d-muted" x="10" y="282">A command runs only when all its words are ready, so the innermost one finishes first.</text>
+</svg>

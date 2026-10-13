@@ -1,9 +1,11 @@
-# Week 2 — Tcl as a calculator. SEED BANK written in P2 so Week 3 warm-ups and the weekly quiz have
-# earlier questions. P3 grows it to 25 items when Week 2 is written. Uses only Week 2 ideas: expr,
-# whole numbers and decimals, the integer-division trap, and [ ] command substitution.
+# Week 2 — Tcl as a calculator. Lesson A: expr, operators, integers and decimals, the integer-division
+# trap. Lesson B: [ ] command substitution, storing results, nesting (brackets OUTSIDE braces only:
+# inside expr's braces, expr runs the inner brackets itself, which Week 3 explains).
+# q01–q07 are the P2 seed items (q05 rewritten in P3); q08–q27 were added in P3.
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
 ai_assisted: true
-reviewed_by: "David"
-review_date: "2026-10-13"
+reviewed_by: ""
+review_date: ""
 questions:
   - id: m10-w02-q01
     type: predict-output
@@ -61,14 +63,19 @@ questions:
   - id: m10-w02-q05
     type: predict-output
     lesson: b
-    tags: [brackets, nesting]
+    tags: [brackets, nesting, set]
     review: false
     prompt: "Brackets inside brackets. What does this print?"
     code: |
-      puts [expr {[expr {2 + 3}] * 10}]
-    answer: "50"
+      set chipWidth 400
+      puts [set half [expr {$chipWidth / 2}]]
+      puts "Half: $half"
+    answer: |-
+      200
+      Half: 200
     explanation: >
-      The inner brackets run first and give 5. Then the outer expr works out 5 * 10.
+      The innermost command finishes first: expr gives 200. Then set half 200 stores the number
+      and gives it back, so puts prints 200. Line 3 shows that half kept the value.
 
   - id: m10-w02-q06
     type: fill-blank
@@ -95,3 +102,323 @@ questions:
     explanation: >
       Brackets run a command, and the first word inside them, 400, is not a command. Maths
       belongs to expr: set area [expr {$chipWidth * $chipHeight}].
+
+  # ---------- P3 additions: Lesson A ----------
+  - id: m10-w02-q08
+    type: predict-output
+    lesson: a
+    tags: [expr, order-of-operations]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      puts [expr {10 + 20 * 3}]
+    answer: "70"
+    explanation: >
+      * comes before +, so expr works out 20 * 3 = 60 first, then 10 + 60 = 70.
+
+  - id: m10-w02-q09
+    type: predict-output
+    lesson: a
+    tags: [expr, integer-division, remainder]
+    review: true
+    prompt: "How many 400 µm chips fit on a 1000 µm strip, and how much is left? What does this print?"
+    code: |
+      puts [expr {1000 / 400}]
+      puts [expr {1000 % 400}]
+    answer: |-
+      2
+      200
+    explanation: >
+      Two integers give integer division: 2.5 becomes 2, so 2 whole chips fit. The % operator gives
+      the remainder: 2 chips use 800 µm, and 200 µm is left over.
+
+  - id: m10-w02-q10
+    type: mcq
+    lesson: a
+    tags: [expr, integer-division, decimals]
+    review: true
+    prompt: "A small test wafer costs 900 dollars and holds 400 chips. Which line prints the real cost of one chip, 2.25?"
+    choices:
+      - 'puts [expr {900 / 400.0}]'
+      - 'puts [expr {900 / 400}]'
+      - 'puts [expr {400 / 900.0}]'
+      - 'puts [expr {900 * 400}]'
+    answer: 'puts [expr {900 / 400.0}]'
+    explanation: >
+      The cost of one chip is the wafer's cost divided by the number of chips. 400.0 is a decimal,
+      so the answer keeps its decimals: 2.25.
+    distractor_feedback:
+      'puts [expr {900 / 400}]': 'Both numbers are integers, so expr drops the decimals and prints 2: the integer-division trap.'
+      'puts [expr {400 / 900.0}]': 'That divides the chips by the cost, the wrong way round. It gives less than 1.'
+      'puts [expr {900 * 400}]': 'That multiplies, giving 360000. To share a cost between chips, divide.'
+
+  - id: m10-w02-q11
+    type: predict-output
+    lesson: a
+    tags: [expr, order-of-operations, parentheses]
+    review: true
+    prompt: "Same numbers, different parentheses. What does this print?"
+    code: |
+      puts [expr {400 - 100 / 2}]
+      puts [expr {(400 - 100) / 2}]
+    answer: |-
+      350
+      150
+    explanation: >
+      In line 1, / comes before -, so 100 / 2 = 50 first, then 400 - 50 = 350. In line 2 the
+      parentheses come first: 400 - 100 = 300, then 300 / 2 = 150.
+
+  - id: m10-w02-q12
+    type: multi-select
+    lesson: a
+    tags: [expr, decimals, integer-division]
+    review: true
+    prompt: "Which of these give a decimal result? Pick all that apply."
+    choices:
+      - 'expr {7 / 2.0}'
+      - 'expr {7.0 / 2}'
+      - 'expr {7 / 2}'
+      - 'expr {8 / 2}'
+    answer:
+      - 'expr {7 / 2.0}'
+      - 'expr {7.0 / 2}'
+    explanation: >
+      If at least one number in a division has a point, the result is a decimal: 3.5. It does not
+      matter which one. 7 / 2 and 8 / 2 divide two integers, so they give the integers 3 and 4.
+
+  - id: m10-w02-q13
+    type: find-the-bug
+    lesson: a
+    tags: [expr, operators, errors]
+    review: false
+    prompt: 'Tcl says: invalid bareword "x". Which line has the bug?'
+    code: |
+      set chipWidth 400
+      set chipHeight 300
+      puts [expr {$chipWidth x $chipHeight}]
+    answer: 3
+    explanation: >
+      x is a letter, not an operator, so expr does not understand it. Multiply with *:
+      puts [expr {$chipWidth * $chipHeight}].
+
+  - id: m10-w02-q14
+    type: fill-blank
+    lesson: a
+    tags: [expr, remainder]
+    review: false
+    prompt: 'Fill the blank so the line prints the remainder, 200.     The line is:   puts [expr {1000 ___ 400}]'
+    answer: ['%']
+    explanation: >
+      The % operator gives what is left over after integer division: 1000 = 2 * 400 + 200.
+
+  - id: m10-w02-q15
+    type: predict-output
+    lesson: a
+    tags: [expr, decimals]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      puts [expr {400 / 2.0}]
+    answer: "200.0"
+    explanation: >
+      2.0 is a decimal, so the result is a decimal too. Even when the answer is a whole number,
+      expr shows it as a decimal: 200.0.
+
+  - id: m10-w02-q16
+    type: mcq
+    lesson: a
+    tags: [expr, order-of-operations, parentheses]
+    review: true
+    prompt: "Lumen-1 is 400 µm wide and 300 µm high. Which line prints its perimeter, 1400?"
+    choices:
+      - 'puts [expr {2 * (400 + 300)}]'
+      - 'puts [expr {2 * 400 + 300}]'
+      - 'puts [expr {(2 * 400) + 300}]'
+      - 'puts [expr {2 + 400 * 300}]'
+    answer: 'puts [expr {2 * (400 + 300)}]'
+    explanation: >
+      The perimeter is twice the width plus the height. The parentheses make expr add first:
+      2 * 700 = 1400.
+    distractor_feedback:
+      'puts [expr {2 * 400 + 300}]': '* comes first, so this is 800 + 300 = 1100.'
+      'puts [expr {(2 * 400) + 300}]': 'The parentheses are around the multiplication, which comes first anyway: 1100.'
+      'puts [expr {2 + 400 * 300}]': 'That is 2 plus the area, 120002. The perimeter needs the width plus the height, times 2.'
+
+  - id: m10-w02-q17
+    type: order-steps
+    lesson: a
+    tags: [expr, order-of-operations]
+    review: false
+    prompt: "Put in order how expr works out   2 * (400 + 300) - 100"
+    steps:
+      - "Work out the parentheses: 400 + 300 = 700"
+      - "Multiply: 2 * 700 = 1400"
+      - "Subtract: 1400 - 100 = 1300"
+    explanation: >
+      Parentheses come first of all. Then * comes before -.
+
+  - id: m10-w02-q18
+    type: mcq
+    lesson: a
+    tags: [expr, errors]
+    review: false
+    prompt: 'Tcl says: unexpected "," outside function argument list. Which line caused it?'
+    choices:
+      - 'puts [expr {120,000 / 1000}]'
+      - 'puts [expr {120000 / 1000}]'
+      - 'puts [expr {120000 / 1000.0}]'
+      - 'puts [expr {(120000) / 1000}]'
+    answer: 'puts [expr {120,000 / 1000}]'
+    explanation: >
+      Write big numbers without commas or spaces. To expr, a comma means something else, so
+      120,000 is not the number 120000.
+    distractor_feedback:
+      'puts [expr {120000 / 1000}]': 'This works and prints 120. There is no comma in it.'
+      'puts [expr {120000 / 1000.0}]': 'This works and prints the decimal 120.0.'
+      'puts [expr {(120000) / 1000}]': 'Parentheses around one number are allowed; this prints 120.'
+
+  # ---------- P3 additions: Lesson B ----------
+  - id: m10-w02-q19
+    type: predict-output
+    lesson: b
+    tags: [brackets, set, expr]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set chipWidth 400
+      set chipHeight 300
+      set area [expr {$chipWidth * $chipHeight}]
+      puts "Area: $area um2"
+    answer: "Area: 120000 um2"
+    explanation: >
+      The brackets run expr first. Its result, 120000, replaces them, so set stores 120000 in area.
+      Then $area is replaced by that number inside the quotes.
+
+  - id: m10-w02-q20
+    type: order-steps
+    lesson: b
+    tags: [brackets, nesting]
+    review: true
+    prompt: 'Put in order what Tcl does with   puts [set area [expr {400 * 300}]]'
+    steps:
+      - "Tcl reads puts, meets [ and starts a new command: set area …"
+      - "While reading the words of set, Tcl meets another [ and runs expr {400 * 300}"
+      - "The result, 120000, takes the place of the inner brackets: set area 120000"
+      - "set stores 120000 in area and gives back 120000"
+      - "puts receives 120000 and prints it"
+    explanation: >
+      Tcl reads left to right and starts a new command at each [. A command runs only when all its
+      words are ready, so the innermost command, expr, finishes first, then set, then puts.
+
+  - id: m10-w02-q21
+    type: mcq
+    lesson: b
+    tags: [brackets, set]
+    review: true
+    prompt: "After  set area [expr {400 * 300}]  what does the variable area hold?"
+    choices:
+      - '120000'
+      - 'expr {400 * 300}'
+      - '[expr {400 * 300}]'
+      - 'Nothing: the result is printed instead'
+    answer: '120000'
+    explanation: >
+      The brackets run expr first, and its result replaces them. So set receives area and 120000,
+      and stores the number, not the maths.
+    distractor_feedback:
+      'expr {400 * 300}': 'That would happen without brackets, but then set gets too many words and stops with wrong # args.'
+      '[expr {400 * 300}]': 'Brackets never reach set: Tcl replaces them with the result before set runs.'
+      'Nothing: the result is printed instead': 'Only puts prints. set stores the result in area, and nothing is printed.'
+
+  - id: m10-w02-q22
+    type: find-the-bug
+    lesson: b
+    tags: [brackets, set, errors]
+    review: true
+    prompt: 'Tcl says: wrong # args: should be "set varName ?newValue?". Which line has the bug?'
+    code: |
+      set chipWidth 400
+      set chipHeight 300
+      set area expr {$chipWidth * $chipHeight}
+      puts "Area: $area um2"
+    answer: 3
+    explanation: >
+      Without brackets, expr is just a word, so set gets three arguments: area, expr and the maths.
+      Write set area [expr {$chipWidth * $chipHeight}] so that expr runs first.
+
+  - id: m10-w02-q23
+    type: predict-output
+    lesson: b
+    tags: [brackets, quotes]
+    review: false
+    prompt: "Only one line has brackets. What does this print?"
+    code: |
+      puts "Area: expr {400 * 300} um2"
+      puts "Area: [expr {400 * 300}] um2"
+    answer: |-
+      Area: expr {400 * 300} um2
+      Area: 120000 um2
+    explanation: >
+      Without brackets nothing runs, so line 1 prints the word expr and the maths as plain text.
+      In line 2 the brackets run expr, and the result lands in the middle of the text.
+
+  - id: m10-w02-q24
+    type: fill-blank
+    lesson: b
+    tags: [brackets, expr]
+    review: false
+    prompt: 'Fill the blank so half holds 200.     The line is:   set half [___ {400 / 2}]'
+    answer: ['expr']
+    explanation: >
+      The first word inside the brackets must be a command. Maths needs the command expr.
+
+  - id: m10-w02-q25
+    type: multi-select
+    lesson: b
+    tags: [brackets, nesting, quotes]
+    review: false
+    prompt: "After  set chipWidth 400  which lines print 200? Pick all that apply."
+    choices:
+      - 'puts [expr {$chipWidth / 2}]'
+      - 'puts [set half [expr {$chipWidth / 2}]]'
+      - 'puts "[expr {$chipWidth / 2}]"'
+      - 'puts [$chipWidth / 2]'
+    answer:
+      - 'puts [expr {$chipWidth / 2}]'
+      - 'puts [set half [expr {$chipWidth / 2}]]'
+      - 'puts "[expr {$chipWidth / 2}]"'
+    explanation: >
+      Brackets work on their own, nested, or inside double quotes. set gives back the value it
+      stores, so the nested line prints 200 too. In the last line the first word inside the
+      brackets is 400, which is not a command: invalid command name "400".
+
+  - id: m10-w02-q26
+    type: mcq
+    lesson: b
+    tags: [results, set]
+    review: false
+    prompt: "Which command gives back the value it has just stored, so that  puts [set x 5]  prints 5?"
+    choices: ['set', 'puts', 'Only expr gives back a result', 'No command gives back a result']
+    answer: 'set'
+    explanation: >
+      Every command gives back a result. set gives back the value it has just stored, which is why
+      it can sit inside brackets.
+    distractor_feedback:
+      'puts': 'puts prints its text, but it gives back an empty result.'
+      'Only expr gives back a result': 'Every command gives back a result. expr gives back its answer, and set gives back the value it stored.'
+      'No command gives back a result': 'Then brackets would be useless. [expr {2 + 3}] is replaced by 5, the result of expr.'
+
+  - id: m10-w02-q27
+    type: predict-output
+    lesson: b
+    tags: [brackets, set, expr]
+    review: true
+    prompt: "CORE is 200 by 160 µm and ADC is 120 by 80 µm. What does this print?"
+    code: |
+      set coreArea [expr {200 * 160}]
+      set adcArea [expr {120 * 80}]
+      puts "Total: [expr {$coreArea + $adcArea}] um2"
+    answer: "Total: 41600 um2"
+    explanation: >
+      Step by step: coreArea holds 32000 and adcArea holds 9600. The brackets in line 3 run expr,
+      which adds them, and the result 41600 lands in the text.

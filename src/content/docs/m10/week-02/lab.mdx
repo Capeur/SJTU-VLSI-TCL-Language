@@ -1,14 +1,19 @@
 ---
-title: "Week 2 Lab"
+title: "Lab: What does one Lumen-1 cost?"
+description: "Week 2 lab: compute Lumen-1's area, how many chips fit on a wafer, and the cost of one chip, then check it automatically."
 milestone: "m10"
 week: 2
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Compute a chain of results with expr, storing each one in a variable
+  - Choose between whole-number and decimal division
+prerequisites: ["m10-w02-a", "m10-w02-b"]
+glossary: [wafer, integer-division, command-substitution, square-micrometre]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Results of a command, Math 101", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl6.html" }
+  - { title: "Tcl tutorial: Grouping arguments with square brackets", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl5.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,87 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-02/data/expected.txt?raw';
 
-Lab for week 2 (Tcl as a calculator) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={2} lesson="lab" minutes={60} />
+
+## Goal
+
+**Work out how much silicon one {chip.name} uses, how many fit on a <GlossaryTerm term="wafer" />, and what one chip costs.**
+
+Why it matters for chips: before a chip is made, engineers estimate its cost exactly like this. A chip that is 10% smaller fits more copies on each wafer, so every chip gets cheaper. Scripts like yours let them try many sizes in seconds.
+
+## What you'll practise
+
+- [Lesson A: expr, Tcl as a calculator](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-a/): operators, whole numbers and decimals, the integer-division trap.
+- [Lesson B: Square brackets](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-b/): storing results with `set` and `[ ]`.
+
+## Specification
+
+The factory makes {chip.name} on a square test wafer, 10000 µm (10 mm) on each side. Real wafers are round; a square keeps the maths simple. The whole wafer costs 1980 dollars. The chips sit in a grid: rows of chips side by side, and rows stacked from top to bottom.
+
+- **Inputs.** The starter gives you four lines: `set chipWidth 400`, `set chipHeight 300`, `set waferSide 10000` and `set waferCost 1980`. **Keep these four lines exactly as they are.** The checker changes their values and runs your script again, to test that you computed every number instead of typing it.
+- **Output.** With these inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- **Only whole chips count.** A chip that hangs over the edge of the wafer is thrown away.
+- Words, capitals and units must match. Extra spaces are forgiven. A decimal counts as right if it differs only in its very last digits.
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-02/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-02" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step, and compare your new line with the specification.
+
+1. **Area in µm².** Store the chip's area in a variable called `chipArea`, then print the first line. `um2` means µm².
+2. **Area in mm².** One mm² is 1000000 µm². Print the second line. You need a decimal here.
+3. **Chips per row.** How many chips fit side by side across the wafer, each `chipWidth` wide? Store the answer in `perRow` and print it.
+4. **Rows.** How many rows fit from the top of the wafer to the bottom, each `chipHeight` high? Store it in `rows` and print it.
+5. **Chips per wafer.** Use `perRow` and `rows`. Store the answer in `perWafer` and print it.
+6. **Cost per chip.** Divide the wafer's cost by the number of chips on it. Watch out for the trap from Lesson A.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Each step follows the same pattern: set name [expr {…}], then puts "Text: $name". For example: set chipArea [expr {$chipWidth * $chipHeight}]',
+  'Steps 3 and 4 count whole chips, so you WANT integer division there: two integers, no .0. Steps 2 and 6 need a decimal answer, so make one of the numbers a decimal.',
+  'If the last test fails, look for a number you typed instead of computing. Every number in your output must come from the four inputs.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 9/9` when everything is right. Fix one `FAIL` at a time, from the top: a wrong number early on makes every later number wrong too.
+
+## Stretch goal: the wasted edge
+
+Some silicon at the edges of the wafer is too small for a whole chip and is thrown away. How much? Paste your finished lab script below, then add three steps: the wafer's area, the area used by all the chips, and the difference, in µm². Then change the chip to 380 µm wide and 320 µm high: does it waste more or less? This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+
+# Then add: the wafer's area, the area used by all chips, and the wasted area.
+`} />

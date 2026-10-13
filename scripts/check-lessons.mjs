@@ -3,7 +3,7 @@
 //     Predict → Run → Explain (7) may sit right after the concept it tests, before the faded
 //     example (decision log, P2). Order: LessonMeta, ChipStory, Goals, warm-up Quiz,
 //     { WorkedExample | PredictOutput }+, FadedExample, PredictOutput*, Trap×1–3, exit Quiz,
-//     CheatCard, FurtherReading. At least one PredictOutput.
+//     CheatCard, FurtherReading. At least one PredictOutput. Week 1 Lesson A has no warm-up.
 //   - at most 150 words of prose between two interactive elements.
 // Pages still marked "P0 placeholder" are skipped.
 // Usage: node scripts/check-lessons.mjs [--verbose]   (--verbose prints each page's sections and word gaps)
@@ -81,8 +81,11 @@ for (const file of walk(path.join(root, 'src/content/docs'), ['.mdx'])) {
 
     const s = sequence.join(' ');
     if (verbose) console.log(`  ${rel}: ${s}`);
-    const pattern = /^LessonMeta ChipStory Goals Quiz:warmup( (WorkedExample|PredictOutput))*( WorkedExample)( (WorkedExample|PredictOutput))* FadedExample( PredictOutput)*( Trap){1,3} Quiz:exit CheatCard FurtherReading$/;
-    if (!pattern.test(s)) problems.push(`${rel}: sections out of PRD §6.3 order:\n      ${s}`);
+    // Week 1 Lesson A is the very first lesson: it has no warm-up (PRD §6.3, section 3). Every other lesson must.
+    const firstLesson = front.milestone === 'm10' && front.week === 1 && front.lesson === 'a';
+    const warmup = firstLesson ? '' : ' Quiz:warmup';
+    const pattern = new RegExp(`^LessonMeta ChipStory Goals${warmup}( (WorkedExample|PredictOutput))*( WorkedExample)( (WorkedExample|PredictOutput))* FadedExample( PredictOutput)*( Trap){1,3} Quiz:exit CheatCard FurtherReading$`);
+    if (!pattern.test(s)) problems.push(`${rel}: sections out of PRD §6.3 order${firstLesson ? ' (Week 1 Lesson A: no warm-up)' : ''}:\n      ${s}`);
     if (!sequence.includes('PredictOutput')) problems.push(`${rel}: no Predict → Run → Explain section`);
     if ((front.goals ?? []).length > 3) problems.push(`${rel}: more than 3 goals`);
     for (const key of ['ai_assisted', 'reviewed_by', 'review_date']) if (!(key in front)) problems.push(`${rel}: frontmatter lacks ${key}`);

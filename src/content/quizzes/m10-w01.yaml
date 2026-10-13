@@ -1,9 +1,9 @@
-# Week 1 — Hello, chip. SEED BANK written in P2 so Week 3 warm-ups and the weekly quiz have earlier
-# questions. P3 grows it to 25 items when Week 1 is written. Uses only Week 1 ideas: puts, comments,
-# commands as words, set and $.
+# Week 1 — Hello, chip. Lesson A: scripts, output, puts, comments. Lesson B: commands as words, set and $.
+# q01–q06 are the P2 seed items (reviewed); q07–q27 were added in P3. Uses only Week 1 ideas.
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
 ai_assisted: true
-reviewed_by: "David"
-review_date: "2026-10-13"
+reviewed_by: ""
+review_date: ""
 questions:
   - id: m10-w01-q01
     type: predict-output
@@ -87,3 +87,350 @@ questions:
     answer: 2
     explanation: >
       Without a $, chipName is just a word, so puts prints it. Write puts $chipName to get the value.
+
+  # ---------- P3 additions: Lesson A ----------
+  - id: m10-w01-q07
+    type: predict-output
+    lesson: a
+    tags: [puts, comments]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      puts "CORE"
+      # puts "SRAM"
+      puts "ADC"
+    answer: |-
+      CORE
+      ADC
+    explanation: >
+      Line 2 starts with #, so it is a comment and Tcl skips it, even though it looks like code.
+      The two puts commands each print one line.
+
+  - id: m10-w01-q08
+    type: mcq
+    lesson: a
+    tags: [output]
+    review: true
+    prompt: "What is the output of a script?"
+    choices:
+      - 'The text the script prints when it runs'
+      - 'The code you type into the box'
+      - 'The comments in the script'
+      - 'The name of the script file'
+    answer: 'The text the script prints when it runs'
+    explanation: >
+      The output is what appears when the script runs. In the playground, it shows up under the code box.
+    distractor_feedback:
+      'The code you type into the box': 'That is the script itself. The output is what the script prints.'
+      'The comments in the script': 'Comments are notes for people. Tcl skips them, so they never appear in the output.'
+      'The name of the script file': 'A file name is just a label. The output is the text that puts prints.'
+
+  - id: m10-w01-q09
+    type: find-the-bug
+    lesson: a
+    tags: [puts, case]
+    review: true
+    prompt: 'Tcl says: invalid command name "Puts". Which line has the bug?'
+    code: |
+      # Lumen-1 passport
+      puts "Chip: Lumen-1"
+      Puts "Size: 400 x 300 um"
+    answer: 3
+    explanation: >
+      Tcl is case-sensitive. Only puts in small letters exists, so Puts with a capital P is an
+      unknown command. Write puts "Size: 400 x 300 um".
+
+  - id: m10-w01-q10
+    type: multi-select
+    lesson: a
+    tags: [comments]
+    review: false
+    prompt: "Which of these lines are comments? Pick all that apply."
+    choices:
+      - '# Lumen-1 passport'
+      - '#puts "SRAM"'
+      - 'puts "# CORE"'
+      - 'Passport for Lumen-1'
+    answer:
+      - '# Lumen-1 passport'
+      - '#puts "SRAM"'
+    explanation: >
+      A line that starts with # is a comment, with or without a space after the #. In puts "# CORE"
+      the line starts with puts, so it is a command that prints # CORE. A note without # is not a
+      comment: Tcl tries to run it and stops with invalid command name "Passport".
+
+  - id: m10-w01-q11
+    type: mcq
+    lesson: a
+    tags: [comments]
+    review: false
+    prompt: "What does Tcl do with a line that starts with # ?"
+    choices:
+      - 'It skips the whole line'
+      - 'It prints the line without the #'
+      - 'It runs the line after all the other commands'
+      - 'It prints the line in grey'
+    answer: 'It skips the whole line'
+    explanation: >
+      A comment is a note for people. Tcl skips it completely, so it never changes the output.
+    distractor_feedback:
+      'It prints the line without the #': 'Comments are never printed. Only puts prints text.'
+      'It runs the line after all the other commands': 'Tcl never runs a comment, not even at the end.'
+      'It prints the line in grey': 'Some editors show comments in grey, but Tcl itself never prints them.'
+
+  - id: m10-w01-q12
+    type: fill-blank
+    lesson: a
+    tags: [puts]
+    review: true
+    prompt: 'Fill the blank so the line prints  Hello, Lumen-1     The line is:   ___ "Hello, Lumen-1"'
+    answer: ['puts']
+    explanation: >
+      puts is the command that prints one line of text. It must be written in small letters.
+
+  - id: m10-w01-q13
+    type: predict-output
+    lesson: a
+    tags: [puts, quotes]
+    review: false
+    prompt: "Look closely at the spaces. What does this print?"
+    code: |
+      puts "Lumen-1   is   ready"
+    answer: "Lumen-1   is   ready"
+    explanation: >
+      Inside double quotes, every character is kept exactly as typed, including each space. The
+      quote marks themselves are not printed.
+
+  - id: m10-w01-q14
+    type: mcq
+    lesson: a
+    tags: [puts, case, errors]
+    review: false
+    prompt: 'You ran  PUTS "Lumen-1"  and Tcl says: invalid command name "PUTS". What is wrong?'
+    choices:
+      - 'Tcl only knows the command puts, in small letters'
+      - 'The text Lumen-1 is too long'
+      - 'The quotes around Lumen-1 are not allowed'
+      - 'PUTS needs a # in front of it'
+    answer: 'Tcl only knows the command puts, in small letters'
+    explanation: >
+      Capitals matter in Tcl. PUTS, Puts and puts are three different names, and only puts exists.
+      The error message shows the exact word Tcl did not know.
+    distractor_feedback:
+      'The text Lumen-1 is too long': 'The message names "PUTS", the command, not the text. puts can print long text.'
+      'The quotes around Lumen-1 are not allowed': 'The quotes are fine: they keep the text together. The problem is the command name.'
+      'PUTS needs a # in front of it': 'A # would turn the line into a comment, and nothing would be printed at all.'
+
+  - id: m10-w01-q15
+    type: find-the-bug
+    lesson: a
+    tags: [comments, errors]
+    review: true
+    prompt: 'Tcl says: invalid command name "Size". Which line has the bug?'
+    code: |
+      # Lumen-1 passport
+      puts "Chip: Lumen-1"
+      Size comes next
+      puts "Size: 400 x 300 um"
+    answer: 3
+    explanation: >
+      Line 3 is meant as a note, but it has no #, so Tcl tries to run it as a command named Size.
+      Write # Size comes next to make it a comment.
+
+  - id: m10-w01-q16
+    type: mcq
+    lesson: a
+    tags: [quotes, errors]
+    review: false
+    prompt: 'You copied  puts “Hello Lumen-1”  from a document, and Tcl says: can not find channel named "“Hello". Why?'
+    choices:
+      - 'The quotes are curly, and Tcl only understands the straight quote mark "'
+      - 'Hello is a word that Tcl reserves for itself'
+      - 'puts cannot print a dash'
+      - 'The playground cannot print long text'
+    answer: 'The quotes are curly, and Tcl only understands the straight quote mark "'
+    explanation: >
+      Word processors turn straight quotes into curly ones. To Tcl, a curly quote is an ordinary
+      character, so the space splits the text into two pieces, and puts takes the first piece as a
+      place to print to. Retype the quotes as straight ones.
+    distractor_feedback:
+      'Hello is a word that Tcl reserves for itself': 'puts "Hello Lumen-1" with straight quotes works fine. Look at the shape of the quotes in the message.'
+      'puts cannot print a dash': 'puts prints any character. The message points at “Hello, with its curly quote.'
+      'The playground cannot print long text': 'The playground prints long text without trouble. The quotes are the problem.'
+
+  - id: m10-w01-q17
+    type: order-steps
+    lesson: a
+    tags: [script, puts, comments]
+    review: false
+    prompt: "Put these lines in order: the script starts with a comment, then prints CHIP PASSPORT, then the name, then the size."
+    steps:
+      - '# Lumen-1 passport'
+      - 'puts "CHIP PASSPORT"'
+      - 'puts "Name: Lumen-1"'
+      - 'puts "Size: 400 x 300 um"'
+    explanation: >
+      Tcl runs a script from top to bottom, so the output appears in the same order as the puts
+      commands. A comment at the top says what the script is for.
+
+  # ---------- P3 additions: Lesson B ----------
+  - id: m10-w01-q18
+    type: mcq
+    lesson: b
+    tags: [commands, words]
+    review: true
+    prompt: "How many words does the command  set chipName Lumen-1  have?"
+    choices: ['3', '1', '2', '4']
+    answer: '3'
+    explanation: >
+      Spaces split a command into words: set, chipName and Lumen-1. The first word is the command
+      name; the other two are its arguments.
+    distractor_feedback:
+      '1': 'Without quotes or braces, each space starts a new word.'
+      '2': 'The command name counts as a word too: set is the first of the three.'
+      '4': 'Count the pieces between the spaces: set, chipName, Lumen-1. The dash in Lumen-1 is part of a word.'
+
+  - id: m10-w01-q19
+    type: predict-output
+    lesson: b
+    tags: [set, variables, dollar]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set block CORE
+      puts "First: $block"
+      set block SRAM
+      puts "Then: block"
+    answer: |-
+      First: CORE
+      Then: block
+    explanation: >
+      Line 2 prints the value at that moment, CORE. Line 3 replaces it with SRAM, but line 4 has no
+      $ in front of block, so puts prints the word block itself.
+
+  - id: m10-w01-q20
+    type: mcq
+    lesson: b
+    tags: [words, arguments, quotes]
+    review: true
+    prompt: 'In  puts "Size: 400 x 300 um"  how many arguments does puts get?'
+    choices: ['1', '5', '2', '0']
+    answer: '1'
+    explanation: >
+      The double quotes keep the text together as one word, spaces and all. So the command has two
+      words: puts, the command name, and one argument, the text.
+    distractor_feedback:
+      '5': 'The spaces inside the double quotes do not split the text. The quotes make it one word.'
+      '2': 'There are two words, but the first one, puts, is the command name, not an argument.'
+      '0': 'The quoted text after puts is an argument: it is what puts prints.'
+
+  - id: m10-w01-q21
+    type: predict-output
+    lesson: b
+    tags: [set, variables, quotes]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set chipWidth 400
+      set chipHeight 300
+      puts "$chipWidth x $chipHeight um"
+    answer: "400 x 300 um"
+    explanation: >
+      Inside double quotes, each $name is replaced by the value of that variable. The x and um are
+      ordinary text.
+
+  - id: m10-w01-q22
+    type: find-the-bug
+    lesson: b
+    tags: [variables, errors, case]
+    review: true
+    prompt: "Tcl says: can't read \"chipwidth\": no such variable. Which line has the bug?"
+    code: |
+      set chipName Lumen-1
+      set chipWidth 400
+      puts "Chip: $chipName"
+      puts "Width: $chipwidth um"
+    answer: 4
+    explanation: >
+      Line 4 asks for chipwidth with a small w, but line 2 created chipWidth with a capital W.
+      Variable names are case-sensitive, so these are two different names.
+
+  - id: m10-w01-q23
+    type: fill-blank
+    lesson: b
+    tags: [set]
+    review: false
+    prompt: 'Fill the blank so the variable block holds SRAM.     The line is:   ___ block SRAM'
+    answer: ['set']
+    explanation: >
+      set stores a value in a variable: the first argument is the name, the second is the value.
+
+  - id: m10-w01-q24
+    type: multi-select
+    lesson: b
+    tags: [dollar, variables]
+    review: false
+    prompt: "After  set chipName Lumen-1  which lines print Lumen-1? Pick all that apply."
+    choices:
+      - 'puts $chipName'
+      - 'puts "$chipName"'
+      - 'puts chipName'
+      - 'puts $ChipName'
+    answer:
+      - 'puts $chipName'
+      - 'puts "$chipName"'
+    explanation: >
+      The $ reads the value, with or without double quotes around it. Without a $, puts prints the
+      word chipName. $ChipName, with a capital C, asks for a different variable that does not exist,
+      so Tcl stops with an error.
+
+  - id: m10-w01-q25
+    type: mcq
+    lesson: b
+    tags: [set, errors]
+    review: false
+    prompt: 'Why does  set chipWidth = 400  give: wrong # args: should be "set varName ?newValue?"'
+    choices:
+      - 'set takes a name and a value; the = makes a third argument'
+      - 'The = sign must touch the number, like =400'
+      - 'Numbers must be written in double quotes'
+      - 'chipWidth is too long for a variable name'
+    answer: 'set takes a name and a value; the = makes a third argument'
+    explanation: >
+      wrong # args means the wrong number of arguments. set expects a variable name and a value.
+      Write set chipWidth 400, with no = sign.
+    distractor_feedback:
+      'The = sign must touch the number, like =400': 'Then the value stored would be the text =400. set never needs an = sign.'
+      'Numbers must be written in double quotes': 'set chipWidth 400 works without quotes. The extra word = is the problem.'
+      'chipWidth is too long for a variable name': 'Names can be long. Descriptive names like chipWidth are good style.'
+
+  - id: m10-w01-q26
+    type: predict-output
+    lesson: b
+    tags: [set, variables]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set layer METAL1
+      set layer METAL2
+      set top $layer
+      puts "Top layer: $top"
+    answer: "Top layer: METAL2"
+    explanation: >
+      By line 3, layer holds METAL2, because the second set replaced METAL1. Tcl replaces $layer
+      with METAL2, so set stores METAL2 in top.
+
+  - id: m10-w01-q27
+    type: order-steps
+    lesson: b
+    tags: [words, dollar, puts]
+    review: false
+    prompt: 'Put in order what Tcl does with   puts "Width: $chipWidth um"   when chipWidth holds 400.'
+    steps:
+      - "Cut the command into words: puts and the quoted text"
+      - "Replace $chipWidth with its value, 400"
+      - "Use the first word, puts, to find the command"
+      - "puts prints its argument: Width: 400 um"
+    explanation: >
+      Tcl first finds the words, then replaces each $name with its value. Only then does the
+      command run, with the finished words as its arguments.

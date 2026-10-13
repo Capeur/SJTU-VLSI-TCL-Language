@@ -1,14 +1,19 @@
 ---
-title: "Week 1 Lab"
+title: "Lab: Chip passport"
+description: "Week 1 lab: write your first real script, which prints Lumen-1's passport, and check it automatically."
 milestone: "m10"
 week: 1
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Write a script that prints several exact lines of text
+  - Use variables so that the output follows the chip's facts
+prerequisites: ["m10-w01-a", "m10-w01-b"]
+glossary: [script, output, variable, comment]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Simple text output", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl1.html" }
+  - { title: "Tcl tutorial: Assigning values to variables", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl2.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,85 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import passport from '../../../../../labs/m10/week-01/data/passport.txt?raw';
 
-Lab for week 1 (Hello, chip) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={1} lesson="lab" minutes={60} />
+
+## Goal
+
+**Write a <GlossaryTerm term="script" /> that prints the passport of {chip.name}: its name, size, blocks and layers.**
+
+Why it matters for chips: every chip-design tool starts a job by printing a summary like this one, so that engineers can check at a glance that they are working on the right chip. Later in the course, your scripts will work these facts out from the layout itself. Today you print them.
+
+## What you'll practise
+
+- [Lesson A: Your first script](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-a/): `puts`, double quotes, comments.
+- [Lesson B: Commands are words](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-b/): `set` and `$`.
+
+## Specification
+
+Your script must print exactly these five lines, in this order:
+
+<pre class="tc-code" tabindex="0">{passport.trimEnd()}</pre>
+
+- **Exact text.** Capitals, spelling and punctuation must match. Extra spaces are forgiven.
+- **Use the variables.** The starter gives you three lines: `set chipName`, `set chipWidth` and `set chipHeight`. **Keep these three lines exactly as they are.** The checker changes their values and runs your script again, to test that your Name and Size lines use `$chipName`, `$chipWidth` and `$chipHeight`.
+- **Sign it.** Put your name in the `# Made by:` <GlossaryTerm term="comment" />.
+
+## Where to run this
+
+Click inside the code box of the Playground tab and type your commands under each step comment. Press **Run** to see your <GlossaryTerm term="output" />, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-01/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-01" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step. Seeing your output grow one line at a time is the fastest way to spot a mistake.
+
+1. **Title.** Under `# Step 1`, print `CHIP PASSPORT`.
+2. **Name.** Print the Name line. Write `$chipName` where the name goes, not the name itself.
+3. **Size.** Print the Size line, with `$chipWidth` and `$chipHeight` in it. The letters `um` stand for µm.
+4. **Blocks and layers.** Print the last two lines. You may type these names: lists of names come in Week 5.
+5. **Test your variables.** Change `400` to `500` in `set chipWidth 400` and press Run. Does your Size line say 500 now? Then change it back to 400.
+6. **Sign it.** Replace `???` in `# Made by: ???` with your name.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Each line of the passport is one puts command. Put the text of each line inside double quotes, like this: puts "CHIP PASSPORT"',
+  'Inside double quotes, $chipName is replaced by the value of the variable. So puts "Name: $chipName" prints Name: Lumen-1.',
+  'An error message names the word Tcl did not understand. Look for a capital letter in puts, a missing $, or a missing closing quote.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you what to put back, usually one of the three `set` lines.
+
+The last line is `RESULT: PASS 9/9` when everything is right. A result like `RESULT: FAIL 6/9` means 6 tests pass so far. Fix one `FAIL` at a time, starting from the top: one early mistake often causes the later ones.
+
+## Stretch goal: draw the floorplan
+
+Use `puts` to draw a rough map of {chip.name} with the characters `+`, `-` and `|`. Here is a start. Add the missing rows, and try to put each block roughly where it sits on the real floorplan. This part is not graded.
+
+<TclPlayground client:visible code={`# Lumen-1, seen from above (not to scale)
+puts "+------------------------------+"
+puts "| ADC     | SENSOR   | PADS    |"
+`} />

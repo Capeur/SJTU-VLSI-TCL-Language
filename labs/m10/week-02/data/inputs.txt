@@ -1,0 +1,4 @@
+set chipWidth 400
+set chipHeight 300
+set waferSide 10000
+set waferCost 1980

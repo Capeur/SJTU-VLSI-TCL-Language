@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 236">
+  <defs><marker id="w01-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-bold" x="10" y="24">The script (what you type)</text>
+  <rect class="d-box-code" x="10" y="36" width="274" height="130" rx="8"/>
+  <text class="d-txt d-small d-muted" x="22" y="70">1</text>
+  <text class="d-txt d-mono d-muted" x="40" y="70"># Lumen-1 passport</text>
+  <text class="d-txt d-small d-muted" x="22" y="104">2</text>
+  <text class="d-txt d-mono" x="40" y="104">puts "Lumen-1"</text>
+  <text class="d-txt d-small d-muted" x="22" y="138">3</text>
+  <text class="d-txt d-mono" x="40" y="138">puts "Size: 400 x 300 um"</text>
+
+  <text class="d-txt d-small" x="338" y="84" text-anchor="middle">Tcl runs</text>
+  <text class="d-txt d-small" x="338" y="102" text-anchor="middle">each command,</text>
+  <text class="d-txt d-small" x="338" y="120" text-anchor="middle">top to bottom</text>
+  <line class="d-arrow" x1="290" y1="134" x2="386" y2="134" marker-end="url(#w01-arrow1)"/>
+
+  <text class="d-txt d-bold" x="396" y="24">The output (what it prints)</text>
+  <rect class="d-box-ok" x="396" y="36" width="234" height="130" rx="8"/>
+  <text class="d-txt d-mono" x="410" y="104">Lumen-1</text>
+  <text class="d-txt d-mono" x="410" y="138">Size: 400 x 300 um</text>
+
+  <text class="d-txt d-small" x="10" y="196">Line 1 is a comment: a note for people. Tcl skips it, so it prints nothing.</text>
+  <text class="d-txt d-small" x="10" y="220">Lines 2 and 3 are commands. Each puts command prints one line of output.</text>
+</svg>

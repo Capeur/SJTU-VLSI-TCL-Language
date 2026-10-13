@@ -1,0 +1,6 @@
+Chip area: 120000 um2
+Chip area: 0.12 mm2
+Chips per row: 25
+Rows per wafer: 33
+Chips per wafer: 825
+Cost per chip: 2.4 dollars

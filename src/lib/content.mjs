@@ -16,6 +16,7 @@ const base = {
     prompt: z.string().min(1),
     explanation: z.string().min(1),
     code: z.string().optional(),
+    long_decimal: z.boolean().default(false),   // M10: allow printing > 4 decimal places (see extract-snippets)
 };
 
 export const questionSchema = z.discriminatedUnion('type', [

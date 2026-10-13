@@ -1,14 +1,21 @@
 ---
-title: "Week 1 Lesson B"
+title: "Commands are words: set and $"
+description: "Week 1, Lesson B: how Tcl splits a command into words, and how to store and read values with set and $."
 milestone: "m10"
 week: 1
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Split a command into its words, and name the command and its arguments
+  - Store a value with set and read it back with $
+  - Predict the output of a script that uses variables
+prerequisites: ["m10-w01-a"]
+glossary: [word, command, argument, variable, value]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Assigning values to variables", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl2.html" }
+  - { title: "Tcl manual page: set", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/set.htm" }
+  - { title: "Tcl(n) manual page: the 12 rules of Tcl (rules 2, 3 and 8)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,182 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 1 (Hello, chip) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · words 5 · variables + worked example 1 8 ·
+    changing a variable + worked example 2 5 · predict 3 · faded 4 · traps 4 · exit quiz 4 · cheat card 1.
+    Warm-up: all 3 items come from Lesson A, the only earlier lesson (decision log, P3). */}
+
+<LessonMeta milestone="m10" week={1} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+{chip.name}'s passport needs the chip's numbers in more than one place: the size line now, and the area and cost lines next week. If the design team makes the chip wider, you would have to hunt down every copy of {chip.width_um} by hand, and missing one gives a passport that disagrees with itself. Today you learn to give a value a name, write it once, and use the name everywhere.
+
+<ChipMap caption={`The ${chip.name} floorplan: ${chip.width_um} by ${chip.height_um} µm, with ${chip.blocks.length} blocks. Every one of these numbers will end up in a script.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Split a command into its words, and name the command and its arguments', 'Store a value with set and read it back with $', 'Predict the output of a script that uses variables']} />
+
+## Warm-up
+
+Three quick questions from Lesson A. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w01" lesson="a" mode="warmup" count={3} mix={1} />
+
+## A command is a row of words
+
+Tcl cuts every command into <GlossaryTerm term="word">words</GlossaryTerm> at the spaces. One space or ten makes no difference. The first word is the command's name: it says what to do. The other words are its <GlossaryTerm term="argument">arguments</GlossaryTerm>: they say what to do it with.
+
+In Lesson A, `puts "Size: 400 x 300 um"` had just two words: `puts` and the text. The double quotes keep the text together as one word, spaces and all.
+
+<Diagram name="w01-command-words" alt="Two commands cut into word boxes. set chipWidth 400 has three words: set is the command name, chipWidth is argument 1 and 400 is argument 2. puts, followed by Size: 400 x 300 um in double quotes, has two words: puts is the command name, and the quoted text is argument 1, kept as one word by the quotes. The quote marks themselves are not part of the word." />
+
+Both lines below print the same thing. The extra spaces in line 2 only separate the words; they are not part of any word.
+
+<TclPlayground client:visible code={`puts "Lumen-1"
+puts          "Lumen-1"`} />
+
+## Variables: give a value a name
+
+A <GlossaryTerm term="variable" /> is a named box that holds a <GlossaryTerm term="value" />. The command `set` puts a value into a box: `set chipWidth 400` means "put 400 in the box called chipWidth". If the box does not exist yet, `set` creates it.
+
+To use the value, write a dollar sign in front of the name: `$chipWidth`. Before the command runs, Tcl replaces `$chipWidth` with 400. This works inside double quotes too.
+
+<Diagram name="w01-variable-box" alt="Three steps from left to right. First, set chipWidth 400 puts 400 into a box labelled chipWidth. In the middle, the variable: a named box holding one value, 400. Last, puts dollar chipWidth: Tcl replaces dollar chipWidth with the value in the box, so puts prints 400. A note says that without the dollar sign, puts chipWidth just prints the word chipWidth." />
+
+<WorkedExample
+  code={`set chipName Lumen-1
+set chipWidth 400
+puts $chipName
+puts "Width: $chipWidth um"`}
+  notes={{
+    1: 'Three words: set is the command, chipName and Lumen-1 are its two arguments. set stores Lumen-1 in a new variable called chipName. set prints nothing.',
+    2: 'The same for the width. Now two boxes exist: chipName holds Lumen-1, chipWidth holds 400.',
+    3: 'The $ asks for the value. Tcl replaces $chipName with Lumen-1, then puts runs and prints: Lumen-1',
+    4: 'Inside double quotes, $chipWidth is still replaced by its value. Output: Width: 400 um'
+  }}
+/>
+
+Run it. Then change 400 to 500 in line 2 and run it again: the output follows the variable.
+
+<TclPlayground client:visible code={`set chipName Lumen-1
+set chipWidth 400
+puts $chipName
+puts "Width: $chipWidth um"`} />
+
+## A variable can change
+
+A box holds one value at a time. A second `set` with the same name throws the old value away and stores the new one. Tcl runs the commands in order, so each `$` gives whatever the box holds at that moment.
+
+<WorkedExample
+  code={`set block CORE
+puts "Now checking: $block"
+set block SRAM
+puts "Now checking: $block"`}
+  notes={{
+    1: 'The variable block holds CORE.',
+    2: 'Output: Now checking: CORE',
+    3: 'The box now holds SRAM. CORE is gone for good.',
+    4: 'The same command as line 2, but the box holds something new, so the output is different: Now checking: SRAM'
+  }}
+/>
+
+## Predict → Run → Explain
+
+Read the code line by line, keeping track of what is in the box. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set block ADC
+puts "Block: $block"
+set block SENSOR
+puts "Block: block"`}
+  expected={`Block: ADC
+Block: block`}
+  explanation="Line 2 prints the value at that moment, ADC. Line 3 replaces ADC with SENSOR. But line 4 has no $ in front of block, so Tcl does not look in the box: block is just a word, and puts prints it as it is."
+/>
+
+## Faded example
+
+Fill each blank so that each puts prints what the comment above it asks for.
+
+<FadedExample
+  client:visible
+  template={`___1___ chipName Lumen-1
+set chipHeight 300
+# Must print: Chip: Lumen-1
+puts "Chip: ___2___chipName"
+# Must print: Height: 300 um
+puts "Height: ___3___ um"`}
+  answers={[['set'], ['$'], ['$chipHeight']]}
+  hints={['Which command stores a value in a variable?', 'Which character asks Tcl for the value of a variable?', 'Write the variable that holds 300, with the character that reads its value.']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set chipName Lumen-1
+puts chipName`}
+  output={`chipName`}
+  fix={`set chipName Lumen-1
+puts $chipName`}
+  why="Without a $, chipName is just a word, and puts prints that word. The $ is what tells Tcl to look in the box. No error appears, so this trap is easy to miss: always check your output."
+/>
+
+<Trap
+  wrong={`set chipWidth 400
+puts "Width: $chipWidht um"`}
+  error={`can't read "chipWidht": no such variable`}
+  fix={`set chipWidth 400
+puts "Width: $chipWidth um"`}
+  why="A typo in the name asks for a box that does not exist. Tcl shows the name it could not find, so compare it letter by letter with your set line. Capitals count too: $ChipWidth is a different name from $chipWidth."
+/>
+
+<Trap
+  wrong={`set chipWidth = 400`}
+  error={`wrong # args: should be "set varName ?newValue?"`}
+  fix={`set chipWidth 400`}
+  why="In maths you write width = 400, but set takes a name and a value, just two arguments. With = it gets three. The message wrong # args means the wrong number of arguments, and Tcl shows the right form: set, a variable name, then the new value."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w01" lesson="b" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Words, set and $" lines={[
+  'Spaces split a command into words; the first word is the command',
+  'The other words are its arguments',
+  'set name value     store value in the variable name',
+  '$name              the value of name (Tcl swaps it in first)',
+  'puts "Width: $w um"   $ works inside double quotes',
+  'A second set replaces the old value',
+  'Names are case-sensitive: $chipName is not $ChipName',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Assigning values to variables', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl2.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: set', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/set.htm', kind: 'tcl-man' },
+  { title: 'Tcl(n) manual page: rules 2 and 3 cover words, rule 8 covers $ (variable substitution)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm', kind: 'tcl-man' },
+]} />

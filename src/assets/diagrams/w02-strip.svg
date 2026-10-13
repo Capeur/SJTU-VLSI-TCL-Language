@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230">
+  <defs>
+    <marker id="w02-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker>
+    <pattern id="w02-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" class="d-arrow"/></pattern>
+  </defs>
+  <text class="d-txt d-bold" x="10" y="22">A strip of silicon 1000 µm long. How many Lumen-1 chips (400 µm wide) fit?</text>
+  <rect class="d-chip" x="10" y="40" width="600" height="80" rx="3"/>
+  <rect class="d-box-info" x="10" y="40" width="240" height="80" rx="3"/>
+  <text class="d-txt d-bold" x="130" y="86" text-anchor="middle">chip 1</text>
+  <rect class="d-box-info" x="250" y="40" width="240" height="80" rx="3"/>
+  <text class="d-txt d-bold" x="370" y="86" text-anchor="middle">chip 2</text>
+  <rect x="490" y="40" width="120" height="80" fill="url(#w02-hatch)"/>
+  <rect class="d-box-warn" x="490" y="40" width="120" height="80" rx="3" fill-opacity="0.35"/>
+  <text class="d-txt d-small d-fg-warn" x="550" y="78" text-anchor="middle">200 µm</text>
+  <text class="d-txt d-small d-fg-warn" x="550" y="96" text-anchor="middle">left over</text>
+  <line class="d-arrow" x1="14" y1="134" x2="606" y2="134" marker-start="url(#w02-arrow2)" marker-end="url(#w02-arrow2)"/>
+  <text class="d-txt d-small" x="310" y="152" text-anchor="middle">1000 µm</text>
+
+  <text class="d-txt d-mono" x="10" y="182">1000 / 400   → 2</text>
+  <text class="d-txt d-small" x="200" y="182">whole numbers in, whole number out: 2 whole chips</text>
+  <text class="d-txt d-mono" x="10" y="204">1000 % 400   → 200</text>
+  <text class="d-txt d-small" x="200" y="204">the remainder: what is left over</text>
+  <text class="d-txt d-mono" x="10" y="226">1000 / 400.0 → 2.5</text>
+  <text class="d-txt d-small" x="200" y="226">a decimal in, a decimal out (but half a chip is useless!)</text>
+</svg>

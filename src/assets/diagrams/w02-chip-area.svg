@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230">
+  <defs><marker id="w02-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <rect class="d-chip" x="40" y="30" width="200" height="150" rx="3"/>
+  <text class="d-txt d-bold" x="140" y="110" text-anchor="middle">Lumen-1</text>
+  <line class="d-arrow" x1="44" y1="198" x2="236" y2="198" marker-start="url(#w02-arrow1)" marker-end="url(#w02-arrow1)"/>
+  <text class="d-txt d-small" x="140" y="220" text-anchor="middle">width 400 µm</text>
+  <line class="d-arrow" x1="26" y1="34" x2="26" y2="176" marker-start="url(#w02-arrow1)" marker-end="url(#w02-arrow1)"/>
+  <text class="d-txt d-small" x="11" y="105" text-anchor="middle" transform="rotate(-90 11 105)">height 300 µm</text>
+
+  <text class="d-txt d-bold" x="280" y="48">Area: how much silicon</text>
+  <text class="d-txt d-mono" x="280" y="76">width × height</text>
+  <text class="d-txt d-mono" x="280" y="100">= 400 × 300 = 120000 µm²</text>
+  <text class="d-txt d-bold" x="280" y="142">Perimeter: the distance around</text>
+  <text class="d-txt d-mono" x="280" y="170">2 × (width + height)</text>
+  <text class="d-txt d-mono" x="280" y="194">= 2 × (400 + 300) = 1400 µm</text>
+</svg>

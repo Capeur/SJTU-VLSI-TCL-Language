@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 214">
+  <defs><marker id="w01-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-bold" x="10" y="24">1. Store</text>
+  <rect class="d-box-code" x="10" y="38" width="180" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="22" y="63">set chipWidth 400</text>
+  <text class="d-txt d-small" x="10" y="102">set puts 400 into the box</text>
+  <text class="d-txt d-small" x="10" y="120">called chipWidth.</text>
+  <line class="d-arrow" x1="196" y1="58" x2="252" y2="96" marker-end="url(#w01-arrow2)"/>
+
+  <text class="d-txt d-bold" x="262" y="24">The variable</text>
+  <rect class="d-box-warn" x="262" y="62" width="128" height="80" rx="6"/>
+  <text class="d-txt d-small d-fg-warn" x="326" y="84" text-anchor="middle">chipWidth</text>
+  <rect class="d-box-ok" x="290" y="94" width="72" height="36" rx="5"/>
+  <text class="d-txt d-mono d-bold" x="326" y="118" text-anchor="middle">400</text>
+  <text class="d-txt d-small" x="262" y="164">A named box that</text>
+  <text class="d-txt d-small" x="262" y="182">holds one value.</text>
+  <line class="d-arrow" x1="396" y1="96" x2="446" y2="58" marker-end="url(#w01-arrow2)"/>
+
+  <text class="d-txt d-bold" x="456" y="24">2. Read</text>
+  <rect class="d-box-code" x="456" y="38" width="174" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="468" y="63">puts $chipWidth</text>
+  <text class="d-txt d-small" x="456" y="102">$chipWidth means "the value</text>
+  <text class="d-txt d-small" x="456" y="120">in chipWidth". Tcl puts 400</text>
+  <text class="d-txt d-small" x="456" y="138">there, then puts prints: 400</text>
+  <text class="d-txt d-small d-muted" x="10" y="206">No $ means no box: puts chipWidth just prints the word chipWidth.</text>
+</svg>

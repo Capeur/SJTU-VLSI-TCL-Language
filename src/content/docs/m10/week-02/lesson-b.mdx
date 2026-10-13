@@ -1,14 +1,21 @@
 ---
-title: "Week 2 Lesson B"
+title: "Square brackets: use a result"
+description: "Week 2, Lesson B: how square brackets run a command first and put its result in its place, storing results with set, and brackets inside brackets."
 milestone: "m10"
 week: 2
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Explain what Tcl does with [ ] before it runs a command
+  - Store a result in a variable with set and [ ]
+  - Predict the output of brackets inside brackets
+prerequisites: ["m10-w02-a"]
+glossary: [command-substitution, result, nesting, square-micrometre]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Grouping arguments with square brackets", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl5.html" }
+  - { title: "Tcl(n) manual page: the 12 rules of Tcl (rule 7, command substitution)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm" }
+  - { title: "Tcl manual page: set (its result)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/set.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,178 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 2 (Tcl as a calculator) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · brackets concept + worked example 1 9 · predict 3 ·
+    nesting concept + worked example 2 7 · step by step 3 · faded 4 · traps 3 · exit quiz 4 · cheat card 1.
+    Nesting is taught only with brackets OUTSIDE braces (puts [set area [expr {…}]]): inside expr's braces,
+    expr itself runs the inner brackets, which Week 3 explains (user decision, P3 review). */}
+
+<LessonMeta milestone="m10" week={2} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+Your Week 1 passport typed the chip's size by hand. A real report works its numbers out and drops them straight into the text, like `Area: 120000 um2`, where expr computed the 120000. Every block on {chip.name} has an area like that, and a script can work out all {chip.blocks.length} of them. To do it, you need the square brackets. In Lesson A you used them as a recipe. Today you learn what they really do.
+
+<ChipMap caption={`The ${chip.name} floorplan. Each block is a rectangle, so a script can compute each block's area with expr and print it in a report.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Explain what Tcl does with [ ] before it runs a command', 'Store a result in a variable with set and [ ]', 'Predict the output of brackets inside brackets']} />
+
+## Warm-up
+
+Two questions from Week 1, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w02" lesson="a" earlier={['m10-w01']} mode="warmup" count={3} mix={1 / 3} />
+
+## Square brackets run a command first
+
+When Tcl meets `[`, it runs everything up to the matching `]` as a command of its own. The <GlossaryTerm term="result" /> of that command then takes the place of the brackets. Only after that does the outer command run. This is called <GlossaryTerm term="command-substitution" />.
+
+Every command gives back a result. expr gives back the answer to its sum. With brackets you hand that answer to another command: to `puts` to print it, or to `set` to keep it in a variable.
+
+<Diagram name="w02-bracket-steps" alt="Three steps. Step 1: in set area, bracket expr 400 times 300 bracket, Tcl meets the opening bracket and runs what is inside as a new command. Step 2: expr 400 times 300 runs and gives back 120000. Step 3: the result takes the place of the brackets, so the command becomes set area 120000, and now set runs. A note says set never sees the brackets or the maths, only the number." />
+
+<WorkedExample
+  code={`set chipWidth 400
+set chipHeight 300
+set area [expr {$chipWidth * $chipHeight}]
+puts "Area: $area um2"
+puts "In mm2: [expr {$area / 1000000.0}]"`}
+  notes={{
+    1: 'The chip is 400 µm wide.',
+    2: 'And 300 µm high.',
+    3: 'The brackets run expr first. Its result, 120000, replaces them, so set gets two arguments: area and 120000. The variable area holds the number, not the maths.',
+    4: 'um2 is how code writes µm², square micrometres. Output: Area: 120000 um2',
+    5: 'Brackets work inside double quotes too: the result lands in the middle of the text. A square millimetre is 1000000 µm², and the .0 makes the answer a decimal. Output: In mm2: 0.12'
+  }}
+/>
+
+<TclPlayground client:visible code={`set chipWidth 400
+set chipHeight 300
+set area [expr {$chipWidth * $chipHeight}]
+puts "Area: $area um2"
+puts "In mm2: [expr {$area / 1000000.0}]"`} />
+
+## Predict → Run → Explain
+
+Only one of these two lines has brackets. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set chipWidth 400
+puts "Width: [expr {$chipWidth / 1000.0}] mm"
+puts "Width: expr $chipWidth / 1000.0 mm"`}
+  expected={`Width: 0.4 mm
+Width: expr 400 / 1000.0 mm`}
+  explanation="In line 2 the brackets run expr, and its result, 0.4, replaces them. Line 3 has no brackets, so nothing runs: expr is just a word in the text. Tcl still replaces $chipWidth with 400, because $ works inside double quotes, and puts prints the rest as it is."
+/>
+
+## Brackets inside brackets
+
+Brackets can sit inside brackets. This is called <GlossaryTerm term="nesting" />. Tcl reads from left to right, and at each `[` it starts a new command. A command can only run once all its words are ready, so the innermost command finishes first, and its result moves outwards.
+
+One more fact makes nesting useful: `set` also gives back a result, the value it has just stored. So `[set area …]` stores a value and passes it on, in one go.
+
+<Diagram name="w02-nesting" alt="The command puts, bracket set area, bracket expr 400 times 300, close brackets. The outer brackets start a new command, set area. While reading the words of set, Tcl meets the inner brackets. The order things finish in: 1, expr 400 times 300 gives 120000; 2, set area 120000 stores the number and gives back 120000; 3, puts 120000 prints it. A note says a command runs only when all its words are ready, so the innermost one finishes first." />
+
+<WorkedExample
+  code={`puts [set area [expr {400 * 300}]]
+puts "Stored: $area"`}
+  notes={{
+    1: 'Tcl starts the outer brackets: a new command, set area …. Reading its words, Tcl meets the inner brackets and runs expr {400 * 300}, which gives 120000. Now set area 120000 runs: it stores the number and gives it back. Finally puts prints it. Output: 120000',
+    2: 'The variable area kept the value. Output: Stored: 120000'
+  }}
+/>
+
+Nesting saves lines, but a long nested line is hard to read and hard to check. When a sum has several steps, give each step its own line and its own variable. The two bottom blocks of {chip.name}, CORE and SRAM, are both 160 µm high:
+
+<TclPlayground client:visible code={`set coreArea [expr {200 * 160}]
+set sramArea [expr {140 * 160}]
+set bothArea [expr {$coreArea + $sramArea}]
+puts "CORE: $coreArea um2"
+puts "SRAM: $sramArea um2"
+puts "Both: $bothArea um2"`} />
+
+## Faded example
+
+Fill each blank so that each line does what its comment says.
+
+<FadedExample
+  client:visible
+  template={`set chipWidth 400
+set chipHeight 300
+# Must store 120000 in area
+set area ___1___expr {$chipWidth * $chipHeight}]
+# Must print: Area: 120000 um2
+puts "Area: ___2___ um2"
+# Must print: Half: 60000
+puts "Half: [___3___ {$area / 2}]"`}
+  answers={[['['], ['$area'], ['expr']]}
+  hints={['The closing bracket needs a partner, so that expr runs first.', 'Which variable holds the area? Write it so that Tcl uses its value.', 'Which command works out maths?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set area [400 * 300]`}
+  error={`invalid command name "400"`}
+  fix={`set area [expr {400 * 300}]`}
+  why="Brackets run a command, so the first word inside them must be a command name. 400 is not a command. Maths always needs expr."
+/>
+
+<Trap
+  wrong={`set area expr {400 * 300}`}
+  error={`wrong # args: should be "set varName ?newValue?"`}
+  fix={`set area [expr {400 * 300}]`}
+  why="Without brackets, expr is just a word. set gets three arguments, area, expr and the maths, but it takes at most two. The brackets make expr run first, so set gets only its result."
+/>
+
+<Trap
+  wrong={`puts "Area: expr {400 * 300} um2"`}
+  output={`Area: expr {400 * 300} um2`}
+  fix={`puts "Area: [expr {400 * 300}] um2"`}
+  why="Without brackets, nothing runs: the word expr and the maths are printed as plain text. No error appears, so this one is easy to miss. Always read your output."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w02" lesson="b" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Square brackets" lines={[
+  '[cmd …]   run cmd first; its result replaces the brackets',
+  'set area [expr {$w * $h}]          keep a result in a variable',
+  'puts "Area: [expr {$w * $h}] um2"  put a result inside text',
+  'Every command gives back a result; set gives back the value it stored',
+  'Brackets in brackets: the innermost command finishes first',
+  'Maths needs expr: [expr {400 * 300}], not [400 * 300]',
+  'Several steps? One line and one variable per step',
+  'um2 in code and output means µm² (square micrometres)',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Grouping arguments with square brackets', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl5.html', kind: 'tutorial' },
+  { title: 'Tcl(n) manual page: the 12 rules of Tcl; rule 7 is command substitution', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: set, including the result it gives back', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/set.htm', kind: 'tcl-man' },
+]} />

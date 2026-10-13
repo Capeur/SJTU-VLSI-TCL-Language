@@ -1,10 +1,14 @@
 ---
 title: "Week 2: Tcl as a calculator"
+description: "Week 2 overview: maths with expr, whole numbers and decimals, square brackets, and the cost of one Lumen-1, in about 3 hours."
 milestone: "m10"
 week: 2
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 180
+goals:
+  - Calculate with expr and predict whole-number and decimal results
+  - Use [ ] to put a command's result into another command
+  - Compute a chain of results, one variable per step
+prerequisites: ["m10-w01-a", "m10-w01-b"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,29 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+This week Tcl becomes your calculator. You work out how much silicon {chip.name} uses and what one chip costs to make. On the way you meet the square brackets, one of the most useful ideas in Tcl: they run a command first and put its result into another command.
+
+## This week you will
+
+<Goals items={['Calculate with expr and predict whole-number and decimal results', 'Use [ ] to put a command\'s result into another command', 'Compute a chain of results, one variable per step']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: expr, Tcl as a calculator](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-a/) | 40 min | Do maths with expr; whole numbers vs decimals; the integer-division trap |
+| [Lesson B: Square brackets](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-b/) | 40 min | Use a command's result; store results; brackets inside brackets |
+| [Lab: What does one Lumen-1 cost?](/SJTU-VLSI-TCL-Language/m10/week-02/lab/) | 60 min | Compute the area, the chips per wafer and the cost of one chip |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-02/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Review these first
+
+This week builds on Week 1. If either of these feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 1, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-a/): `puts`, double quotes and comments.
+- [Week 1, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-b/): commands are words; `set` and `$`.

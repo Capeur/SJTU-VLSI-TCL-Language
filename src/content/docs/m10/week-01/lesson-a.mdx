@@ -1,14 +1,21 @@
 ---
-title: "Week 1 Lesson A"
+title: "Your first script: puts and comments"
+description: "Week 1, Lesson A: what a chip and a script are, how to print text with puts, and how to write comments."
 milestone: "m10"
 week: 1
 lesson: "a"
-minutes: 0
-goals: []
+minutes: 40
+goals:
+  - Run a script in the playground and read its output
+  - Write puts commands that print a line of text
+  - Add comments that Tcl skips
 prerequisites: []
-glossary: []
+glossary: [chip, layer, micrometre, block, script, command, tcl, output, playground, comment, error-message]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Simple text output", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl1.html" }
+  - { title: "Tcl manual page: puts", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/puts.htm" }
+  - { title: "Tcl(n) manual page: the 12 rules of Tcl (rule 10, comments)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,193 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import LayerStack from '../../../../components/LayerStack.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 1 (Hello, chip) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 4 · first Run 3 · scripts, commands, output 5 · puts worked example 6 ·
+    comments worked example 5 · faded 4 · predict ×2 4 · traps 4 · exit quiz 4 · cheat card 1.
+    No warm-up: this is the learner's very first lesson (PRD §6.3). */}
+
+<LessonMeta milestone="m10" week={1} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+Meet {chip.name}, {chip.tagline}. A <GlossaryTerm term="chip" /> is built like a city seen from above, drawn on a stack of see-through sheets: one for the ground, others for the streets and the highways. Each sheet is a <GlossaryTerm term="layer" />. {chip.name} is {chip.width_um} by {chip.height_um} <GlossaryTerm term="micrometre">µm</GlossaryTerm>, about the size of a grain of salt, with {chip.blocks.length} <GlossaryTerm term="block">blocks</GlossaryTerm> as its neighbourhoods. Nobody draws millions of shapes by hand: engineers write scripts. This week you write your first one.
+
+<LayerStack caption="A chip is a city map drawn in layers. These are the teaching layers you will use in this course." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Run a script in the playground and read its output', 'Write puts commands that print a line of text', 'Add comments that Tcl skips']} />
+
+## Warm-up
+
+No warm-up today: this is your very first lesson. From Lesson B on, every lesson starts with three quick questions.
+
+## Press Run
+
+Below is a <GlossaryTerm term="playground" />: a box where you type code and run it, right in your browser. Press **Run** and watch what appears under the box. You do not need to understand the code yet.
+
+<TclPlayground client:visible code={`puts "Hello, I am Lumen-1"`} />
+
+The text that appeared is the <GlossaryTerm term="output" />. You just ran your first program! **Reset** brings back the original code whenever you need it.
+
+## Scripts, commands and output
+
+A <GlossaryTerm term="script" /> is a list of instructions for the computer, written as plain text, like a recipe. Each instruction is a <GlossaryTerm term="command" />, and each command sits on its own line. The computer runs the commands one after another, from top to bottom.
+
+This course writes scripts in <GlossaryTerm term="tcl" />, said "tickle". Many chip-design tools understand Tcl, which is why you learn it here.
+
+Your first command is `puts`, short for "put string". A string is a piece of text. `puts` prints one line of text, then moves to the next line.
+
+<Diagram name="w01-script-run" alt="On the left, a script of three numbered lines: a comment, # Lumen-1 passport, then puts with Lumen-1 in quotes, then puts with Size: 400 x 300 um in quotes. An arrow says Tcl runs the commands from top to bottom. On the right, the output has two lines, Lumen-1 and Size: 400 x 300 um. A note says the comment prints nothing and each puts command prints one line." />
+
+<WorkedExample
+  code={`puts "Lumen-1"
+puts "A light-sensor chip"
+puts "Size: 400 x 300 um"`}
+  notes={{
+    1: 'puts is the command. It prints the text after it. The double quotes mark where the text starts and ends; they are not printed. Output: Lumen-1',
+    2: 'A second command on its own line. The text has spaces in it, and the quotes keep it together as one piece. Week 3 explains quotes in detail; for now, put your text inside double quotes. Output: A light-sensor chip',
+    3: 'The letters um stand for µm, micrometres. The µ sign is hard to type, so code and output write um instead. You will see um everywhere in this course. Output: Size: 400 x 300 um'
+  }}
+/>
+
+Run it. Then change the text inside the quotes and run it again. The output follows exactly what you type, capitals and spaces included.
+
+<TclPlayground client:visible code={`puts "Lumen-1"
+puts "A light-sensor chip"
+puts "Size: 400 x 300 um"`} />
+
+## Comments: notes for humans
+
+A <GlossaryTerm term="comment" /> is a note for the people who read your script, including you next month. A line that starts with `#` is a comment. Tcl skips the whole line, so a comment never changes the output.
+
+Good comments say what a part of the script is for. Put them on their own line, just above the code they explain.
+
+<WorkedExample
+  code={`# Lumen-1 passport, version 1
+# It prints the chip's name and size.
+puts "Chip: Lumen-1"
+# The size is width x height, in micrometres
+puts "Size: 400 x 300 um"`}
+  notes={{
+    1: 'The # at the start makes this whole line a comment. Tcl skips it. It names the script, like a title.',
+    2: 'Another comment, saying what the script does.',
+    3: 'A command. Output: Chip: Lumen-1',
+    4: 'A comment can sit between commands, to explain the line below it.',
+    5: 'Output: Size: 400 x 300 um. Five lines of script, but only two lines of output: the three comments print nothing.'
+  }}
+/>
+
+<TclPlayground client:visible code={`# Lumen-1 passport, version 1
+# It prints the chip's name and size.
+puts "Chip: Lumen-1"
+# The size is width x height, in micrometres
+puts "Size: 400 x 300 um"`} />
+
+## Faded example
+
+Your turn. Fill each blank so that the script prints exactly what its first comment asks for.
+
+<FadedExample
+  client:visible
+  template={`# Must print two lines: CHIP PASSPORT, then Name: Lumen-1
+___1___ "CHIP PASSPORT"
+___2___ The next line prints the name
+puts "Name: Lumen-1___3___`}
+  answers={[['puts'], ['#'], ['"']]}
+  hints={['Which command prints a line of text?', 'This line is a note for people. Which character makes Tcl skip a line?', 'The text started with a double quote. What must it end with?']}
+/>
+
+## Predict → Run → Explain
+
+Before you run, type what you think the output will be. Run unlocks once you have typed something. Your guess does not need to be right: a wrong guess shows you exactly what to learn next.
+
+<PredictOutput
+  client:visible
+  code={`# Lumen-1 blocks
+puts "SENSOR"
+# puts "PADS"
+puts "# CORE"`}
+  expected={`SENSOR
+# CORE`}
+  explanation="Lines 1 and 3 start with #, so they are comments, and Tcl skips them, even though line 3 looks like code. In line 4 the line starts with puts, so it is a command. The # is inside the text that puts prints, so it appears in the output."
+/>
+
+<PredictOutput
+  client:visible
+  code={`puts "CORE    SRAM"
+puts "ADC SENSOR PADS"`}
+  expected={`CORE    SRAM
+ADC SENSOR PADS`}
+  explanation="Inside double quotes, every character is kept exactly as you typed it, including the four spaces between CORE and SRAM. puts prints the text exactly as it is."
+/>
+
+## Common traps
+
+When Tcl cannot run a command, it stops and shows an <GlossaryTerm term="error-message">error message</GlossaryTerm>. Errors are normal: every programmer sees them every day. Read the message first. It usually names the exact word that Tcl did not understand.
+
+<Trap
+  wrong={`Puts "Hello, Lumen-1"`}
+  error={`invalid command name "Puts"`}
+  fix={`puts "Hello, Lumen-1"`}
+  why="Tcl is case-sensitive: capital and small letters are different. Puts and puts are two different names, and only puts exists. The message invalid command name means Tcl does not know the first word of the command, and it shows you that word."
+/>
+
+<Trap
+  wrong={`Passport for Lumen-1
+puts "Name: Lumen-1"`}
+  error={`invalid command name "Passport"`}
+  fix={`# Passport for Lumen-1
+puts "Name: Lumen-1"`}
+  why="A note without # is not a comment. Tcl thinks it is a command and tries to run its first word, Passport, which does not exist. Start every note with #."
+/>
+
+<Trap
+  wrong={`puts “Hello Lumen-1”`}
+  error={`can not find channel named "“Hello"`}
+  fix={`puts "Hello Lumen-1"`}
+  why="Word processors and chat apps often turn straight quotes into curly ones, like “ and ”. Tcl only understands the straight quote mark. With curly quotes, the space splits the text into two pieces, and puts thinks the first piece, “Hello, names a place to print to, called a channel. Type code in the playground or in a plain text editor, not in a word processor."
+/>
+
+## Exit quiz
+
+Four questions on this lesson. You get feedback right after each answer.
+
+<Quiz bank="m10-w01" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="puts and comments" lines={[
+  'A script is a list of commands, run from top to bottom',
+  'puts "some text"     print one line of text',
+  'Text with spaces goes inside straight double quotes "..."',
+  '# a note             a comment: Tcl skips the whole line',
+  'Capitals matter: puts works, Puts does not',
+  'um in code and output means µm (micrometres)',
+  'An error message names the word Tcl did not understand',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Simple text output (puts and comments)', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl1.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: puts (more options than you need today)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/puts.htm', kind: 'tcl-man' },
+  { title: 'Tcl(n) manual page: the 12 rules of Tcl; rule 10 is about comments', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm', kind: 'tcl-man' },
+]} />

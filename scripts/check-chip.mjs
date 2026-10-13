@@ -3,6 +3,8 @@
 //   - set chipName / chipWidth / chipHeight <value>  must match the JSON
 //   - any "Lumen-<n>" must be the chip's real name
 //   - a block written as {NAME x y w h} must match the block's numbers
+//   - "<w> x <h> um" and "<w> × <h>" must be the chip's size or a block's size (also in diagrams)
+//   - "Blocks: …" and "Layers: …" lists must match the JSON (all names, same order)
 // Usage: node scripts/check-chip.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,18 +16,26 @@ const chip = JSON.parse(fs.readFileSync(path.join(root, 'src/data/lumen-1.json')
 const files = [
     ...walk(path.join(root, 'src/content/docs'), ['.md', '.mdx']),
     ...walk(path.join(root, 'src/content/quizzes'), ['.yaml']),
+    ...walk(path.join(root, 'src/content/glossary'), ['.yaml']),
     ...walk(path.join(root, 'labs'), ['.tcl', '.txt', '.md']),
+    ...walk(path.join(root, 'src/assets/diagrams'), ['.svg']),
 ].filter((f) => !f.endsWith(`${path.sep}demo.mdx`));
 
 const blocks = Object.fromEntries(chip.blocks.map((b) => [b.name, b]));
+const sizes = new Set([`${chip.width_um} x ${chip.height_um}`, ...chip.blocks.map((b) => `${b.w} x ${b.h}`)]);
+const blockList = chip.blocks.map((b) => b.name).join(' ');
+const layerList = chip.layers.join(' ');
 const errors = [];
 for (const file of files) {
     const rel = path.relative(root, file);
     fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
         const where = `${rel}:${i + 1}`;
-        for (const m of line.matchAll(/\bset\s+(chipName|chipWidth|chipHeight)\s+("?)([^\s"}\]]+)\2/g)) {
+        // The value ends at a space, quote, bracket, or prose punctuation (`400`, in an MDX sentence).
+        // Values that do not start with a letter or digit ($var, [cmd], the "= 400" trap) are not facts.
+        for (const m of line.matchAll(/\bset\s+(chipName|chipWidth|chipHeight)\s+("?)([^\s"}\]`,;<]+)\2/g)) {
             const want = String(chip[chip.tcl_names[m[1]]]);
-            if (m[3] !== want && !m[3].startsWith('$') && !m[3].startsWith('[')) errors.push(`${where}: ${m[1]} is ${m[3]}, but Lumen-1 says ${want}`);
+            const value = m[3].replace(/\.+$/, '');
+            if (value !== want && /^[A-Za-z0-9]/.test(value)) errors.push(`${where}: ${m[1]} is ${value}, but Lumen-1 says ${want}`);
         }
         for (const m of line.matchAll(/\bLumen-(\d+)\b/g)) {
             if (`Lumen-${m[1]}` !== chip.name) errors.push(`${where}: "${m[0]}" — the chip is called ${chip.name}`);
@@ -34,6 +44,16 @@ for (const file of files) {
             const b = blocks[m[1]];
             if (b && [b.x, b.y, b.w, b.h].join(' ') !== m.slice(2, 6).join(' ')) {
                 errors.push(`${where}: block ${m[0]} differs from Lumen-1 {${b.name} ${b.x} ${b.y} ${b.w} ${b.h}}`);
+            }
+        }
+        // "400 x 300 um" (code) or "400 × 300" (prose, diagrams): the chip's size or one block's size.
+        for (const m of [...line.matchAll(/\b(\d+) x (\d+) um\b/g), ...line.matchAll(/\b(\d+) × (\d+)\b/g)]) {
+            if (!sizes.has(`${m[1]} x ${m[2]}`)) errors.push(`${where}: "${m[0]}" is not the size of ${chip.name} or of one of its blocks`);
+        }
+        // "Blocks: CORE SRAM …" and "Layers: ACTIVE POLY …" lists must be complete and in the JSON's order.
+        for (const [label, want] of [['Blocks', blockList], ['Layers', layerList]]) {
+            for (const m of line.matchAll(new RegExp(`\\b${label}: ([A-Z][A-Z0-9]*(?: [A-Z][A-Z0-9]*)+)`, 'g'))) {
+                if (m[1] !== want) errors.push(`${where}: "${label}: ${m[1]}" — ${chip.name} says "${label}: ${want}"`);
             }
         }
     });

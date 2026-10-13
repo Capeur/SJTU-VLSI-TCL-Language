@@ -1,14 +1,18 @@
 ---
-title: "Week 1 Quiz"
+title: "Week 1 quiz"
+description: "Week 1 weekly quiz: 10 questions on puts, comments, words, set and $."
 milestone: "m10"
 week: 1
 lesson: "quiz"
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 20
+goals:
+  - Recall this week's ideas without notes
+  - Find the gaps before Week 2 builds on them
+prerequisites: ["m10-w01-a", "m10-w01-b"]
 glossary: []
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Dunlosky et al. (2013): which study strategies make the grade", url: "https://www.psychologicalscience.org/news/releases/which-study-strategies-make-the-grade.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +20,19 @@ review_date: ""
 sidebar: {"label":"Quiz","order":4}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import Quiz from '../../../../components/Quiz.astro';
 
-Quiz for week 1 (Hello, chip) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={1} lesson="quiz" minutes={20} />
+
+Ten questions on this week. From Week 2 on, about 3 of the 10 come from earlier weeks; this week there are no earlier weeks yet. Answer without your notes. A quiz is practice, not a test: the struggle to remember is what makes the memory stronger.
+
+- After each answer you see why the right answer is right, and why your choice was not.
+- At the end you get your score and can read every explanation again.
+- Every question you miss goes into your [spaced review](/SJTU-VLSI-TCL-Language/review/) deck, so it comes back in a few days.
+
+Nothing is sent anywhere. Your score stays in this browser.
+
+<Quiz bank="m10-w01" mode="weekly" count={10} mix={1} />
+
+When you are done, press **Try again with new questions** for a different mix. The week has more than 25 questions to draw from.
