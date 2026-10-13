@@ -12,3 +12,21 @@
   --m40: #ff9c73;
 }
 .draft-banner-note { font-weight: 600; }
+
+/* Component tokens: follow Starlight's light/dark switch (PRD §7, §13). */
+:root {
+  --c-ok-bg: #e3f4ea; --c-ok-fg: #0b5a30; --c-ok-border: #2e8b57;
+  --c-bad-bg: #fbe7e7; --c-bad-fg: #8a1c1c; --c-bad-border: #c0392b;
+  --c-warn-bg: #fff4d6; --c-warn-fg: #6b4a00; --c-warn-border: #c58a00;
+  --c-info-bg: #e6f0fb; --c-info-fg: #124a85; --c-info-border: #2f6db5;
+  --c-code-bg: #f3f4f6; --c-code-fg: #1b1f24;
+  --c-focus: #1a5fd0;
+}
+:root[data-theme='dark'] {
+  --c-ok-bg: #12301f; --c-ok-fg: #8be0ae; --c-ok-border: #3da86a;
+  --c-bad-bg: #3a1717; --c-bad-fg: #ffb0a8; --c-bad-border: #d9604f;
+  --c-warn-bg: #3a2e0c; --c-warn-fg: #f4d27a; --c-warn-border: #c9a02a;
+  --c-info-bg: #12263d; --c-info-fg: #a9cdf7; --c-info-border: #4c8ad6;
+  --c-code-bg: #161b22; --c-code-fg: #e6edf3;
+  --c-focus: #7fb0ff;
+}

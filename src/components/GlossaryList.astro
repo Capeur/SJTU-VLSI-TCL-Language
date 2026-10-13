@@ -1,0 +1,16 @@
+---
+import { loadGlossary } from '../lib/content.mjs';
+const entries = Object.entries(loadGlossary()).sort(([a], [b]) => a.localeCompare(b));
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<dl>
+  {entries.map(([key, e]) => (
+    <>
+      <dt id={key}><strong>{e.term}</strong></dt>
+      <dd>
+        <p>{e.long ?? e.short}</p>
+        {e.see_also.length > 0 && <p>See also: {e.see_also.map((s, i) => <>{i > 0 && ', '}<a href={`${base}/reference/glossary/#${s}`}>{s}</a></>)}</p>}
+      </dd>
+    </>
+  ))}
+</dl>

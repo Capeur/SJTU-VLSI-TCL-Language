@@ -1,0 +1,50 @@
+/* Shared styles for the course components (PRD §7). Tokens live in tokens.css. */
+.tc-box { border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; padding: 0.9rem 1.1rem; margin: 1.25rem 0; background: var(--sl-color-bg-nav); }
+.tc-box > :first-child { margin-top: 0; }
+.tc-box > :last-child { margin-bottom: 0; }
+.tc-title { font-weight: 700; font-size: 0.95rem; margin: 0 0 0.4rem; }
+.tc-code { background: var(--c-code-bg); color: var(--c-code-fg); font-family: var(--sl-font-mono); font-size: 0.875rem; line-height: 1.55; padding: 0.7rem 0.9rem; border-radius: 0.4rem; overflow-x: auto; white-space: pre; margin: 0.5rem 0; tab-size: 4; }
+.tc-btn { font: inherit; font-size: 0.875rem; padding: 0.35rem 0.9rem; border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg); color: var(--sl-color-text); cursor: pointer; }
+.tc-btn:hover:not(:disabled) { background: var(--sl-color-gray-6); }
+.tc-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.tc-btn.primary { background: var(--sl-color-accent); color: var(--sl-color-black); border-color: var(--sl-color-accent); font-weight: 600; }
+.tc-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0; }
+.tc-input, .tc-textarea { font-family: var(--sl-font-mono); font-size: 0.875rem; background: var(--sl-color-bg); color: var(--sl-color-text); border: 1px solid var(--sl-color-gray-4); border-radius: 0.35rem; padding: 0.3rem 0.5rem; }
+.tc-textarea { width: 100%; min-height: 7rem; resize: vertical; box-sizing: border-box; tab-size: 4; }
+.tc-out { background: var(--c-code-bg); color: var(--c-code-fg); font-family: var(--sl-font-mono); font-size: 0.85rem; white-space: pre-wrap; padding: 0.6rem 0.8rem; border-radius: 0.4rem; min-height: 2.2rem; margin: 0.4rem 0; }
+.tc-out.err { border-left: 4px solid var(--c-bad-border); }
+.tc-badge { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.05rem 0.5rem; border-radius: 999px; border: 1px solid currentColor; }
+.tc-ok { background: var(--c-ok-bg); color: var(--c-ok-fg); border-color: var(--c-ok-border); }
+.tc-bad { background: var(--c-bad-bg); color: var(--c-bad-fg); border-color: var(--c-bad-border); }
+.tc-warn { background: var(--c-warn-bg); color: var(--c-warn-fg); border-color: var(--c-warn-border); }
+.tc-info { background: var(--c-info-bg); color: var(--c-info-fg); border-color: var(--c-info-border); }
+.tc-feedback { border: 1px solid; border-radius: 0.4rem; padding: 0.5rem 0.8rem; margin: 0.5rem 0; }
+.tc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tc-box :focus-visible, .tc-term:focus-visible, .tc-code:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; }
+.tc-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: center; border-left: 6px solid var(--ms, var(--sl-color-accent)); }
+.tc-dots { display: inline-flex; gap: 0.3rem; align-items: center; }
+.tc-dot { width: 0.8rem; height: 0.8rem; border-radius: 50%; border: 2px solid var(--sl-color-gray-3); box-sizing: border-box; }
+.tc-dot[data-done] { background: var(--ms, var(--sl-color-accent)); border-color: var(--ms, var(--sl-color-accent)); }
+.tc-note-aside { border-left: 6px solid var(--c-info-border); }
+.tc-trap { border-left: 6px solid var(--c-warn-border); }
+.tc-version { border-left: 6px solid var(--c-info-border); }
+.tc-term { text-decoration: underline dotted; text-underline-offset: 3px; color: inherit; position: relative; cursor: help; }
+.tc-term .tc-tip { display: none; position: absolute; left: 0; top: 100%; z-index: 20; width: max-content; max-width: min(20rem, 80vw); background: var(--sl-color-black); color: var(--sl-color-white); border: 1px solid var(--sl-color-gray-4); border-radius: 0.4rem; padding: 0.5rem 0.7rem; font-size: 0.85rem; text-decoration: none; font-weight: 400; }
+.tc-term:hover .tc-tip, .tc-term:focus .tc-tip, .tc-term:focus-visible .tc-tip { display: block; }
+.tc-lines { list-style: none; padding: 0; margin: 0; counter-reset: ln; }
+.tc-lines li { counter-increment: ln; padding: 0 0.5rem; border-left: 3px solid transparent; }
+.tc-lines li::before { content: counter(ln); display: inline-block; width: 2rem; color: var(--sl-color-gray-3); text-align: right; margin-right: 0.8rem; }
+.tc-lines li[data-hl] { background: var(--c-warn-bg); border-left-color: var(--c-warn-border); color: var(--c-warn-fg); }
+.tc-notes { padding-left: 1.2rem; }
+.tc-notes li { margin: 0.25rem 0; padding: 0.15rem 0.4rem; border-radius: 0.3rem; }
+.tc-notes li:hover, .tc-notes li:focus { background: var(--c-warn-bg); color: var(--c-warn-fg); }
+.tc-tabs [role='tablist'] { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--sl-color-gray-5); }
+.tc-tabs [role='tab'] { font: inherit; padding: 0.4rem 0.9rem; border: 1px solid transparent; border-bottom: 0; background: none; color: var(--sl-color-text); cursor: pointer; border-radius: 0.4rem 0.4rem 0 0; }
+.tc-tabs [role='tab'][aria-selected='true'] { border-color: var(--sl-color-gray-5); background: var(--sl-color-bg); font-weight: 700; }
+.tc-tabs [role='tab'][aria-disabled='true'] { opacity: 0.55; cursor: not-allowed; }
+.tc-choice { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.25rem 0; }
+.tc-blank { width: 8ch; }
+.tc-blank[data-state='ok'] { border-color: var(--c-ok-border); background: var(--c-ok-bg); }
+.tc-blank[data-state='bad'] { border-color: var(--c-bad-border); background: var(--c-bad-bg); }
+.tc-order li { margin: 0.25rem 0; }
+@media (max-width: 40rem) { .tc-meta { flex-direction: column; align-items: flex-start; } }

@@ -1,0 +1,89 @@
+# Demo bank for /demo/. Not part of the course. Every predict-output answer is checked against real tclsh by scripts/validate-quizzes.mjs.
+- id: demo-q01
+  type: predict-output
+  lesson: a
+  tags: [substitution, braces]
+  review: true
+  prompt: "What does this print?"
+  code: |
+    set x 5
+    puts {x is $x}
+  answer: "x is $x"
+  explanation: >
+    Braces stop all substitution, so $x is printed literally.
+- id: demo-q02
+  type: predict-output
+  lesson: a
+  tags: [substitution, quotes]
+  review: true
+  prompt: "What does this print?"
+  code: |
+    set x 5
+    puts "x is $x"
+  answer: "x is 5"
+  explanation: >
+    Double quotes group words but still allow substitution, so $x becomes 5.
+- id: demo-q03
+  type: mcq
+  lesson: a
+  tags: [command]
+  review: true
+  prompt: "In `puts hello`, which word is the command name?"
+  choices: ["puts", "hello", "Both words", "Neither word"]
+  answer: "puts"
+  explanation: >
+    The first word of a command is always the command name. The rest are arguments.
+  distractor_feedback:
+    "hello": "hello is the argument. It is what puts will print."
+- id: demo-q04
+  type: multi-select
+  lesson: a
+  tags: [substitution]
+  review: false
+  prompt: "Which of these does Tcl substitute inside double quotes? Pick all that apply."
+  choices: ["$name", "[expr {1+1}]", "\\n", "{braces}"]
+  answer: ["$name", "[expr {1+1}]", "\\n"]
+  explanation: >
+    Variable, command and backslash substitution all happen inside double quotes. Braces are only characters there.
+- id: demo-q05
+  type: fill-blank
+  lesson: a
+  tags: [variables]
+  review: false
+  prompt: "Fill in the blank so the script prints 7: `___ total 7` then `puts $total`."
+  answer: ["set"]
+  explanation: >
+    The set command creates a variable and gives it a value.
+- id: demo-q06
+  type: find-the-bug
+  lesson: b
+  tags: [expr]
+  review: true
+  prompt: "This script should print 12, but Tcl says: invalid command name \"width\". Which line has the bug?"
+  code: |
+    set width 3
+    set height 4
+    set area [width * height]
+    puts $area
+  answer: 3
+  explanation: >
+    Square brackets run a command, and Tcl read width as the command name. Math belongs inside expr, like [expr {$width * $height}].
+- id: demo-q07
+  type: order-steps
+  lesson: b
+  tags: [substitution]
+  review: false
+  prompt: "Put the steps Tcl follows for one command in order."
+  steps: ["Split the line into words", "Do substitutions in each word", "Run the command with the final words"]
+  explanation: >
+    Tcl first finds the words, then substitutes, then calls the command.
+- id: demo-q08
+  type: mcq
+  lesson: b
+  tags: [layer]
+  review: false
+  prompt: "In our analogy, what is a layer?"
+  choices: ["One sheet of the city map", "A whole city", "A single building"]
+  answer: "One sheet of the city map"
+  explanation: >
+    A layout is drawn in layers, like roads, buildings and pipes on separate sheets of a map.
