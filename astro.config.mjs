@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import preact from '@astrojs/preact';
 import starlightLinksValidator from 'starlight-links-validator';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -26,6 +27,7 @@ export default defineConfig({
   base: '/SJTU-VLSI-TCL-Language',
   markdown: { remarkPlugins: [remarkMath], rehypePlugins: [rehypeKatex] },
   integrations: [
+    preact(),
     starlight({
       title: 'Tcl to Tapeout',
       description: 'A free 40-week course: Tcl from zero to VLSI layout scripting.',
@@ -33,14 +35,14 @@ export default defineConfig({
       plugins: [starlightLinksValidator()],
       routeMiddleware: './src/routeMiddleware.ts',
       components: { Footer: './src/components/Footer.astro' },
-      customCss: ['katex/dist/katex.min.css', './src/styles/tokens.css'],
+      customCss: ['katex/dist/katex.min.css', './src/styles/tokens.css', './src/styles/components.css'],
       sidebar: [
         { label: 'Start here', slug: 'start-here' },
         { label: 'Roadmap', slug: 'roadmap' },
         ...sidebar,
         { label: 'Playground', slug: 'playground' },
         { label: 'Spaced review', slug: 'review' },
-        { label: 'Reference', items: [{ label: 'Overview', slug: 'reference' }, { label: 'Glossary', slug: 'reference/glossary' }] },
+        { label: 'Reference', items: [{ label: 'Overview', slug: 'reference' }, { label: 'Glossary', slug: 'reference/glossary' }, { label: 'Cheat sheets', slug: 'reference/cheatsheets' }] },
         { label: 'Setup', slug: 'setup' },
         { label: 'About', slug: 'about' },
       ],
