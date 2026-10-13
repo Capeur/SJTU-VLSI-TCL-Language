@@ -4,6 +4,7 @@ description: "Every course component on one page, for testing. Not part of the c
 sidebar:
   hidden: true
 pagefind: false
+runs_in: [playground]
 head:
   - tag: meta
     attrs: { name: robots, content: noindex }
@@ -163,6 +164,15 @@ Answer some quiz questions wrongly above, then reload this page to see them here
   { title: 'Tcl man page: puts', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/puts.htm', kind: 'tcl-man' },
 ]} />
 
+## 8b. Output without a newline
+
+`puts -nonewline` prints text without ending the line. The playground must still show it when the run ends. Press Run: you should see `no newline here` on one line, then `done`.
+
+<TclPlayground client:visible code={`puts -nonewline "no newline "
+puts -nonewline "here"
+puts ""
+puts -nonewline done`} />
+
 ## 17. A runnable snippet block
 
 This block is tested in CI on Tcl 8.6 and 9.0:
@@ -170,4 +180,16 @@ This block is tested in CI on Tcl 8.6 and 9.0:
 ```tcl run expect="x is $x"
 set x 5
 puts {x is $x}
+```
+
+This block is run in the browser engine too, because the page says `runs_in: [playground]`. Its output ends without a newline:
+
+```tcl run expect="no newline"
+puts -nonewline "no newline"
+```
+
+This block needs the real machine, so it is marked for the terminal and skipped by the browser check:
+
+```tcl run runs_in=terminal expect="hi"
+puts [exec echo hi]
 ```

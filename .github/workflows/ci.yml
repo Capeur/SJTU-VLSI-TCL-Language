@@ -59,3 +59,17 @@ jobs:
           else echo "::notice::DRV-Lite tests not yet added (P5)"; fi
       - name: Lab tests against private reference solutions
         run: echo "::warning::private solutions repository not available; lab tests skipped"
+
+  wacl:
+    # Runs every snippet marked runs_in=playground in the real browser engine (Wacl, Tcl 8.6.6),
+    # so code that passes on tclsh 8.6.17 / 9.0 but fails in the browser is caught.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Snippets in Wacl (headless Chrome)
+        run: |
+          export CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
+          npm run snippets:wacl

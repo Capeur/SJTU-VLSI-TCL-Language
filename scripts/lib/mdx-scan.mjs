@@ -17,10 +17,10 @@ export function walk(dir, exts, out = []) {
 /** Info-string attributes: tcl run expect="a\nb" drvlite */
 export function parseInfo(info) {
     const attrs = {};
-    const re = /([a-zA-Z0-9_-]+)(?:=(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'))?/g;
+    const re = /([a-zA-Z0-9_-]+)(?:=(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"']+)))?/g;
     let m;
     while ((m = re.exec(info))) {
-        const raw = m[2] ?? m[3];
+        const raw = m[2] ?? m[3] ?? m[4];
         attrs[m[1]] = raw === undefined ? true : raw.replace(/\\n/g, '\n').replace(/\\(["'\\])/g, '$1');
     }
     return attrs;
