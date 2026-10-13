@@ -2,8 +2,8 @@
 # earlier questions. P3 grows it to 25 items when Week 2 is written. Uses only Week 2 ideas: expr,
 # whole numbers and decimals, the integer-division trap, and [ ] command substitution.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-13"
 questions:
   - id: m10-w02-q01
     type: predict-output

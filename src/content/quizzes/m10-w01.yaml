@@ -2,8 +2,8 @@
 # questions. P3 grows it to 25 items when Week 1 is written. Uses only Week 1 ideas: puts, comments,
 # commands as words, set and $.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-13"
 questions:
   - id: m10-w01-q01
     type: predict-output

@@ -1,8 +1,8 @@
 # Week 3 — The quoting week. Lesson A: quotes vs braces. Lesson B: backslashes, the rules, braced expr.
 # Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-13"
 questions:
   # ---------- Lesson A ----------
   - id: m10-w03-q01
