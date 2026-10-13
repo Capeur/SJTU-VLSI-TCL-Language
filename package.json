@@ -12,7 +12,9 @@
     "validate": "node scripts/validate-quizzes.mjs",
     "snippets:extract": "node scripts/extract-snippets.mjs",
     "snippets:test": "npm run snippets:extract && tclsh scripts/run-snippets.tcl",
-    "test": "npm run validate && npm run snippets:test"
+    "test": "npm run validate && npm run snippets:test",
+    "snippets:wacl": "npm run snippets:extract && node scripts/run-wacl-snippets.mjs",
+    "test:wacl": "npm run snippets:wacl"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
@@ -20,11 +22,14 @@
     "@astrojs/starlight": "^0.42.6",
     "astro": "^7.3.8",
     "katex": "^0.19.0",
-    "preact": "^11.0.1",
+    "preact": "^10.29.8",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "starlight-links-validator": "^0.27.0",
     "typescript": "^7.0.2",
     "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.13.0"
   }
 }

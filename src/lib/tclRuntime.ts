@@ -25,19 +25,6 @@ export interface TclRuntime {
 
 export const DEFAULT_TIMEOUT_MS = 5000;
 
-// Tcl run before every script so one run cannot see variables, procs or namespaces from another.
-const RESET_SCRIPT = `
-foreach __v [info vars ::*] { if {[lsearch -exact $::__keepVars $__v] < 0} { catch {unset $__v} } }
-foreach __p [info procs ::*] { if {[lsearch -exact $::__keepProcs $__p] < 0} { catch {rename $__p {}} } }
-foreach __n [namespace children ::] { if {[lsearch -exact $::__keepNs $__n] < 0} { catch {namespace delete $__n} } }
-unset -nocomplain __v __p __n
-`;
-const SNAPSHOT_SCRIPT = `
-set ::__keepVars [concat [info vars ::*] ::__keepVars ::__keepProcs ::__keepNs]
-set ::__keepProcs [info procs ::*]
-set ::__keepNs [namespace children ::]
-`;
-
 interface WorkerReply {
     id?: number;
     ready?: boolean;
@@ -71,8 +58,7 @@ export class WaclRuntime implements TclRuntime {
             worker.onmessage = (event: MessageEvent<WorkerReply>) => {
                 const msg = event.data;
                 if (msg.ready) {
-                    // Snapshot the pristine interpreter, then report ready.
-                    this.send(SNAPSHOT_SCRIPT).then(() => resolve());
+                    resolve();
                 } else if (msg.fatal) {
                     this.ready = null;
                     reject(new Error(msg.fatal));
@@ -108,7 +94,6 @@ export class WaclRuntime implements TclRuntime {
     async run(code: string, options: TclRunOptions = {}): Promise<TclRunResult> {
         await this.init();
         const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-        await this.send(RESET_SCRIPT);
         let script = code;
         if (options.stdin !== undefined) {
             script = `set stdinText {${options.stdin.replace(/[{}\\]/g, '\\$&')}}\n${code}`;
