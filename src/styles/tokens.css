@@ -1,0 +1,14 @@
+/* Milestone accent colours (text contrast >= 4.5:1 on the page background). */
+:root {
+  --m10: #0b6b3a;
+  --m20: #0a5a9c;
+  --m30: #8a2f9e;
+  --m40: #a8411a;
+}
+:root[data-theme='dark'] {
+  --m10: #5fd18d;
+  --m20: #6db6ff;
+  --m30: #d79bea;
+  --m40: #ff9c73;
+}
+.draft-banner-note { font-weight: 600; }

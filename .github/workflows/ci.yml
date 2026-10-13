@@ -1,0 +1,51 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Build (includes content schema + internal link validation)
+        run: npm run build
+
+  tcl:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tcl: ['8.6', '9.0']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tcl ${{ matrix.tcl }}
+        run: |
+          if [ "${{ matrix.tcl }}" = "8.6" ]; then
+            sudo apt-get update && sudo apt-get install -y tcl8.6 tcllib
+            echo "TCLSH=tclsh8.6" >> "$GITHUB_ENV"
+          else
+            sudo apt-get update && sudo apt-get install -y tcl9.0 || {
+              echo "tcl9.0 not available from apt; building from source"
+              curl -fsSL https://prdownloads.sourceforge.net/tcl/tcl9.0.1-src.tar.gz | tar xz
+              (cd tcl9.0.1/unix && ./configure --prefix=/usr/local && make -j"$(nproc)" && sudo make install)
+              echo "TCLSH=/usr/local/bin/tclsh9.0" >> "$GITHUB_ENV"
+            }
+            [ -n "$TCLSH" ] || echo "TCLSH=tclsh9.0" >> "$GITHUB_ENV"
+          fi
+      - name: Report Tcl version
+        run: echo 'puts [info patchlevel]' | $TCLSH
+      # The steps below start working when the scripts/tests land (P1 and P5); they skip until then.
+      - name: Snippet tests
+        run: |
+          if [ -f scripts/run-snippets.tcl ]; then $TCLSH scripts/run-snippets.tcl; else echo "::notice::snippet runner not yet added (P1)"; fi
+      - name: DRV-Lite tests
+        run: |
+          if ls drvlite/tests/*.test >/dev/null 2>&1; then
+            for t in drvlite/tests/*.test; do $TCLSH "$t"; done
+          else echo "::notice::DRV-Lite tests not yet added (P5)"; fi
+      - name: Lab tests against private reference solutions
+        run: echo "::warning::private solutions repository not available; lab tests skipped"

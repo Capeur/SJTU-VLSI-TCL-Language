@@ -1,0 +1,23 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default {...Astro.props}><slot /></Default>
+<div class="course-footer">
+  <p>
+    DRV-Lite is an independent educational simulator. It is not affiliated with, endorsed by, or a
+    replacement for Siemens EDA Calibre®. Calibre and DESIGNrev are trademarks of Siemens. Command
+    forms marked ⚠️ are approximations for learning.
+  </p>
+  <p>
+    This course was produced with AI tools (Claude) as part of a VLSI course project. Every
+    published page is reviewed by a named human (<code>reviewed_by</code> in its frontmatter); pages
+    without one carry a “Draft” banner.
+  </p>
+  <p>Code: MIT · Content: CC BY-SA 4.0 · No tracking or analytics.</p>
+</div>
+
+<style>
+  .course-footer { font-size: var(--sl-text-xs); color: var(--sl-color-gray-3); margin-top: 1rem; }
+  .course-footer p { margin: 0.25rem 0; }
+</style>
