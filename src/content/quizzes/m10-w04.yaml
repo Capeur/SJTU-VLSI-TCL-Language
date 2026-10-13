@@ -1,0 +1,500 @@
+# Week 4 — Decisions & loops. Lesson A: comparisons (1 or 0), == for numbers and eq for text, && and ||,
+# if/else, elseif chains. Lesson B: incr, while, for, why conditions and bodies are braced.
+# Numbers: METAL2 rule 4 um, stripes every 50 um, pads every 25 um. The lab's numbers (METAL1 3 um,
+# space 2 um, the 20 um channel) are not used here (style rule 21).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w04-q01
+    type: predict-output
+    lesson: a
+    tags: [if, elseif]
+    review: true
+    prompt: "A 6 µm wire meets an if with four branches. What does this print?"
+    code: |
+      set wireWidth 6
+      if {$wireWidth >= 10} {
+          puts "power"
+      } elseif {$wireWidth >= 4} {
+          puts "signal"
+      } elseif {$wireWidth >= 2} {
+          puts "thin"
+      } else {
+          puts "too narrow"
+      }
+    answer: "signal"
+    explanation: >
+      Tcl tests the conditions from the top. 6 >= 10 is false, 6 >= 4 is true, so the signal
+      branch runs and Tcl stops testing. 6 >= 2 is true as well, but the first true test wins.
+
+  - id: m10-w04-q02
+    type: mcq
+    lesson: a
+    tags: [if, eq, errors]
+    review: true
+    prompt: 'This line stops with  invalid bareword "METAL2".  Which line fixes it?     if {$layer == METAL2} {'
+    choices:
+      - 'if {$layer eq "METAL2"} {'
+      - 'if {$layer == $METAL2} {'
+      - 'if {$layer = "METAL2"} {'
+      - 'if {$layer eq METAL2} {'
+    answer: 'if {$layer eq "METAL2"} {'
+    explanation: >
+      Inside a condition, text goes in double quotes, and text is compared with eq:
+      == for numbers, eq for text.
+    distractor_feedback:
+      'if {$layer == $METAL2} {': 'There is no variable called METAL2, so Tcl says: can''t read "METAL2": no such variable.'
+      'if {$layer = "METAL2"} {': 'A single = is not an operator in Tcl. expr says: incomplete operator "=".'
+      'if {$layer eq METAL2} {': 'eq is right, but METAL2 still has no quotes, so it is still an invalid bareword.'
+
+  - id: m10-w04-q03
+    type: find-the-bug
+    lesson: a
+    tags: [if, else, errors]
+    review: true
+    prompt: 'Tcl says: invalid command name "else". Which line has the bug?'
+    code: |
+      set wireWidth 3
+      if {$wireWidth >= 4} {
+          puts "OK"
+      }
+      else {
+          puts "TOO NARROW"
+      }
+    answer: 5
+    explanation: >
+      A new line ends a command, so the if command ends at line 4, and line 5 starts a new command
+      called else, which does not exist. Join lines 4 and 5:  } else {
+      The real problem is the line break between them; Tcl reports it at line 5, where else stands alone.
+
+  - id: m10-w04-q04
+    type: predict-output
+    lesson: a
+    tags: [comparison, expr]
+    review: true
+    prompt: "Comparisons give 1 or 0. What does this print?"
+    code: |
+      set wireWidth 5
+      puts [expr {$wireWidth > 4}]
+      puts [expr {$wireWidth == 4}]
+      puts [expr {$wireWidth != 4}]
+    answer: |-
+      1
+      0
+      1
+    explanation: >
+      5 is more than 4: true, 1. 5 is not equal to 4: false, 0. 5 is different from 4: true, 1.
+
+  - id: m10-w04-q05
+    type: predict-output
+    lesson: a
+    tags: [if]
+    review: false
+    prompt: "This if has no else. What does this print?"
+    code: |
+      set wireWidth 4
+      if {$wireWidth < 4} {
+          puts "TOO NARROW"
+      }
+      puts "Checked"
+    answer: "Checked"
+    explanation: >
+      4 < 4 is false, so Tcl skips the body. With no else, nothing else runs, and the script goes
+      on with the next command.
+
+  - id: m10-w04-q06
+    type: mcq
+    lesson: a
+    tags: [comparison, design-rule]
+    review: true
+    prompt: "The rule: METAL2 wires must be at least 4 µm wide. Which condition is true for exactly the wires that follow the rule?"
+    choices:
+      - '$wireWidth >= 4'
+      - '$wireWidth > 4'
+      - '$wireWidth <= 4'
+      - '$wireWidth == 4'
+    answer: '$wireWidth >= 4'
+    explanation: >
+      "At least 4" means 4 or more, which is >=. A wire of exactly 4 µm follows the rule.
+    distractor_feedback:
+      '$wireWidth > 4': 'This calls a wire of exactly 4 µm too narrow, but the rule allows it.'
+      '$wireWidth <= 4': 'That means "at most 4": it is true for the narrow wires, the wrong way round.'
+      '$wireWidth == 4': 'This is true only for 4 µm. A 6 µm wire also follows the rule.'
+
+  - id: m10-w04-q07
+    type: predict-output
+    lesson: a
+    tags: [and, or, comparison]
+    review: true
+    prompt: "&& means both, || means at least one. What does this print?"
+    code: |
+      set wireWidth 12
+      puts [expr {$wireWidth >= 4 && $wireWidth < 10}]
+      puts [expr {$wireWidth < 4 || $wireWidth >= 10}]
+    answer: |-
+      0
+      1
+    explanation: >
+      Line 2: 12 >= 4 is true but 12 < 10 is false, and && needs both, so 0. Line 3: 12 < 4 is
+      false but 12 >= 10 is true, and || needs only one, so 1.
+
+  - id: m10-w04-q08
+    type: multi-select
+    lesson: a
+    tags: [eq, ne, and, or]
+    review: false
+    prompt: "layer holds METAL2 and wireWidth holds 6. Which conditions are true? Pick all that apply."
+    choices:
+      - '$layer eq "METAL2"'
+      - '$layer ne "METAL1"'
+      - '$wireWidth >= 4 && $layer eq "METAL1"'
+      - '$wireWidth > 10 || $layer eq "METAL2"'
+    answer:
+      - '$layer eq "METAL2"'
+      - '$layer ne "METAL1"'
+      - '$wireWidth > 10 || $layer eq "METAL2"'
+    explanation: >
+      eq is true when the texts are the same, ne when they differ. The third one needs both tests
+      true, but the layer is not METAL1. The last one needs only one true test, and the layer test is true.
+
+  - id: m10-w04-q09
+    type: fill-blank
+    lesson: a
+    tags: [eq]
+    review: false
+    prompt: 'Fill the blank to compare the text in layer with METAL2:     if {$layer ___ "METAL2"} {'
+    answer: ['eq']
+    explanation: >
+      == for numbers, eq for text. == "METAL2" happens to work too, but eq is the right habit for text.
+
+  - id: m10-w04-q10
+    type: order-steps
+    lesson: a
+    tags: [if, elseif]
+    review: false
+    prompt: 'wireWidth is 6. Put in order what Tcl does with:  if {$wireWidth >= 10} {…} elseif {$wireWidth >= 4} {puts "Signal wire"} else {…}'
+    steps:
+      - "Test the first condition: 6 >= 10 is false, so skip the first body"
+      - "Test the elseif condition: 6 >= 4 is true"
+      - "Run the elseif body: print Signal wire"
+      - "Skip the else body and go on after the if"
+    explanation: >
+      Tcl tests the conditions from the top and runs the first branch whose condition is true.
+      After that branch, it skips everything else in the if.
+
+  - id: m10-w04-q11
+    type: predict-output
+    lesson: a
+    tags: [if, elseif, order]
+    review: true
+    prompt: "The tests are in a different order. What does a 12 µm wire print?"
+    code: |
+      set wireWidth 12
+      if {$wireWidth >= 4} {
+          puts "Signal wire"
+      } elseif {$wireWidth >= 10} {
+          puts "Power wire"
+      } else {
+          puts "Too narrow"
+      }
+    answer: "Signal wire"
+    explanation: >
+      12 >= 4 is true, and the first true test wins, so the power test never gets a chance. Put
+      the strictest test first: >= 10 before >= 4.
+
+  - id: m10-w04-q12
+    type: find-the-bug
+    lesson: a
+    tags: [comparison, errors]
+    review: false
+    prompt: 'Tcl says: incomplete operator "=". Which line has the bug?'
+    code: |
+      set wireWidth 4
+      set minWidth 4
+      if {$wireWidth = $minWidth} {
+          puts "At the minimum"
+      }
+    answer: 3
+    explanation: >
+      A single = is not a comparison in Tcl. To ask "equal?" for numbers, write ==.
+
+  - id: m10-w04-q13
+    type: predict-output
+    lesson: a
+    tags: [eq, text]
+    review: false
+    prompt: "eq compares text. What does this print?"
+    code: |
+      set layer metal2
+      if {$layer eq "METAL2"} {
+          puts "Same"
+      } else {
+          puts "Different"
+      }
+    answer: "Different"
+    explanation: >
+      eq compares text exactly, letter by letter, and capitals count: metal2 is not METAL2.
+
+  - id: m10-w04-q14
+    type: fill-blank
+    lesson: a
+    tags: [elseif]
+    review: false
+    prompt: 'Fill the blank so that the second test runs only when the first one failed:     } ___ {$wireWidth >= 4} {'
+    answer: ['elseif']
+    explanation: >
+      elseif adds a branch with its own condition. Tcl tests it only if every test above it was false.
+
+  # ---------- Lesson B ----------
+  - id: m10-w04-q15
+    type: predict-output
+    lesson: b
+    tags: [while, incr]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set x 0
+      set count 0
+      while {$x < 10} {
+          incr x 4
+          incr count
+      }
+      puts "$count $x"
+    answer: "3 12"
+    explanation: >
+      The checks see x = 0, 4 and 8: all less than 10, so the body runs three times and x becomes
+      4, 8, then 12. At the next check 12 < 10 is false, and the loop ends with count 3 and x 12.
+
+  - id: m10-w04-q16
+    type: order-steps
+    lesson: b
+    tags: [for]
+    review: true
+    prompt: 'Put in order what for does with  for {start} {condition} {next} {body}'
+    steps:
+      - "Run start, once"
+      - "Check the condition; if it is false, the loop ends"
+      - "Run the body"
+      - "Run next"
+      - "Go back to the check"
+    explanation: >
+      start runs only once. Then every pass is: check, body, next. The loop ends at the first
+      check that is false.
+
+  - id: m10-w04-q17
+    type: predict-output
+    lesson: b
+    tags: [for, counter]
+    review: true
+    prompt: "What is i after the loop? What does this print?"
+    code: |
+      for {set i 1} {$i <= 3} {incr i} {
+          puts "Pass $i"
+      }
+      puts "After: $i"
+    answer: |-
+      Pass 1
+      Pass 2
+      Pass 3
+      After: 4
+    explanation: >
+      After pass 3, next makes i 4, and 4 <= 3 is false, so the loop ends. i keeps its last value, 4.
+
+  - id: m10-w04-q18
+    type: predict-output
+    lesson: b
+    tags: [incr]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set x 10
+      incr x
+      incr x 5
+      puts $x
+    answer: "16"
+    explanation: >
+      incr x adds 1, so x is 11. incr x 5 adds 5, so x is 16.
+
+  - id: m10-w04-q19
+    type: predict-output
+    lesson: b
+    tags: [while]
+    review: true
+    prompt: "x starts outside the chip. What does this print?"
+    code: |
+      set x 500
+      while {$x < 400} {
+          puts "Stripe at x = $x um"
+          incr x 50
+      }
+      puts "Done"
+    answer: "Done"
+    explanation: >
+      while checks the condition before the first pass. 500 < 400 is false, so the body never runs:
+      a loop can run zero times.
+
+  - id: m10-w04-q20
+    type: mcq
+    lesson: b
+    tags: [while, braces, quotes]
+    review: true
+    prompt: 'The body of this loop is in double quotes, and it prints 0 three times. Why?     set i 0;  while {$i < 3} "puts $i; incr i"'
+    choices:
+      - 'Tcl replaced $i with 0 once, before while started, so every pass runs puts 0'
+      - 'incr does not work inside a loop body'
+      - 'A while loop always prints the starting value'
+      - 'puts cannot print a variable that is changing'
+    answer: 'Tcl replaced $i with 0 once, before while started, so every pass runs puts 0'
+    explanation: >
+      Tcl substitutes once, before the command runs. Double quotes let $i be replaced right away, so
+      the body is frozen as "puts 0; incr i". Braces keep $i, so it is read fresh on every pass.
+    distractor_feedback:
+      'incr does not work inside a loop body': 'incr works: it names the variable without a $, so i grows and the loop stops after 3 passes.'
+      'A while loop always prints the starting value': 'With braces, the same loop prints 0, 1 and 2.'
+      'puts cannot print a variable that is changing': 'puts prints whatever it receives. Here it receives 0 every time, because the body was substituted once.'
+
+  - id: m10-w04-q21
+    type: find-the-bug
+    lesson: b
+    tags: [while, infinite-loop]
+    review: true
+    prompt: "This should print stripes at 50, 100 and so on up to 350, but it never stops. Which line has the bug?"
+    code: |
+      set x 50
+      set pitch 50
+      while {$x < 400} {
+          puts "Stripe at x = $x um"
+          incr pitch 50
+      }
+    answer: 5
+    explanation: >
+      The condition tests x, but the body changes pitch, so x stays 50 and 50 < 400 is true
+      forever. Line 5 should be  incr x $pitch.
+
+  - id: m10-w04-q22
+    type: fill-blank
+    lesson: b
+    tags: [for, comparison]
+    review: false
+    prompt: 'Fill the blank so the loop prints 1, 2, 3, 4 and 5:     for {set i 1} {$i ___ 5} {incr i} {puts $i}'
+    answer: ['<=']
+    explanation: >
+      The loop must run for i = 5 too, so the test is "at most 5": <=. With < it would stop after 4.
+
+  - id: m10-w04-q23
+    type: mcq
+    lesson: b
+    tags: [incr, expr]
+    review: false
+    prompt: "Which line adds 0.5 to x?"
+    choices:
+      - 'set x [expr {$x + 0.5}]'
+      - 'incr x 0.5'
+      - 'incr $x 0.5'
+      - 'set x $x + 0.5'
+    answer: 'set x [expr {$x + 0.5}]'
+    explanation: >
+      incr adds whole numbers only. For a decimal, work out the new value with expr and store it with set.
+    distractor_feedback:
+      'incr x 0.5': 'incr adds whole numbers only. Tcl says: expected integer but got "0.5".'
+      'incr $x 0.5': 'incr needs the variable''s name, not its value, and it still adds whole numbers only.'
+      'set x $x + 0.5': 'Without expr there is no maths: set gets four words and stops with wrong # args.'
+
+  - id: m10-w04-q24
+    type: predict-output
+    lesson: b
+    tags: [for, incr]
+    review: false
+    prompt: "The next part can add more than 1. What does this print?"
+    code: |
+      for {set x 0} {$x <= 400} {incr x 100} {
+          puts $x
+      }
+    answer: |-
+      0
+      100
+      200
+      300
+      400
+    explanation: >
+      x goes 0, 100, 200, 300, 400. 400 <= 400 is still true, so 400 is printed. Then x is 500 and
+      the loop ends.
+
+  - id: m10-w04-q25
+    type: multi-select
+    lesson: b
+    tags: [for, off-by-one]
+    review: false
+    prompt: "Which loops print exactly 1, 2 and 3, one per line? Pick all that apply."
+    choices:
+      - 'for {set i 1} {$i <= 3} {incr i} {puts $i}'
+      - 'for {set i 1} {$i < 3} {incr i} {puts $i}'
+      - 'for {set i 0} {$i < 3} {incr i} {puts $i}'
+      - 'for {set i 0} {$i < 3} {incr i} {puts [expr {$i + 1}]}'
+    answer:
+      - 'for {set i 1} {$i <= 3} {incr i} {puts $i}'
+      - 'for {set i 0} {$i < 3} {incr i} {puts [expr {$i + 1}]}'
+    explanation: >
+      The first counts 1 to 3. The last counts 0 to 2 but prints one more each time: 1, 2, 3.
+      The second stops before 3 (1, 2), and the third prints 0, 1, 2.
+
+  - id: m10-w04-q26
+    type: predict-output
+    lesson: b
+    tags: [while, and]
+    review: false
+    prompt: "The loop has two tests joined with &&. What does this print?"
+    code: |
+      set x 0
+      set count 0
+      while {$x < 400 && $count < 3} {
+          incr x 100
+          incr count
+      }
+      puts "$count $x"
+    answer: "3 300"
+    explanation: >
+      && needs both tests true. After 3 passes count is 3, so count < 3 is false and the loop ends,
+      even though 300 < 400 is still true.
+
+  - id: m10-w04-q27
+    type: mcq
+    lesson: b
+    tags: [while, braces]
+    review: true
+    prompt: "Why are the condition and the body of a while loop written in braces?"
+    choices:
+      - 'So that while receives them unchanged and works them out again on every pass'
+      - 'Braces only make the code look tidy; quotes work the same'
+      - 'Because the body must be a list'
+      - 'So that Tcl substitutes them once, before the loop starts'
+    answer: 'So that while receives them unchanged and works them out again on every pass'
+    explanation: >
+      Tcl substitutes a command's words once, before the command runs. Braces stop that, so while
+      can look up $x fresh on every pass.
+    distractor_feedback:
+      'Braces only make the code look tidy; quotes work the same': 'With quotes, $x is replaced once, before the loop starts: the condition never changes and the loop may never end.'
+      'Because the body must be a list': 'The body is a script: commands that run on every pass.'
+      'So that Tcl substitutes them once, before the loop starts': 'That is what quotes do, and it is exactly the problem. Braces stop the early substitution.'
+
+  - id: m10-w04-q28
+    type: predict-output
+    lesson: b
+    tags: [for, if, counter]
+    review: true
+    prompt: "A loop with an if inside. What does this print?"
+    code: |
+      set passing 0
+      for {set w 2} {$w <= 6} {incr w} {
+          if {$w >= 4} {
+              incr passing
+          }
+      }
+      puts "$passing widths pass"
+    answer: "3 widths pass"
+    explanation: >
+      w takes the values 2, 3, 4, 5 and 6. Only 4, 5 and 6 are at least 4, so the counter goes up
+      three times.

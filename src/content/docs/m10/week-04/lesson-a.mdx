@@ -1,14 +1,21 @@
 ---
-title: "Week 4 Lesson A"
+title: "if: make a decision"
+description: "Week 4, Lesson A: comparisons that give 1 or 0, if and else, and elseif chains, checking Lumen-1's wires against a design rule."
 milestone: "m10"
 week: 4
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Write an if/else that picks one of two branches
+  - Compare numbers with < <= > >= == != and text with eq, and join tests with && and ||
+  - Predict which branch of an if/elseif/else chain runs
+prerequisites: ["m10-w03-b"]
+glossary: [design-rule, wire, condition, comparison-operator, branch]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Numeric comparisons 101, if", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl7.html" }
+  - { title: "Tcl manual page: if", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/if.htm" }
+  - { title: "Tcl manual page: expr (comparison and logical operators)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/expr.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,250 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 4 (Decisions & loops) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · comparisons (one rule: == for numbers, eq for text;
+    && and ||) + playground 6 · if/else + diagram + worked example 1 + playground 7 · predict 3 ·
+    elseif + worked example 2 5 · faded 3 · traps 4 · exit quiz 4 · cheat card 1 = 39 min.
+    Under 40, so the && / || practice (faded blank 2, quiz items) stays here (user rule, P3 review).
+    Numbers: lessons use METAL2 (minimum width 4 um); the lab uses METAL1 (3 um), style rule 21. */}
+
+<LessonMeta milestone="m10" week={4} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+Before {chip.name} is made, the factory sends a rulebook. Each of its <GlossaryTerm term="design-rule">design rules</GlossaryTerm> is a limit that every shape must respect. One rule says how thin a <GlossaryTerm term="wire" /> may be: on the METAL2 layer, at least 4 µm. A thinner wire may break when it is made, and one broken wire can make the whole chip useless. So a script must look at each wire and decide: OK, or too narrow? Until now, your scripts ran every line, every time. Today they learn to choose.
+
+<Diagram name="w04-wire-width" alt="Three METAL2 wires drawn to scale next to a dashed ruler that marks the 4 micrometre minimum width. VDD is 6 micrometres wide: OK, wider than the minimum. CLK is 4 micrometres wide: OK, exactly the minimum, which is allowed. DATA is 3 micrometres wide: too narrow, it may break when it is made." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Write an if/else that picks one of two branches', 'Compare numbers with < <= > >= == != and text with eq, and join tests with && and ||', 'Predict which branch of an if/elseif/else chain runs']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 3. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w04" earlier={['m10-w01', 'm10-w02', 'm10-w03']} mode="warmup" />
+
+## Comparisons give 1 or 0
+
+A decision starts with a yes-or-no question: is this wire at least 4 µm wide? In Tcl, that question is a <GlossaryTerm term="condition" />, and expr answers it with 1 for true or 0 for false. The symbols that compare two values are <GlossaryTerm term="comparison-operator">comparison operators</GlossaryTerm>:
+
+| You write | It asks |
+|---|---|
+| `<` and `>` | less than? more than? |
+| `<=` and `>=` | at most? at least? |
+| `==` and `!=` | equal? not equal? (numbers) |
+| `eq` and `ne` | equal? not equal? (text) |
+
+Remember one rule: **`==` for numbers, `eq` for text.** Text goes in double quotes, as in `$layer eq "METAL2"`. Writing `== "METAL2"` happens to work too, but `eq` is the right habit for text.
+
+To ask two questions at once, join them: `&&` means "and" (both must be true), and `||` means "or" (at least one must be true).
+
+<TclPlayground client:visible code={`set wireWidth 6
+set layer METAL2
+puts [expr {$wireWidth >= 4}]
+puts [expr {$wireWidth < 4}]
+puts [expr {$layer eq "METAL2"}]
+puts [expr {$wireWidth >= 4 && $wireWidth < 10}]`} />
+
+Run it. Then change the width to 3 and predict each line before you run it again.
+
+## if and else: two branches
+
+The command `if` takes a condition and a body: `if {condition} {body}`. When the condition is true, Tcl runs the body. When it is false, Tcl skips it. Add `else` and a second body for the false case. Each path is a <GlossaryTerm term="branch" />, and exactly one branch runs.
+
+Write it the way the example shows: the condition in braces, `} else {` on one line, and 4 spaces before each command inside a body. The braces matter, just as in `expr {…}`: Lesson B shows why.
+
+<Diagram name="w04-if-flow" alt="A flowchart for if, with the condition dollar wireWidth at least dollar minWidth. expr works out the condition. If it gives 1, true, the first body runs: puts Wire OK. If it gives 0, false, the else body runs: puts Wire TOO NARROW. Both paths then join and the script goes on with puts Check done. Exactly one body runs." />
+
+<WorkedExample
+  code={`set minWidth 4
+set wireWidth 3
+if {$wireWidth >= $minWidth} {
+    puts "Wire OK"
+} else {
+    puts "Wire TOO NARROW"
+}
+puts "Check done"`}
+  notes={{
+    1: 'The METAL2 rule: at least 4 µm.',
+    2: 'This wire is 3 µm wide.',
+    3: 'The condition asks: is 3 at least 4? expr says 0, false, so Tcl skips the first body.',
+    4: 'Skipped this time. With a 5 µm wire, this line would run instead.',
+    5: 'Close the first body and start the else body on the same line, so that else belongs to this if.',
+    6: 'The false branch runs. Output: Wire TOO NARROW',
+    7: 'The end of the if command.',
+    8: 'After the if, the script goes on as usual. Output: Check done'
+  }}
+/>
+
+Run it. Then change the width to 5, and then to 4. Which branch runs each time?
+
+<TclPlayground client:visible code={`set minWidth 4
+set wireWidth 3
+if {$wireWidth >= $minWidth} {
+    puts "Wire OK"
+} else {
+    puts "Wire TOO NARROW"
+}
+puts "Check done"`} />
+
+## Predict → Run → Explain
+
+A wire of exactly 4 µm meets the rule "at least 4 µm". Two ifs test it in two ways. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set minWidth 4
+set wireWidth 4
+if {$wireWidth > $minWidth} {
+    puts "A: OK"
+} else {
+    puts "A: TOO NARROW"
+}
+if {$wireWidth >= $minWidth} {
+    puts "B: OK"
+} else {
+    puts "B: TOO NARROW"
+}`}
+  expected={`A: TOO NARROW
+B: OK`}
+  explanation="The first if asks: is 4 more than 4? No, so A says TOO NARROW. The second asks: is 4 at least 4? Yes, so B says OK. The rule says at least 4 µm, so a wire of exactly 4 µm is allowed, and the right test is >=. Choosing > where you need >= is one of the most common bugs in rule checks."
+/>
+
+## elseif: the first true test wins
+
+Sometimes there are more than two answers. A METAL2 wire can be a power wire (at least 10 µm), a signal wire (at least 4 µm), or too narrow. Add a branch with `elseif`, which has a condition of its own.
+
+Tcl tests the conditions from the top, one by one, and runs the **first** branch whose condition is true. It skips all the others, even if their conditions are true too. The else branch runs only when every test failed. So the order matters: put the strictest test first.
+
+<WorkedExample
+  code={`set wireWidth 6
+if {$wireWidth >= 10} {
+    puts "Power wire"
+} elseif {$wireWidth >= 4} {
+    puts "Signal wire"
+} else {
+    puts "Too narrow for METAL2"
+}`}
+  notes={{
+    1: 'A 6 µm wire on METAL2.',
+    2: 'First test: is 6 at least 10? No, 0. Tcl skips this branch.',
+    3: 'Skipped.',
+    4: 'Second test: is 6 at least 4? Yes, 1. This branch runs, and Tcl stops testing.',
+    5: 'Output: Signal wire',
+    6: 'else catches every wire that failed all the tests above. Skipped here.',
+    7: 'Runs only for a wire under 4 µm.',
+    8: 'The end of the if command. Exactly one of the three branches ran. If the >= 4 test came first, a 12 µm power wire would pass it and be called a signal wire.'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script prints `METAL2 wire: OK` only when the layer is METAL2 **and** the wire is at least 4 µm wide.
+
+<FadedExample
+  client:visible
+  template={`set layer METAL2
+set wireWidth 5
+# Must print: METAL2 wire: OK
+if {$layer ___1___ "METAL2" ___2___ $wireWidth >= 4} {
+    puts "$layer wire: OK"
+} ___3___ {
+    puts "$layer wire: check it"
+}`}
+  answers={[['eq'], ['&&'], ['else']]}
+  hints={['The layer name is text. Which operator compares text?', 'Both tests must be true. Which operator means "and"?', 'Which word starts the branch that runs when the condition is false?']}
+/>
+
+## Common traps
+
+Each trap shows the real message Tcl gives. Read the message first: it usually names the word Tcl did not understand.
+
+<Trap
+  wrong={`set wireWidth 3
+if {$wireWidth >= 4} {
+    puts "OK"
+}
+else {
+    puts "TOO NARROW"
+}`}
+  error={`invalid command name "else"`}
+  fix={`set wireWidth 3
+if {$wireWidth >= 4} {
+    puts "OK"
+} else {
+    puts "TOO NARROW"
+}`}
+  why="A new line ends a command, unless it sits inside braces or quotes (Week 3, the rules). So the if command ends after its first body, and Tcl reads else as the name of a new command, which does not exist. Keep } else { on one line."
+/>
+
+<Trap
+  wrong={`set layer METAL2
+if {$layer == METAL2} {
+    puts "Metal 2"
+}`}
+  error={`invalid bareword "METAL2"`}
+  fix={`set layer METAL2
+if {$layer eq "METAL2"} {
+    puts "Metal 2"
+}`}
+  why="Inside a condition, expr expects numbers, variables or text in quotes. A bare word like METAL2 is none of those, so expr stops. Put text in double quotes, and compare it with eq: == for numbers, eq for text."
+/>
+
+<Trap
+  wrong={`set wireWidth 4
+if {$wireWidth = 4} {
+    puts "At the minimum"
+}`}
+  error={`incomplete operator "="`}
+  fix={`set wireWidth 4
+if {$wireWidth == 4} {
+    puts "At the minimum"
+}`}
+  why="In maths, = means equal. In Tcl, a single = is not an operator at all, so expr says the operator is incomplete. To ask 'equal?', write == for numbers, or eq for text."
+/>
+
+## Exit quiz
+
+Four questions on this lesson. You get feedback right after each answer.
+
+<Quiz bank="m10-w04" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="if, elseif, else" lines={[
+  'if {cond} {…} elseif {cond} {…} else {…}',
+  '} else {  and  } elseif {…} {  on ONE line',
+  '< <= > >= == !=   compare numbers: 1 is true, 0 is false',
+  'eq ne   compare text:  $layer eq "METAL2"',
+  '&& both must be true    || at least one must be true',
+  'The first true condition wins; the others are skipped',
+  'at least is >=    at most is <=',
+  'A single = is not a comparison: write ==',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Numeric comparisons 101, if', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl7.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: if, including elseif and else', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/if.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: expr; the operators section lists every comparison, eq and ne, && and ||', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/expr.htm', kind: 'tcl-man' },
+]} />

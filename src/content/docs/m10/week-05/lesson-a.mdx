@@ -1,14 +1,22 @@
 ---
-title: "Week 5 Lesson A"
+title: "Lists: many values in one"
+description: "Week 5, Lesson A: lists as words in a row, llength and lindex counting from 0, building lists with list, and a rectangle stored as {x1 y1 x2 y2}."
 milestone: "m10"
 week: 5
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Count the elements of a list and pick one with llength and lindex, counting from 0
+  - Build a list from variables with the list command
+  - Store a rectangle as {x1 y1 x2 y2} and compute its width and height
+prerequisites: ["m10-w03-a", "m10-w04-b"]
+glossary: [list, element, index, coordinate]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Tcl data structures 101, the list", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl14.html" }
+  - { title: "Tcl manual page: list", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/list.htm" }
+  - { title: "Tcl manual page: llength", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/llength.htm" }
+  - { title: "Tcl manual page: lindex", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lindex.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,199 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 5 (Lists I) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · list concept + diagram + worked example 1 + playground 8 ·
+    predict 3 · rectangles concept + diagram + worked example 2 8 · faded 3 · traps 4 · exit quiz 4 ·
+    cheat card 1 = 37 min. Lists stay flat this week; nested lists are Week 6 (user decision, P3 review).
+    Lessons use the real block corners from lumen-1.json; the lab uses its own METAL1 shapes (style rule 21). */}
+
+<LessonMeta milestone="m10" week={5} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+In Week 1, the passport printed the names of {chip.name}'s blocks as typed text: CORE, SRAM, ADC, SENSOR and PADS. That text is already a <GlossaryTerm term="list" />: {chip.blocks.length} names in a row. Once Tcl treats it as a list, it can count the names and pick out the third one. Each block is also a rectangle, and a rectangle is four numbers in a row: another list. Lists are how your scripts will carry every shape of the chip, from this week to the last.
+
+<ChipMap caption={`The ${chip.name} floorplan: ${chip.blocks.length} blocks, so a list of ${chip.blocks.length} names. Each block is a rectangle, so it can be stored as a list of four numbers.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Count the elements of a list and pick one with llength and lindex, counting from 0', 'Build a list from variables with the list command', 'Store a rectangle as {x1 y1 x2 y2} and compute its width and height']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 4. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w05" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04']} mode="warmup" />
+
+## A list is words in a row
+
+A <GlossaryTerm term="list" /> is one value that holds many values in order, separated by spaces. Each value in it is an <GlossaryTerm term="element" />. You can write a list in braces: `set blocks {CORE SRAM ADC SENSOR PADS}`. The braces make it one word for set, exactly as in Week 3.
+
+Two commands read a list. `llength` counts its elements. `lindex` picks one element by its <GlossaryTerm term="index" />, its position number. **Tcl counts from 0**: the first element has index 0, the second has index 1. The word `end` means the last element, so you do not have to count.
+
+<Diagram name="w05-list-boxes" alt="The list CORE SRAM ADC SENSOR PADS drawn as five boxes in a row, numbered 0, 1, 2, 3 and 4 underneath; 4 is also called end. Counting starts at 0. Below: llength of blocks gives 5; lindex blocks 0 gives CORE; lindex blocks 2 gives ADC; lindex blocks end gives PADS." />
+
+<WorkedExample
+  code={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts [llength $blocks]
+puts [lindex $blocks 0]
+puts [lindex $blocks 2]
+puts [lindex $blocks end]`}
+  notes={{
+    1: 'One variable, five elements. The braces keep the five names together as one word for set.',
+    2: 'llength counts the elements. Output: 5',
+    3: 'Index 0 is the first element. Output: CORE',
+    4: 'Index 2 is the THIRD element: 0, 1, 2. Output: ADC',
+    5: 'end is the last element, however long the list is. Output: PADS'
+  }}
+/>
+
+Run it. Then change the 2 to 4, and then to 5. What does lindex give for an index that does not exist?
+
+<TclPlayground client:visible code={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts [llength $blocks]
+puts [lindex $blocks 0]
+puts [lindex $blocks 2]
+puts [lindex $blocks end]`} />
+
+## Predict → Run → Explain
+
+{chip.name} has seven layers. Type your prediction, then run it. The full stop at the end of line 4 is part of the text.
+
+<PredictOutput
+  client:visible
+  code={`set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+puts "Count: [llength $layers]"
+puts "Second: [lindex $layers 1]"
+puts "Number 7: [lindex $layers 7]."`}
+  expected={`Count: 7
+Second: POLY
+Number 7: .`}
+  explanation="There are 7 layers, so llength gives 7. Index 1 is the second element, POLY, because counting starts at 0. The last layer, TEXT, has index 6, so index 7 is past the end: lindex gives an empty value, and no error. The full stop shows where the empty value landed."
+/>
+
+## Rectangles as lists
+
+Every block of {chip.name} is a rectangle, and two corners describe it: the bottom-left corner (x1, y1) and the top-right corner (x2, y2). Each <GlossaryTerm term="coordinate" /> is a distance in µm from the chip's bottom-left corner. Four numbers make one list: CORE is `{20 20 220 180}`.
+
+The width is x2 − x1, and the height is y2 − y1. With lindex, x1 is index 0, y1 is index 1, x2 is index 2 and y2 is index 3.
+
+When the numbers are in variables, build the list with the `list` command: `list $x1 $y1 $x2 $y2`. Braces would freeze the dollar signs, as you saw in Week 3.
+
+<Diagram name="w05-rect-corners" alt="The CORE block drawn on x and y axes from the chip's corner at 0, 0. Its bottom-left corner is x1, y1 equal to 20, 20 and its top-right corner is x2, y2 equal to 220, 180. An arrow across shows width equals x2 minus x1 equals 200; an arrow up shows height equals y2 minus y1 equals 160. Next to it, the list 20 20 220 180 with index 0 x1, index 1 y1, index 2 x2 and index 3 y2: one value holds the whole rectangle." />
+
+<WorkedExample
+  code={`set x1 20
+set y1 20
+set x2 220
+set y2 180
+set core [list $x1 $y1 $x2 $y2]
+puts "CORE: $core"
+set width [expr {[lindex $core 2] - [lindex $core 0]}]
+set height [expr {[lindex $core 3] - [lindex $core 1]}]
+puts "Width: $width um, height: $height um"`}
+  notes={{
+    1: 'The bottom-left corner of CORE: x1 …',
+    2: '… and y1.',
+    3: 'The top-right corner: x2 …',
+    4: '… and y2.',
+    5: 'list builds a list from the four values. Tcl replaces each $ first, so core holds 20 20 220 180.',
+    6: 'Output: CORE: 20 20 220 180',
+    7: 'x2 is index 2 and x1 is index 0. expr runs the brackets inside its braces itself (Week 3). 220 - 20 = 200.',
+    8: 'y2 is index 3 and y1 is index 1: 180 - 20 = 160.',
+    9: 'Output: Width: 200 um, height: 160 um. In Week 23 you will draw rectangles like this one in a real layout.'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that each line prints what its comment asks for. SENSOR's corners are `{160 200 260 280}`.
+
+<FadedExample
+  client:visible
+  template={`set blocks {CORE SRAM ADC SENSOR PADS}
+# Must print: 5 blocks
+puts "[___1___ $blocks] blocks"
+# Must print: First: CORE
+puts "First: [lindex $blocks ___2___]"
+set sensor {160 200 260 280}
+# Must print: Width: 100
+puts "Width: [expr {[lindex $sensor 2] - [lindex $sensor ___3___]}]"`}
+  answers={[['llength'], ['0'], ['0']]}
+  hints={['Which command counts the elements of a list?', 'Tcl counts from 0. What is the index of the first element?', 'The width is x2 - x1. x2 is index 2; which index is x1?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts "Last block: [lindex $blocks 5]"`}
+  output={`Last block:`}
+  fix={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts "Last block: [lindex $blocks end]"`}
+  why="Five elements have the indexes 0 to 4. Index 5 is past the end, and lindex gives an empty value instead of an error, so the mistake is silent. Use end for the last element, or count from 0."
+/>
+
+<Trap
+  wrong={`set x1 20
+set y1 20
+set rect {$x1 $y1 220 180}
+puts [lindex $rect 0]`}
+  output={`$x1`}
+  fix={`set x1 20
+set y1 20
+set rect [list $x1 $y1 220 180]
+puts [lindex $rect 0]`}
+  why="Braces freeze everything inside, so the list holds the text $x1, not the number 20. To build a list from variables, use the list command: Tcl replaces each $ first, then list keeps the values."
+/>
+
+<Trap
+  wrong={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts [llength blocks]`}
+  output={`1`}
+  fix={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts [llength $blocks]`}
+  why="Without the $, llength receives the word blocks itself: a list with one element. The $ asks for the value of the variable, the list of five names."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w05" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Lists: llength, lindex, list" lines={[
+  'set blocks {CORE SRAM ADC}   a list: elements separated by spaces',
+  'llength $blocks         the number of elements: 3',
+  'lindex $blocks 0        the first element: counting starts at 0',
+  'lindex $blocks end      the last element',
+  'An index past the end gives an empty value, not an error',
+  'list $x1 $y1 $x2 $y2    build a list from variables',
+  'Rectangle {x1 y1 x2 y2}: width = x2 - x1, height = y2 - y1',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Tcl data structures 101, the list', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl14.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: list (how it adds braces when an element has spaces)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/list.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: llength', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/llength.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: lindex, including end and end-1', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/lindex.htm', kind: 'tcl-man' },
+]} />

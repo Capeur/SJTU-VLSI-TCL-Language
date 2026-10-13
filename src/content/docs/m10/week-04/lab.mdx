@@ -1,14 +1,19 @@
 ---
-title: "Week 4 Lab"
+title: "Lab: Is this wire wide enough?"
+description: "Week 4 lab: check a METAL1 wire against the minimum width, then count how many wires fit in the channel between CORE and SRAM, and check it automatically."
 milestone: "m10"
 week: 4
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Choose between three results with if, elseif and else
+  - Use a while loop to place repeated shapes until no more fit
+prerequisites: ["m10-w04-a", "m10-w04-b"]
+glossary: [design-rule, wire, channel, branch, loop]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Numeric comparisons 101, if", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl7.html" }
+  - { title: "Tcl tutorial: Looping 101, while loop", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl9.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,92 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Diagram from '../../../../components/Diagram.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-04/data/expected.txt?raw';
 
-Lab for week 4 (Decisions & loops) — content arrives in a later phase.
+export const core = chip.blocks.find((b) => b.name === 'CORE');
+export const sram = chip.blocks.find((b) => b.name === 'SRAM');
+
+<LessonMeta milestone="m10" week={4} lesson="lab" minutes={60} />
+
+## Goal
+
+**Check one METAL1 <GlossaryTerm term="wire" /> against the minimum width, then count how many wires fit side by side in the gap between two blocks of {chip.name}.**
+
+Why it matters for chips: a <GlossaryTerm term="design-rule">design rule</GlossaryTerm> check looks at millions of shapes and decides, for each one, whether it is OK. Routing tools, which draw the wires, ask the second question all the time: how many wires fit in this space? Both are an if and a loop at heart.
+
+## What you'll practise
+
+- [Lesson A: if, make a decision](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-a/): comparisons, `if`, `elseif`, `else`.
+- [Lesson B: Loops](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-b/): `while`, `incr`, a counter.
+
+## Specification
+
+Between CORE and SRAM there is a strip of empty space: CORE ends at x = {core.x + core.w} µm and SRAM starts at x = {sram.x} µm. That is a {sram.x - core.x - core.w} µm <GlossaryTerm term="channel" />, where METAL1 wires can run from bottom to top.
+
+- **Inputs.** The starter gives you five lines: `set wireName CLK`, `set wireWidth 2`, `set minWidth 3`, `set minSpace 2` and `set channelWidth 20`. All sizes are in µm. **Keep these five lines exactly as they are.** The checker changes their values three times and runs your script again, to test every branch of your if and every length of your loop.
+- **Output.** With these inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- **Line 2, the result,** is one of three texts: `TOO NARROW` when the wire is narrower than `minWidth`, `OK, AT THE MINIMUM` when it is exactly `minWidth`, and `OK` when it is wider.
+- **The tracks.** Each track is a wire of width `minWidth`. Every wire must stay at least `minSpace` away from CORE, from SRAM and from the next wire. x is measured from CORE's edge, and a track's x is its left edge. The first track starts at x = `minSpace`. A track fits only if `x + minWidth + minSpace` is not more than `channelWidth`.
+- Words, capitals and units must match. Extra spaces are forgiven. These are teaching numbers: real chips use much thinner wires.
+
+<Diagram name="w04-tracks" alt="The channel between CORE on the left and SRAM on the right, seen from above, with the example inputs. x is measured from CORE's edge, x equal to 0, to SRAM's edge, x equal to 20. Three green tracks, each 3 micrometres wide, start at x equal to 2, 7 and 12, with 2 micrometres of space before each one. After the third track, the strip from 17 to 20 is hatched: too small for another track, because a track also needs 2 micrometres of space before SRAM." />
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-04/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-04" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step, and compare your new lines with the specification.
+
+1. **The wire line.** Print line 1 with `$wireName`, `$wireWidth` and `$minWidth` in it.
+2. **The result.** Write an if with an elseif and an else. Each branch prints one of the three result lines. Then test it: change `wireWidth` to 3, then to 4, and press Run each time. Does the result change? Put it back to 2.
+3. **The tracks.** Set `x` to `minSpace` and a counter to 0. Then write a while loop: while a track fits at `x`, add 1 to the counter, print the track line, and move `x` on by one track and one space.
+4. **The count.** After the loop, print how many tracks fit.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Step 2 needs three branches: if {$wireWidth < $minWidth} {…} elseif {$wireWidth == $minWidth} {…} else {…}. Keep } elseif { and } else { on one line.',
+  'Step 3, the condition: while {$x + $minWidth + $minSpace <= $channelWidth} {…}. In the body: incr the counter, puts the line, then incr x by minWidth + minSpace. incr x can take a [expr {…}] as its second word.',
+  'If the checker says your script ran too long, your loop never ends: the body must change x on every pass. If a test with new inputs fails, look for a number you typed instead of computing it.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 9/9` when everything is right. The last three tests change the inputs: a wire exactly at the minimum, a channel where the last track fits exactly, and a channel with no room at all. They pass only if your script really decides and really loops. If your loop never ends, the checker stops it and tells you, instead of freezing.
+
+## Stretch goal: the narrowest channel
+
+How narrow could the channel be and still hold 5 tracks? Paste your finished lab script below. Then add a loop that starts with a channel width of 0 and makes it 1 µm wider on every pass, until 5 tracks fit. Print the answer. This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+
+# Then find the narrowest channel that holds 5 tracks.
+`} />

@@ -1,10 +1,14 @@
 ---
 title: "Week 4: Decisions & loops"
+description: "Week 4 overview: comparisons, if/elseif/else, while and for loops, and checking Lumen-1's wires against a design rule, in about 3 hours."
 milestone: "m10"
 week: 4
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 180
+goals:
+  - Make a script choose between branches with if, elseif and else
+  - Repeat commands with while and for, counting with incr
+  - Brace every condition and loop body, and know why
+prerequisites: ["m10-w02-a", "m10-w03-b"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,29 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+Until now, your scripts ran every line, once, from top to bottom. This week they learn to choose and to repeat. You check {chip.name}'s wires against the factory's rules, and you count how many wires fit between two blocks. Every later week uses these two ideas: the M10 capstone, the Mini Floorplan Checker, is built from them.
+
+## This week you will
+
+<Goals items={['Make a script choose between branches with if, elseif and else', 'Repeat commands with while and for, counting with incr', 'Brace every condition and loop body, and know why']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: if, make a decision](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-a/) | 40 min | Compare values; choose a branch with if, elseif and else |
+| [Lesson B: Loops](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-b/) | 40 min | Repeat with while and for; count with incr; brace every loop |
+| [Lab: Is this wire wide enough?](/SJTU-VLSI-TCL-Language/m10/week-04/lab/) | 60 min | Check a wire against the rule; count the wires that fit in a channel |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-04/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Review these first
+
+This week builds on two earlier lessons. If either feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 2, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-a/): `expr`, operators and the order of operations. Conditions are expr maths.
+- [Week 3, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-03/lesson-b/): Tcl substitutes only once, and braced `expr`. This explains why loops need braces.

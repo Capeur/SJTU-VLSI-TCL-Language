@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 270">
+  <defs><marker id="w05-arrow3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="10" y="24">foreach layer $layers { puts "Layer $number: $layer" … }</text>
+
+  <rect class="d-box-info" x="10" y="44" width="120" height="40" rx="6"/>
+  <text class="d-txt d-small d-bold" x="70" y="69" text-anchor="middle">ACTIVE</text>
+  <rect class="d-box-info" x="138" y="44" width="120" height="40" rx="6"/>
+  <text class="d-txt d-small d-bold" x="198" y="69" text-anchor="middle">POLY</text>
+  <rect class="d-box-info" x="266" y="44" width="120" height="40" rx="6"/>
+  <text class="d-txt d-small d-bold" x="326" y="69" text-anchor="middle">CONTACT</text>
+  <rect class="d-box-info" x="394" y="44" width="120" height="40" rx="6"/>
+  <text class="d-txt d-small d-bold" x="454" y="69" text-anchor="middle">METAL1</text>
+  <text class="d-txt d-bold" x="530" y="69">… 3 more</text>
+
+  <line class="d-arrow" x1="70" y1="84" x2="70" y2="122" marker-end="url(#w05-arrow3)"/>
+  <line class="d-arrow" x1="198" y1="84" x2="198" y2="122" marker-end="url(#w05-arrow3)"/>
+  <line class="d-arrow" x1="326" y1="84" x2="326" y2="122" marker-end="url(#w05-arrow3)"/>
+
+  <rect class="d-box-ok" x="10" y="126" width="120" height="56" rx="6"/>
+  <text class="d-txt d-small" x="70" y="146" text-anchor="middle">pass 1</text>
+  <text class="d-txt d-small d-mono" x="70" y="168" text-anchor="middle">layer=ACTIVE</text>
+  <rect class="d-box-ok" x="138" y="126" width="120" height="56" rx="6"/>
+  <text class="d-txt d-small" x="198" y="146" text-anchor="middle">pass 2</text>
+  <text class="d-txt d-small d-mono" x="198" y="168" text-anchor="middle">layer=POLY</text>
+  <rect class="d-box-ok" x="266" y="126" width="120" height="56" rx="6"/>
+  <text class="d-txt d-small" x="326" y="146" text-anchor="middle">pass 3</text>
+  <text class="d-txt d-small d-mono" x="326" y="168" text-anchor="middle">layer=CONTACT</text>
+
+  <text class="d-txt d-small" x="10" y="216">On every pass, foreach puts the next element in the loop variable, then runs the body.</text>
+  <text class="d-txt d-small" x="10" y="238">After the last element, the loop ends. No counter, no condition: foreach does the counting.</text>
+</svg>

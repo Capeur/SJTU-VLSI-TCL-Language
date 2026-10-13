@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 430">
+  <defs><marker id="w05-arrow4" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <!-- 3 px per um; origin at chip (20, 30) -> px (40, 370); px = 40 + (x - 20) * 3, py = 370 - (y - 30) * 3 -->
+  <text class="d-txt d-small d-muted" x="40" y="18">The three METAL1 shapes of the starter, inside CORE (3 pixels per µm)</text>
+  <g transform="translate(0, 34)">
+  <line class="d-arrow" x1="40" y1="370" x2="600" y2="370" marker-end="url(#w05-arrow4)"/>
+  <line class="d-arrow" x1="40" y1="370" x2="40" y2="4" marker-end="url(#w05-arrow4)"/>
+  <text class="d-txt d-small" x="604" y="374">x</text>
+  <text class="d-txt d-small" x="34" y="10" text-anchor="end">y</text>
+
+  <!-- shape 1: 30 40 90 70 -->
+  <rect class="d-box-ok" x="70" y="250" width="180" height="90"/>
+  <text class="d-txt d-bold" x="160" y="300" text-anchor="middle">1</text>
+  <text class="d-txt d-small" x="70" y="358">(30, 40)</text>
+  <text class="d-txt d-small" x="250" y="244" text-anchor="end">(90, 70)</text>
+  <!-- shape 2: 100 40 104 150 -->
+  <rect class="d-box-ok" x="280" y="10" width="12" height="330"/>
+  <text class="d-txt d-bold" x="300" y="180">2</text>
+  <text class="d-txt d-small d-muted" x="300" y="200">4 wide: OK</text>
+  <!-- shape 3: 120 60 170 62 -->
+  <rect class="d-box-bad" x="340" y="274" width="150" height="6"/>
+  <text class="d-txt d-bold" x="415" y="266" text-anchor="middle">3</text>
+  <text class="d-txt d-small d-fg-bad" x="415" y="302" text-anchor="middle">only 2 high: too narrow</text>
+  <text class="d-txt d-small d-muted" x="500" y="100">minWidth is 3 µm</text>
+  </g>
+</svg>

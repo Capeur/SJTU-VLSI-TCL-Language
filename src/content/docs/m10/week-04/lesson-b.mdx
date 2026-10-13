@@ -1,14 +1,23 @@
 ---
-title: "Week 4 Lesson B"
+title: "Loops: while, for and incr"
+description: "Week 4, Lesson B: repeating commands with while and for, counting with incr, and why loop conditions and bodies are always braced."
 milestone: "m10"
 week: 4
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Repeat commands with while and a variable changed by incr
+  - Write a for loop that counts from a start to an end
+  - Explain why loop conditions and bodies are braced, and spot an unbraced one
+prerequisites: ["m10-w04-a"]
+glossary: [pitch, loop, loop-body, counter, infinite-loop]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Looping 101, while loop", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl9.html" }
+  - { title: "Tcl tutorial: Looping 102, for and incr", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl10.html" }
+  - { title: "Tcl manual page: while", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/while.htm" }
+  - { title: "Tcl manual page: for", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/for.htm" }
+  - { title: "Tcl manual page: incr", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/incr.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +25,220 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 4 (Decisions & loops) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · incr + while + diagram + worked example 1 + playground 9 ·
+    predict 3 · for + worked example 2 5 · why braces + diagram 4 · faded 3 · traps 4 · exit quiz 4 ·
+    cheat card 1 = 39 min. A forgotten incr (infinite loop) cannot be a Trap component: CI runs the wrong code of every Trap.
+    It is taught in prose, the glossary and the lab checker. break/continue are not taught (user decision). */}
+
+<LessonMeta milestone="m10" week={4} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+Every block of {chip.name} needs power. Thin METAL2 power stripes cross the chip from bottom to top, one every 50 µm. The distance from one stripe to the next is called the <GlossaryTerm term="pitch" />. A report must list where each stripe sits: 50, 100, 150 and so on. That is seven puts lines today, and a chip with a 10 µm pitch would need 39. A <GlossaryTerm term="loop" /> does it in four lines: it runs the same commands again and again, with a new number each time.
+
+<Diagram name="w04-stripes" alt="Lumen-1 seen from above, 400 micrometres wide, with seven vertical METAL2 power stripes at x equal to 50, 100, 150, 200, 250, 300 and 350 micrometres. The distance between two stripes, the pitch, is 50 micrometres. There is no stripe at 0 or at 400, the chip's edges." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Repeat commands with while and a variable changed by incr', 'Write a for loop that counts from a start to an end', 'Explain why loop conditions and bodies are braced, and spot an unbraced one']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 3, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w04" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03']} mode="warmup" count={3} mix={1 / 3} />
+
+## while: repeat while a test is true
+
+First, a small helper. `incr x` adds 1 to the variable x, and `incr x 50` adds 50. It works on whole numbers only. Like `set`, it takes the variable's name, with no `$`, because it changes what is in the box.
+
+Now the loop. `while {condition} {body}` checks the condition. If it is true, while runs the <GlossaryTerm term="loop-body">body</GlossaryTerm>, then checks the condition again. Each run of the body is called a pass. When the condition is false, the loop ends and the script goes on.
+
+Something in the body must change what the condition tests, or the loop never ends. Here, `incr x` moves x one pitch further on every pass.
+
+<Diagram name="w04-while-loop" alt="The cycle of a while loop, for while dollar x less than dollar chipWidth. Step 1: check the condition. If it gives 1, true, step 2 runs the body: print a stripe, then incr x, and goes back to the check. If it gives 0, false, step 3: go on after the loop. Below, the values of x at each check: 50, 100, 150, 200, 250, 300 and 350 are true, so a stripe is printed each time; at 400 the check is false and the loop ends." />
+
+<WorkedExample
+  code={`set chipWidth 400
+set pitch 50
+set x 50
+while {$x < $chipWidth} {
+    puts "Stripe at x = $x um"
+    incr x $pitch
+}
+puts "Done"`}
+  notes={{
+    1: 'Lumen-1 is 400 µm wide.',
+    2: 'One stripe every 50 µm.',
+    3: 'The first stripe sits 50 µm from the left edge.',
+    4: 'Check: is x still inside the chip? 50 < 400 is true, so the body runs.',
+    5: 'Output on the first pass: Stripe at x = 50 um',
+    6: 'Move to the next stripe: x becomes 100. Then while checks the condition again.',
+    7: 'The end of the body. Passes 2 to 7 print 100, 150 and so on up to 350. Then x is 400, 400 < 400 is false, and the loop ends.',
+    8: 'Output: Done. There is no stripe at 400: that is the right edge of the chip.'
+  }}
+/>
+
+Run it. Then change the pitch to 100 and predict the output before you run it again.
+
+<TclPlayground client:visible code={`set chipWidth 400
+set pitch 50
+set x 50
+while {$x < $chipWidth} {
+    puts "Stripe at x = $x um"
+    incr x $pitch
+}
+puts "Done"`} />
+
+## Predict → Run → Explain
+
+This loop starts at 0 and adds 150 before it prints. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set x 0
+while {$x < 400} {
+    incr x 150
+    puts "Stripe at x = $x um"
+}`}
+  expected={`Stripe at x = 150 um
+Stripe at x = 300 um
+Stripe at x = 450 um`}
+  explanation="while checks its condition only at the top of each pass. The third pass starts with x = 300, and 300 < 400 is true, so the body runs: incr makes x 450, and puts prints a stripe at x = 450 um. That stripe lies outside the 400 µm chip. This is an off-by-one mistake: one pass too many, because the body changes x after the check and then uses it. The worked example avoids it by printing first and adding after, so every x it prints has just passed the check."
+/>
+
+## for: count from a start to an end
+
+Many loops follow the same pattern: set a variable, test it, run the body, change the variable. `for` writes the first three parts in one line, so you cannot forget one:
+
+`for {start} {condition} {next} {body}`
+
+for runs start once. Then, on every pass, it checks the condition, runs the body, and runs next. When a variable only counts the passes, it is called a <GlossaryTerm term="counter" />.
+
+<WorkedExample
+  code={`set x 290
+for {set pad 1} {$pad <= 4} {incr pad} {
+    puts "Pad $pad at x = $x um"
+    incr x 25
+}`}
+  notes={{
+    1: 'The PADS block starts at x = 280 µm. The first pad sits 10 µm inside it.',
+    2: 'start: pad is 1. condition: is pad at most 4? next: incr pad after every pass. So the body runs for pad = 1, 2, 3 and 4.',
+    3: 'Output on the first pass: Pad 1 at x = 290 um',
+    4: 'The pads have a 25 µm pitch, so x moves on too. The counter and x both change on every pass.',
+    5: 'After pass 4, pad becomes 5, 5 <= 4 is false, and the loop ends. The last line printed is: Pad 4 at x = 365 um'
+  }}
+/>
+
+## Why loops need braces
+
+Week 3's one-pass rule explains the braces. Tcl substitutes a command's words once, before the command runs. But while must check its condition again on every pass, so the condition has to reach while unchanged, as `$x < 400`. Braces do exactly that. In double quotes, Tcl would replace `$x` once, before the loop starts, so while would receive `0 < 400` and test it forever. The body needs braces for the same reason: it must run fresh on every pass.
+
+A loop that never ends is an <GlossaryTerm term="infinite-loop">infinite loop</GlossaryTerm>. Its usual cause is a forgotten `incr`: if nothing in the body changes x, the condition stays true. The playground stops any run after 5 seconds and asks whether you have an infinite loop.
+
+<Diagram name="w04-braced-loop" alt="Two columns, starting from set x 0. With quotes, wrong: Tcl substitutes once, before while starts, so while receives 0 less than 400 and checks that on every pass; x grows, but the test never sees it, so it is always true and never stops. With braces, right: while receives dollar x less than 400 and looks up x again on every pass, 0, 50, and so on up to 400 less than 400, which is false at last, so the loop ends." />
+
+## Faded example
+
+Fill each blank so that each loop prints what its comment asks for.
+
+<FadedExample
+  client:visible
+  template={`# Must print stripes at x = 100, 200 and 300 um
+set x 100
+while {$x ___1___ 400} {
+    puts "Stripe at x = $x um"
+    ___2___ x 100
+}
+# Must print 1, 2 and 3, one per line
+for {set i 1} {$i <= 3} {___3___} {
+    puts $i
+}`}
+  answers={[['<'], ['incr'], ['incr i']]}
+  hints={['Stripes at 100, 200 and 300, but not at 400. Which comparison is true for 300 and false for 400?', 'Which command adds a number to a variable?', 'The next part runs after every pass. It must add 1 to the counter i.']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set i 0
+while {$i < 3} "
+    puts $i
+    incr i
+"`}
+  output={`0
+0
+0`}
+  fix={`set i 0
+while {$i < 3} {
+    puts $i
+    incr i
+}`}
+  why="The body is in double quotes, so Tcl replaced $i with 0 once, before while started. Every pass runs puts 0. incr i still works, because it names the variable without a $, so the loop does stop. Braces keep the body unchanged, so $i is read fresh on every pass."
+/>
+
+<Trap
+  wrong={`set x 0
+incr x 0.5`}
+  error={`expected integer but got "0.5"`}
+  fix={`set x 0
+set x [expr {$x + 0.5}]
+puts $x`}
+  why="incr only adds whole numbers. To add a decimal, work out the new value with expr and store it with set."
+/>
+
+<Trap
+  wrong={`for {set pad 1} {$pad < 4} {incr pad} {
+    puts "Pad $pad"
+}`}
+  output={`Pad 1
+Pad 2
+Pad 3`}
+  fix={`for {set pad 1} {$pad <= 4} {incr pad} {
+    puts "Pad $pad"
+}`}
+  why="The PADS block has four pads, but this loop stops when pad reaches 4, so pad 4 is missing. Counting from 1 to 4 needs <= 4. When a loop runs one pass too few or too many, check the condition first."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w04" lesson="b" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="while, for, incr" lines={[
+  'incr x       add 1 to x      incr x 50   add 50 (whole numbers only)',
+  'while {condition} {body}    check, run the body, check again…',
+  'for {set i 1} {$i <= 4} {incr i} {body}   start · condition · next · body',
+  'The condition is checked BEFORE each pass: a loop may run zero times',
+  'Something in the body must change what the condition tests',
+  'Always brace the condition and the body: Tcl substitutes once',
+  'One pass too many or too few? Check < versus <=',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Looping 101, the while loop', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl9.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Looping 102, for and incr', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl10.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: while (it explains why the condition is braced)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/while.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: for', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/for.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: incr', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/incr.htm', kind: 'tcl-man' },
+]} />

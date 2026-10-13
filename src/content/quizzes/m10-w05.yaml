@@ -1,0 +1,461 @@
+# Week 5 — Lists I. Lesson A: lists as words in a row, llength, lindex (from 0, end, past the end),
+# the list command, a rectangle as {x1 y1 x2 y2}. Lesson B: foreach (one and several loop variables),
+# lappend. Lists stay flat this week; nested lists are Week 6.
+# Numbers: Lumen-1's real blocks and layers. The lab's METAL1 shapes are not used here (style rule 21).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w05-q01
+    type: predict-output
+    lesson: a
+    tags: [list, llength, lindex]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+      puts [llength $layers]
+      puts [lindex $layers 3]
+      puts [lindex $layers end]
+    answer: |-
+      7
+      METAL1
+      TEXT
+    explanation: >
+      llength counts 7 elements. Counting from 0, index 3 is the fourth element, METAL1.
+      end is the last element, TEXT.
+
+  - id: m10-w05-q02
+    type: mcq
+    lesson: a
+    tags: [list, braces]
+    review: true
+    prompt: "x1 and y1 both hold 20. Which line stores the list 20 20 220 180 in rect?"
+    choices:
+      - 'set rect [list $x1 $y1 220 180]'
+      - 'set rect {$x1 $y1 220 180}'
+      - 'set rect $x1 $y1 220 180'
+      - 'set rect [$x1 $y1 220 180]'
+    answer: 'set rect [list $x1 $y1 220 180]'
+    explanation: >
+      Tcl replaces $x1 and $y1 first, then the list command builds one list from the four values.
+    distractor_feedback:
+      'set rect {$x1 $y1 220 180}': 'Braces freeze the dollar signs, so the list holds the text $x1, not 20.'
+      'set rect $x1 $y1 220 180': 'set takes a name and ONE value. With five words it stops with wrong # args.'
+      'set rect [$x1 $y1 220 180]': 'The brackets run a command, and the first word is 20, which is not a command: invalid command name "20".'
+
+  - id: m10-w05-q03
+    type: fill-blank
+    lesson: a
+    tags: [lindex, end]
+    review: true
+    prompt: 'blocks holds CORE SRAM ADC SENSOR PADS. Fill the blank so the line prints the last block without counting:     puts [lindex $blocks ___]'
+    answer: ['end', '4']
+    explanation: >
+      end always means the last element, however long the list is. Counting from 0, 4 works too
+      for this list of five.
+
+  - id: m10-w05-q04
+    type: predict-output
+    lesson: a
+    tags: [lindex, index]
+    review: true
+    prompt: "Counting starts at 0. What does this print?"
+    code: |
+      set blocks {CORE SRAM ADC SENSOR PADS}
+      puts [lindex $blocks 1]
+      puts [lindex $blocks 3]
+    answer: |-
+      SRAM
+      SENSOR
+    explanation: >
+      CORE is index 0, so index 1 is the second block, SRAM, and index 3 is the fourth, SENSOR.
+
+  - id: m10-w05-q05
+    type: predict-output
+    lesson: a
+    tags: [lindex, index]
+    review: true
+    prompt: "The list has three elements. What does this print?"
+    code: |
+      set pads {P1 P2 P3}
+      puts "<[lindex $pads 3]>"
+    answer: "<>"
+    explanation: >
+      Three elements have the indexes 0, 1 and 2. Index 3 is past the end, so lindex gives an
+      empty value, with no error. Only the two angle brackets are printed.
+
+  - id: m10-w05-q06
+    type: predict-output
+    lesson: a
+    tags: [rectangle, lindex, expr]
+    review: true
+    prompt: "ADC's corners as {x1 y1 x2 y2}. What does this print?"
+    code: |
+      set adc {20 200 140 280}
+      set width [expr {[lindex $adc 2] - [lindex $adc 0]}]
+      set height [expr {[lindex $adc 3] - [lindex $adc 1]}]
+      puts "ADC: $width by $height"
+    answer: "ADC: 120 by 80"
+    explanation: >
+      The width is x2 - x1 = 140 - 20 = 120 (indexes 2 and 0). The height is y2 - y1 = 280 - 200 = 80
+      (indexes 3 and 1).
+
+  - id: m10-w05-q07
+    type: multi-select
+    lesson: a
+    tags: [llength, lindex]
+    review: false
+    prompt: "blocks holds CORE SRAM ADC SENSOR PADS. Which lines print 5? Pick all that apply."
+    choices:
+      - 'puts [llength $blocks]'
+      - 'puts [llength blocks]'
+      - 'puts [lindex {1 2 3 4 5} end]'
+      - 'puts [lindex {1 2 3 4 5} 5]'
+    answer:
+      - 'puts [llength $blocks]'
+      - 'puts [lindex {1 2 3 4 5} end]'
+    explanation: >
+      llength $blocks counts five names. In {1 2 3 4 5}, the last element is 5, at index end (or 4).
+      llength blocks counts the word blocks itself: 1. Index 5 is past the end: an empty value.
+
+  - id: m10-w05-q08
+    type: find-the-bug
+    lesson: a
+    tags: [list, braces]
+    review: true
+    prompt: "This should print SENSOR's width, 100, but expr stops with an error about a non-numeric string. Which line has the bug?"
+    code: |
+      set x1 160
+      set y1 200
+      set sensor {$x1 $y1 260 280}
+      set width [expr {[lindex $sensor 2] - [lindex $sensor 0]}]
+      puts $width
+    answer: 3
+    explanation: >
+      The braces freeze $x1 and $y1, so element 0 is the text $x1, which is not a number. Build
+      the list with the list command: set sensor [list $x1 $y1 260 280].
+
+  - id: m10-w05-q09
+    type: mcq
+    lesson: a
+    tags: [lindex, index]
+    review: false
+    prompt: "What does lindex give when you ask for an index past the end of the list?"
+    choices:
+      - 'An empty value, with no error'
+      - 'An error message'
+      - 'The last element'
+      - 'The number 0'
+    answer: 'An empty value, with no error'
+    explanation: >
+      lindex quietly gives an empty value. That makes an off-by-one index easy to miss, so check
+      your output, or use end for the last element.
+    distractor_feedback:
+      'An error message': 'That would be easier to spot, but lindex gives no error. It gives an empty value.'
+      'The last element': 'Only the index end (or the right number) gives the last element.'
+      'The number 0': 'lindex gives an empty value, not 0. puts prints nothing for it.'
+
+  - id: m10-w05-q10
+    type: predict-output
+    lesson: a
+    tags: [list]
+    review: false
+    prompt: "SRAM's corners, built with list. What does this print?"
+    code: |
+      set x1 240
+      set y1 20
+      set sram [list $x1 $y1 380 180]
+      puts $sram
+      puts [llength $sram]
+    answer: |-
+      240 20 380 180
+      4
+    explanation: >
+      Tcl replaces $x1 and $y1 first, so list receives 240, 20, 380 and 180 and builds a list of
+      four elements.
+
+  - id: m10-w05-q11
+    type: order-steps
+    lesson: a
+    tags: [lindex, brackets]
+    review: false
+    prompt: 'blocks holds CORE SRAM ADC SENSOR PADS. Put in order what Tcl does with:   puts [lindex $blocks end]'
+    steps:
+      - "Meet the brackets and start a new command: lindex"
+      - "Replace $blocks with its value, the list of five names"
+      - "lindex gives back the last element, PADS"
+      - "PADS replaces the brackets, and puts prints it"
+    explanation: >
+      The brackets run lindex first (Week 2). Inside them, $blocks is substituted, then lindex
+      works on the list, and its result takes the place of the brackets.
+
+  - id: m10-w05-q12
+    type: fill-blank
+    lesson: a
+    tags: [rectangle, lindex]
+    review: false
+    prompt: 'rect holds {x1 y1 x2 y2}. Fill the blank so height holds y2 - y1:     set height [expr {[lindex $rect 3] - [lindex $rect ___]}]'
+    answer: ['1']
+    explanation: >
+      Counting from 0: x1 is index 0, y1 is index 1, x2 is index 2 and y2 is index 3.
+
+  - id: m10-w05-q13
+    type: mcq
+    lesson: a
+    tags: [rectangle, index]
+    review: false
+    prompt: "A rectangle is stored as {x1 y1 x2 y2}. Which index holds y2?"
+    choices: ['3', '4', '2', '1']
+    answer: '3'
+    explanation: >
+      Counting from 0: x1 is 0, y1 is 1, x2 is 2 and y2 is 3.
+    distractor_feedback:
+      '4': 'That counts from 1. Tcl counts from 0, so the fourth element has index 3, and index 4 is past the end.'
+      '2': 'Index 2 is x2, the third element.'
+      '1': 'Index 1 is y1, the bottom edge.'
+
+  - id: m10-w05-q14
+    type: predict-output
+    lesson: a
+    tags: [list, lindex, quotes]
+    review: false
+    prompt: "A list can hold words and numbers. What does this print?"
+    code: |
+      set passport {Lumen-1 400 300}
+      puts "[lindex $passport 0] is [lindex $passport 1] um wide"
+    answer: "Lumen-1 is 400 um wide"
+    explanation: >
+      Index 0 is the name and index 1 is the width. Inside the double quotes, each pair of brackets
+      runs lindex, and its result lands in the text.
+
+  # ---------- Lesson B ----------
+  - id: m10-w05-q15
+    type: predict-output
+    lesson: b
+    tags: [foreach, several-variables]
+    review: true
+    prompt: "Two loop variables. What does this print?"
+    code: |
+      foreach {name width} {ADC 120 SENSOR 100 PADS 100} {
+          puts "$name: $width um"
+      }
+    answer: |-
+      ADC: 120 um
+      SENSOR: 100 um
+      PADS: 100 um
+    explanation: >
+      With two loop variables, each pass takes two elements: ADC and 120, then SENSOR and 100,
+      then PADS and 100. Six elements, two per pass: three passes.
+
+  - id: m10-w05-q16
+    type: find-the-bug
+    lesson: b
+    tags: [lappend, dollar]
+    review: true
+    prompt: 'This should print  Tall: CORE SRAM,  but it prints  Tall:  and no error. Which line has the bug?'
+    code: |
+      set tall {}
+      foreach {name height} {CORE 160 ADC 80 SRAM 160} {
+          if {$height > 100} {
+              lappend $tall $name
+          }
+      }
+      puts "Tall: $tall"
+    answer: 4
+    explanation: >
+      lappend takes the variable's NAME. With $tall, Tcl first replaces it with the empty list,
+      so lappend adds to a variable with an empty name. Write: lappend tall $name.
+
+  - id: m10-w05-q17
+    type: predict-output
+    lesson: b
+    tags: [foreach, counter]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set count 0
+      foreach block {CORE SRAM ADC SENSOR PADS} {
+          incr count
+      }
+      puts "$count blocks"
+    answer: "5 blocks"
+    explanation: >
+      The body runs once per element: five times, so the counter goes up to 5.
+
+  - id: m10-w05-q18
+    type: predict-output
+    lesson: b
+    tags: [lappend, llength]
+    review: true
+    prompt: "lappend can add more than one element. What does this print?"
+    code: |
+      set names {}
+      lappend names CORE
+      lappend names SRAM ADC
+      puts $names
+      puts [llength $names]
+    answer: |-
+      CORE SRAM ADC
+      3
+    explanation: >
+      The first lappend adds CORE to the empty list. The second adds SRAM and ADC to the end.
+      The list now has three elements.
+
+  - id: m10-w05-q19
+    type: predict-output
+    lesson: b
+    tags: [foreach, lappend, if]
+    review: true
+    prompt: "Collecting with lappend. What does this print?"
+    code: |
+      set short {}
+      foreach {name width height} {CORE 200 160 SRAM 140 160 ADC 120 80} {
+          if {$height < 100} {
+              lappend short $name
+          }
+      }
+      puts "Short: $short"
+    answer: "Short: ADC"
+    explanation: >
+      Three passes, one block each. Only ADC is less than 100 µm tall (80), so only ADC is added
+      to the list.
+
+  - id: m10-w05-q20
+    type: mcq
+    lesson: b
+    tags: [foreach, several-variables]
+    review: false
+    prompt: "foreach {a b c} runs over a list of 12 elements. How many passes does it make?"
+    choices: ['4', '12', '3', '36']
+    answer: '4'
+    explanation: >
+      Each pass takes three elements, so 12 elements make 12 / 3 = 4 passes.
+    distractor_feedback:
+      '12': 'That would be one variable, one element per pass. With three variables, each pass takes three.'
+      '3': 'There are three loop VARIABLES, but the number of passes is 12 divided by 3.'
+      '36': 'foreach does not multiply: it walks through the 12 elements once, three at a time.'
+
+  - id: m10-w05-q21
+    type: multi-select
+    lesson: b
+    tags: [lappend, set, incr, dollar]
+    review: true
+    prompt: "Which commands take a variable's NAME, without a $, because they change what is in the variable? Pick all that apply."
+    choices: ['set', 'incr', 'lappend', 'llength']
+    answer: ['set', 'incr', 'lappend']
+    explanation: >
+      set, incr and lappend change a variable, so they need its name: set x 5, incr x, lappend x CORE.
+      llength only reads a list, so it takes the value: llength $blocks.
+
+  - id: m10-w05-q22
+    type: predict-output
+    lesson: b
+    tags: [foreach, dollar]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      foreach layer layers {
+          puts "Layer: $layer"
+      }
+    answer: "Layer: layers"
+    explanation: >
+      Without a $, the list is the word layers itself: one element. The body runs once, with layer
+      holding the word layers.
+
+  - id: m10-w05-q23
+    type: mcq
+    lesson: b
+    tags: [lappend]
+    review: false
+    prompt: "found holds a list of block names. Which line adds SENSOR to the end of it?"
+    choices:
+      - 'lappend found SENSOR'
+      - 'lappend $found SENSOR'
+      - 'lappend found $SENSOR'
+      - 'set found SENSOR'
+    answer: 'lappend found SENSOR'
+    explanation: >
+      lappend takes the list variable's name, then the values to add.
+    distractor_feedback:
+      'lappend $found SENSOR': '$found gives the list''s value, so lappend would change a different variable, named after that value.'
+      'lappend found $SENSOR': 'There is no variable called SENSOR: can''t read "SENSOR": no such variable. The block name is plain text.'
+      'set found SENSOR': 'set replaces the whole list with the one word SENSOR.'
+
+  - id: m10-w05-q24
+    type: order-steps
+    lesson: b
+    tags: [foreach, several-variables]
+    review: false
+    prompt: 'Put in order what Tcl does with:   foreach {name width} {ADC 120 PADS 100} {puts "$name $width"}'
+    steps:
+      - "Set name to ADC and width to 120, then run the body"
+      - "Set name to PADS and width to 100, then run the body"
+      - "No elements are left, so the loop ends"
+    explanation: >
+      Each pass takes the next two elements, because there are two loop variables. The loop ends
+      when the list runs out.
+
+  - id: m10-w05-q25
+    type: fill-blank
+    lesson: b
+    tags: [foreach, several-variables]
+    review: false
+    prompt: 'Fill the blank so each pass takes a name and a height:     foreach {name ___} {CORE 160 ADC 80} {puts "$name: $height"}'
+    answer: ['height']
+    explanation: >
+      The body uses $height, so the second loop variable must be called height.
+
+  - id: m10-w05-q26
+    type: predict-output
+    lesson: b
+    tags: [foreach, several-variables, incr]
+    review: true
+    prompt: "SENSOR and PADS are both 100 by 80 µm. What does this print?"
+    code: |
+      set total 0
+      foreach {name width height} {SENSOR 100 80 PADS 100 80} {
+          incr total [expr {$width * $height}]
+      }
+      puts "Total: $total um2"
+    answer: "Total: 16000 um2"
+    explanation: >
+      Two passes, one per block. Each area is 100 * 80 = 8000, and incr adds both to total:
+      16000.
+
+  - id: m10-w05-q27
+    type: predict-output
+    lesson: b
+    tags: [foreach, several-variables]
+    review: false
+    prompt: "The list has an odd number of elements. What does this print?"
+    code: |
+      foreach {name width} {CORE 200 SRAM} {
+          puts "$name: <$width>"
+      }
+    answer: |-
+      CORE: <200>
+      SRAM: <>
+    explanation: >
+      On the second pass only SRAM is left, so width gets an empty value, with no error. Check that
+      the list length is a multiple of the number of loop variables.
+
+  - id: m10-w05-q28
+    type: find-the-bug
+    lesson: b
+    tags: [foreach, loop-variable]
+    review: false
+    prompt: "This should print 460, but incr stops with an error: what it got is not a whole number. Which line has the bug?"
+    code: |
+      set widths {200 140 120}
+      set total 0
+      foreach width $widths {
+          incr total $widths
+      }
+      puts $total
+    answer: 4
+    explanation: >
+      Inside the body, use the loop variable, width: one number per pass. $widths is the whole
+      list, which is not a whole number. Write: incr total $width.

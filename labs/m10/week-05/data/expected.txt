@@ -1,0 +1,9 @@
+Width: 60 um
+Height: 30 um
+Area: 1800 um2
+Shape 1: width 60, height 30, area 1800
+Shape 2: width 4, height 110, area 440
+Shape 3: width 50, height 2, area 100
+Shapes: 3
+Total area: 2340 um2
+Too narrow: shape 3

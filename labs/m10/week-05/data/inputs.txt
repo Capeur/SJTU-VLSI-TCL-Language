@@ -1,0 +1,3 @@
+set rect {30 40 90 70}
+set shapes {30 40 90 70 100 40 104 150 120 60 170 62}
+set minWidth 3

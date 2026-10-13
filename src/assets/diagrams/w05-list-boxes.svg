@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 250">
+  <defs><marker id="w05-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="10" y="24">set blocks {CORE SRAM ADC SENSOR PADS}</text>
+  <text class="d-txt d-small d-muted" x="10" y="46">One value: a string of words. As a list, each word is an element with a number.</text>
+
+  <rect class="d-box-info" x="10" y="70" width="110" height="50" rx="6"/>
+  <text class="d-txt d-bold" x="65" y="101" text-anchor="middle">CORE</text>
+  <rect class="d-box-info" x="135" y="70" width="110" height="50" rx="6"/>
+  <text class="d-txt d-bold" x="190" y="101" text-anchor="middle">SRAM</text>
+  <rect class="d-box-info" x="260" y="70" width="110" height="50" rx="6"/>
+  <text class="d-txt d-bold" x="315" y="101" text-anchor="middle">ADC</text>
+  <rect class="d-box-info" x="385" y="70" width="110" height="50" rx="6"/>
+  <text class="d-txt d-bold" x="440" y="101" text-anchor="middle">SENSOR</text>
+  <rect class="d-box-info" x="510" y="70" width="110" height="50" rx="6"/>
+  <text class="d-txt d-bold" x="565" y="101" text-anchor="middle">PADS</text>
+
+  <text class="d-txt d-mono d-fg-warn" x="65" y="146" text-anchor="middle">0</text>
+  <text class="d-txt d-mono d-fg-warn" x="190" y="146" text-anchor="middle">1</text>
+  <text class="d-txt d-mono d-fg-warn" x="315" y="146" text-anchor="middle">2</text>
+  <text class="d-txt d-mono d-fg-warn" x="440" y="146" text-anchor="middle">3</text>
+  <text class="d-txt d-mono d-fg-warn" x="565" y="146" text-anchor="middle">4 = end</text>
+  <text class="d-txt d-small d-fg-warn" x="10" y="170">index: counting starts at 0</text>
+
+  <text class="d-txt d-mono" x="10" y="206">llength $blocks     → 5</text>
+  <text class="d-txt d-mono" x="10" y="230">lindex $blocks 0    → CORE</text>
+  <text class="d-txt d-mono" x="330" y="206">lindex $blocks 2    → ADC</text>
+  <text class="d-txt d-mono" x="330" y="230">lindex $blocks end  → PADS</text>
+</svg>

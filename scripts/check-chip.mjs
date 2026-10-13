@@ -5,6 +5,8 @@
 //   - a block written as {NAME x y w h} must match the block's numbers
 //   - "<w> x <h> um" and "<w> × <h>" must be the chip's size or a block's size (also in diagrams)
 //   - "Blocks: …" and "Layers: …" lists must match the JSON (all names, same order)
+//   - the channel between CORE and SRAM (Week 4 lab): `set channelWidth <n>` and "<n> µm channel/gap
+//     between (the) CORE and SRAM" must equal the gap computed from the blocks' x and w
 // Usage: node scripts/check-chip.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,6 +27,8 @@ const blocks = Object.fromEntries(chip.blocks.map((b) => [b.name, b]));
 const sizes = new Set([`${chip.width_um} x ${chip.height_um}`, ...chip.blocks.map((b) => `${b.w} x ${b.h}`)]);
 const blockList = chip.blocks.map((b) => b.name).join(' ');
 const layerList = chip.layers.join(' ');
+// The empty strip between CORE (left) and SRAM (right): SRAM's left edge minus CORE's right edge.
+const coreSramGap = blocks.SRAM.x - (blocks.CORE.x + blocks.CORE.w);
 const errors = [];
 for (const file of files) {
     const rel = path.relative(root, file);
@@ -49,6 +53,13 @@ for (const file of files) {
         // "400 x 300 um" (code) or "400 × 300" (prose, diagrams): the chip's size or one block's size.
         for (const m of [...line.matchAll(/\b(\d+) x (\d+) um\b/g), ...line.matchAll(/\b(\d+) × (\d+)\b/g)]) {
             if (!sizes.has(`${m[1]} x ${m[2]}`)) errors.push(`${where}: "${m[0]}" is not the size of ${chip.name} or of one of its blocks`);
+        }
+        // The Week 4 lab channel is the real gap between CORE and SRAM.
+        for (const m of line.matchAll(/\bset\s+channelWidth\s+([0-9.]+)/g)) {
+            if (Number(m[1]) !== coreSramGap) errors.push(`${where}: channelWidth is ${m[1]}, but the gap between CORE and SRAM is ${coreSramGap} um`);
+        }
+        for (const m of line.matchAll(/\b(\d+) (?:µm|um) (?:wide )?(?:channel|gap) between (?:the )?CORE and SRAM\b/g)) {
+            if (Number(m[1]) !== coreSramGap) errors.push(`${where}: "${m[0]}" — the gap between CORE and SRAM is ${coreSramGap} µm`);
         }
         // "Blocks: CORE SRAM …" and "Layers: ACTIVE POLY …" lists must be complete and in the JSON's order.
         for (const [label, want] of [['Blocks', blockList], ['Layers', layerList]]) {

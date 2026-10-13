@@ -1,0 +1,6 @@
+Wire CLK: 2 um wide, minimum 3 um
+Result: TOO NARROW
+Track 1: x = 2 um
+Track 2: x = 7 um
+Track 3: x = 12 um
+Tracks that fit: 3

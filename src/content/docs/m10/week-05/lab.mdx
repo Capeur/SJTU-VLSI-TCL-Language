@@ -1,14 +1,19 @@
 ---
-title: "Week 5 Lab"
+title: "Lab: Rectangles as lists"
+description: "Week 5 lab: store METAL1 rectangles as {x1 y1 x2 y2} lists, compute widths, heights and areas with lindex and foreach, and find the shapes that are too narrow."
 milestone: "m10"
 week: 5
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Read the corners of a rectangle stored as a list, and compute its size
+  - Walk a flat list of rectangles with foreach, four numbers per pass
+prerequisites: ["m10-w05-a", "m10-w05-b"]
+glossary: [coordinate, list, design-rule, bounding-box]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Tcl data structures 101, the list", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl14.html" }
+  - { title: "Tcl manual page: foreach", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/foreach.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,93 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Diagram from '../../../../components/Diagram.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-05/data/expected.txt?raw';
 
-Lab for week 5 (Lists I) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={5} lesson="lab" minutes={60} />
+
+## Goal
+
+**Store METAL1 rectangles as lists, work out their sizes, and find the ones that are too narrow for the factory.**
+
+Why it matters for chips: in a layout file, every shape is just numbers: the <GlossaryTerm term="coordinate">coordinates</GlossaryTerm> of its corners. Layout tools read those numbers in long flat lists, four at a time for a rectangle. In Week 23 you will hand lists like these to a layout tool and see them drawn. Today your script reads them and checks them against a <GlossaryTerm term="design-rule">design rule</GlossaryTerm>, like the Week 4 lab, but for many shapes at once.
+
+## What you'll practise
+
+- [Lesson A: Lists](/SJTU-VLSI-TCL-Language/m10/week-05/lesson-a/): `llength`, `lindex` counting from 0, rectangles as `{x1 y1 x2 y2}`.
+- [Lesson B: foreach and lappend](/SJTU-VLSI-TCL-Language/m10/week-05/lesson-b/): several loop variables, building a list.
+- [Week 4, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-a/): `if`, and `||` to join two tests.
+
+## Specification
+
+Inside the CORE block of {chip.name}, some METAL1 rectangles have been drawn. Each one is a <GlossaryTerm term="list" /> of four coordinates in µm, `{x1 y1 x2 y2}`: the bottom-left corner, then the top-right corner.
+
+- **Inputs.** The starter gives you three lines: `set rect {30 40 90 70}`, one rectangle; `set shapes {…}`, three rectangles in one flat list, four numbers each; and `set minWidth 3`, the METAL1 minimum width. **Keep these three lines exactly as they are.** The checker changes their values twice and runs your script again.
+- **Output.** With these inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- **Lines 1 to 3** are the width, height and area of `rect`. The width is x2 − x1 and the height is y2 − y1.
+- **Then one line per shape** in `shapes`, numbered from 1, then the number of shapes and their total area.
+- **Too narrow.** A shape is too narrow if its width **or** its height is less than `minWidth`. A side exactly as wide as `minWidth` is fine. Print one line `Too narrow: shape N` for each narrow shape, in order. If no shape is too narrow, print `Too narrow: none`.
+- Words, capitals and units must match. Extra spaces are forgiven.
+
+<Diagram name="w05-lab-shapes" alt="The three METAL1 shapes of the starter drawn to scale inside CORE. Shape 1 is a rectangle from 30, 40 to 90, 70. Shape 2 is a tall thin strip, 4 micrometres wide and 110 high: OK, because 4 is not less than the 3 micrometre minimum. Shape 3 is a long flat strip, 50 micrometres wide but only 2 high: too narrow, because its height is less than 3." />
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-05/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-05" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step, and compare your new lines with the specification.
+
+1. **Width.** Use `lindex $rect 2` and `lindex $rect 0` inside `expr` to compute the width of `rect`, store it, and print line 1.
+2. **Height.** The same with indexes 3 and 1.
+3. **Area.** Width times height.
+4. **One line per shape.** Set a counter to 0. Write `foreach {x1 y1 x2 y2} $shapes {…}`. In the body, add 1 to the counter, compute the width, height and area, and print the shape line.
+5. **Count and total.** Before the loop, set a total to 0. In the body, add each area to it. After the loop, print the two lines.
+6. **Too narrow.** Before the loop, set an empty list. In the body, if the shape is too narrow, lappend its number. After the loop, print `Too narrow: none` if the list is empty, otherwise one line per number with a second foreach.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Step 1 in one line: set width [expr {[lindex $rect 2] - [lindex $rect 0]}]. Remember that lindex counts from 0: x1 is index 0, y1 is 1, x2 is 2, y2 is 3.',
+  'Step 6, the test: if {$width < $minWidth || $height < $minWidth} {lappend narrow $count}. After the loop, test the list with if {[llength $narrow] == 0} {…}.',
+  'If a test with new inputs fails, look for a number you typed instead of computing it, or for a count that assumes exactly three shapes.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 11/11` when everything is right. The last two tests change the inputs: four shapes with none too narrow, then two shapes that are both too narrow. They pass only if every line comes from the lists.
+
+## Stretch goal: the bounding box
+
+The <GlossaryTerm term="bounding-box">bounding box</GlossaryTerm> of a group of shapes is the smallest rectangle that holds them all. Its x1 is the smallest x1 of all the shapes, its y1 the smallest y1, its x2 the largest x2, and its y2 the largest y2. Paste your finished lab script below, then add a loop that finds the bounding box of `shapes` and prints it as a list. Hint: start from the first shape's corners, and use an if for each corner. This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+
+# Then find the bounding box of all the shapes.
+`} />

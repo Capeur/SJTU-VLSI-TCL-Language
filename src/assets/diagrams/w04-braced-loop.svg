@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300">
+  <defs><marker id="w04-arrow3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="10" y="22">set x 0</text>
+
+  <text class="d-txt d-bold" x="10" y="56">Quotes (wrong)</text>
+  <text class="d-txt d-mono" x="10" y="80">while "$x &lt; 400" {…}</text>
+  <rect class="d-box-code" x="10" y="94" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="20" y="116">Tcl substitutes once, before while</text>
+  <text class="d-txt d-small" x="20" y="138">starts. while receives: <tspan class="d-mono">0 &lt; 400</tspan></text>
+  <line class="d-arrow" x1="160" y1="152" x2="160" y2="172" marker-end="url(#w04-arrow3)"/>
+  <rect class="d-box-code" x="10" y="176" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="20" y="198">Each pass, while checks <tspan class="d-mono">0 &lt; 400</tspan>.</text>
+  <text class="d-txt d-small" x="20" y="218">x grows, but the test never sees it.</text>
+  <line class="d-arrow" x1="160" y1="234" x2="160" y2="254" marker-end="url(#w04-arrow3)"/>
+  <rect class="d-box-bad" x="10" y="258" width="300" height="38" rx="6"/>
+  <text class="d-txt d-bold d-fg-bad" x="20" y="283">Always true: it never stops</text>
+
+  <text class="d-txt d-bold" x="330" y="56">Braces (right)</text>
+  <text class="d-txt d-mono" x="330" y="80">while {$x &lt; 400} {…}</text>
+  <rect class="d-box-code" x="330" y="94" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="340" y="116">Braces freeze it. while receives:</text>
+  <text class="d-txt d-mono" x="340" y="140">$x &lt; 400</text>
+  <line class="d-arrow" x1="480" y1="152" x2="480" y2="172" marker-end="url(#w04-arrow3)"/>
+  <rect class="d-box-code" x="330" y="176" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="340" y="198">Each pass, while looks up x again:</text>
+  <text class="d-txt d-small" x="340" y="218"><tspan class="d-mono">0 &lt; 400</tspan>, <tspan class="d-mono">50 &lt; 400</tspan>, … <tspan class="d-mono">400 &lt; 400</tspan></text>
+  <line class="d-arrow" x1="480" y1="234" x2="480" y2="254" marker-end="url(#w04-arrow3)"/>
+  <rect class="d-box-ok" x="330" y="258" width="300" height="38" rx="6"/>
+  <text class="d-txt d-bold d-fg-ok" x="340" y="283">False at last: the loop ends</text>
+</svg>

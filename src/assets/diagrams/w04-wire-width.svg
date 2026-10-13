@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 270">
+  <text class="d-txt d-bold" x="10" y="22">The rule: a METAL2 wire must be at least 4 µm wide</text>
+  <text class="d-txt d-small d-muted" x="10" y="42">(a teaching number; drawn to scale, 8 pixels per µm)</text>
+
+  <!-- ruler: the minimum width, 4 um = 32 px -->
+  <line class="d-ink" x1="560" y1="70" x2="560" y2="250" stroke-dasharray="5 4"/>
+  <line class="d-ink" x1="600" y1="70" x2="600" y2="250" stroke-dasharray="5 4"/>
+
+  <!-- VDD: 6 um = 48 px -->
+  <rect class="d-box-ok" x="10" y="66" width="340" height="48" rx="2"/>
+  <text class="d-txt d-bold" x="22" y="96">VDD</text>
+  <text class="d-txt" x="366" y="88">6 µm: OK</text>
+  <text class="d-txt d-small d-muted" x="366" y="106">wider than the minimum</text>
+
+  <!-- CLK: 4 um = 32 px -->
+  <rect class="d-box-ok" x="10" y="134" width="340" height="32" rx="2"/>
+  <text class="d-txt d-bold" x="22" y="156">CLK</text>
+  <text class="d-txt" x="366" y="148">4 µm: OK</text>
+  <text class="d-txt d-small d-muted" x="366" y="166">exactly the minimum: allowed</text>
+
+  <!-- DATA: 3 um = 24 px -->
+  <rect class="d-box-bad" x="10" y="190" width="340" height="24" rx="2"/>
+  <text class="d-txt d-bold" x="22" y="208">DATA</text>
+  <text class="d-txt d-fg-bad" x="366" y="204">3 µm: TOO NARROW</text>
+  <text class="d-txt d-small d-muted" x="366" y="222">it may break when it is made</text>
+
+  <rect class="d-box-warn" x="560" y="134" width="40" height="32" fill-opacity="0.5"/>
+  <text class="d-txt d-small" x="580" y="266" text-anchor="middle">4 µm</text>
+</svg>

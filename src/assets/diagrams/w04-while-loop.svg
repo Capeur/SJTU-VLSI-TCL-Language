@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300">
+  <defs><marker id="w04-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="10" y="22">while {$x &lt; $chipWidth} { … incr x $pitch }</text>
+
+  <rect class="d-box-info" x="10" y="50" width="260" height="62" rx="8"/>
+  <text class="d-txt d-bold" x="22" y="74">1. Check the condition</text>
+  <text class="d-txt d-mono d-small" x="22" y="98">$x &lt; $chipWidth</text>
+
+  <line class="d-arrow" x1="140" y1="112" x2="140" y2="152" marker-end="url(#w04-arrow2)"/>
+  <text class="d-txt d-small d-fg-ok" x="150" y="138">1 (true)</text>
+  <rect class="d-box-ok" x="10" y="156" width="260" height="62" rx="8"/>
+  <text class="d-txt d-bold" x="22" y="180">2. Run the body</text>
+  <text class="d-txt d-small" x="22" y="204">print a stripe, then incr x</text>
+
+  <!-- back to the check -->
+  <path class="d-arrow" d="M270 187 L300 187 L300 81 L278 81" marker-end="url(#w04-arrow2)"/>
+  <text class="d-txt d-small" x="308" y="138">back to the check</text>
+
+  <line class="d-arrow" x1="270" y1="66" x2="420" y2="66" marker-end="url(#w04-arrow2)"/>
+  <text class="d-txt d-small d-fg-bad" x="300" y="58">0 (false)</text>
+  <rect class="d-box-code" x="424" y="44" width="206" height="44" rx="8"/>
+  <text class="d-txt d-small" x="436" y="71">3. Go on after the loop</text>
+
+  <text class="d-txt d-bold" x="10" y="250">x at each check:</text>
+  <text class="d-txt d-mono d-small" x="10" y="274">50 100 150 200 250 300 350</text>
+  <text class="d-txt d-small d-fg-ok" x="10" y="292">true: a stripe is printed</text>
+  <text class="d-txt d-mono d-small d-fg-bad" x="300" y="274">400</text>
+  <text class="d-txt d-small d-fg-bad" x="300" y="292">false: the loop ends</text>
+</svg>

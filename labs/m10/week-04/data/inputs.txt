@@ -1,0 +1,5 @@
+set wireName CLK
+set wireWidth 2
+set minWidth 3
+set minSpace 2
+set channelWidth 20

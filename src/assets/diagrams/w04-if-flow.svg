@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 330">
+  <defs><marker id="w04-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <rect class="d-box-code" x="150" y="10" width="340" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="320" y="36" text-anchor="middle">if {$wireWidth &gt;= $minWidth}</text>
+  <line class="d-arrow" x1="320" y1="50" x2="320" y2="72" marker-end="url(#w04-arrow1)"/>
+
+  <polygon class="d-box-info" points="320,76 450,116 320,156 190,116"/>
+  <text class="d-txt d-small" x="320" y="112" text-anchor="middle">expr works out the</text>
+  <text class="d-txt d-small" x="320" y="130" text-anchor="middle">condition: 1 or 0?</text>
+
+  <line class="d-arrow" x1="190" y1="116" x2="120" y2="116"/>
+  <line class="d-arrow" x1="120" y1="116" x2="120" y2="182" marker-end="url(#w04-arrow1)"/>
+  <text class="d-txt d-small d-fg-ok" x="128" y="106">1 (true)</text>
+  <line class="d-arrow" x1="450" y1="116" x2="520" y2="116"/>
+  <line class="d-arrow" x1="520" y1="116" x2="520" y2="182" marker-end="url(#w04-arrow1)"/>
+  <text class="d-txt d-small d-fg-bad" x="458" y="106">0 (false)</text>
+
+  <rect class="d-box-ok" x="10" y="186" width="250" height="58" rx="6"/>
+  <text class="d-txt d-small" x="20" y="206">first body, in braces</text>
+  <text class="d-txt d-mono" x="20" y="230">puts "Wire OK"</text>
+  <rect class="d-box-bad" x="380" y="186" width="250" height="58" rx="6"/>
+  <text class="d-txt d-small" x="390" y="206">else body, in braces</text>
+  <text class="d-txt d-mono" x="390" y="230">puts "Wire TOO NARROW"</text>
+
+  <line class="d-arrow" x1="135" y1="244" x2="300" y2="276" marker-end="url(#w04-arrow1)"/>
+  <line class="d-arrow" x1="505" y1="244" x2="340" y2="276" marker-end="url(#w04-arrow1)"/>
+  <rect class="d-box-code" x="200" y="280" width="240" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="320" y="306" text-anchor="middle">puts "Check done"</text>
+  <text class="d-txt d-small d-muted" x="10" y="300">Exactly one body runs.</text>
+  <text class="d-txt d-small d-muted" x="10" y="318">Then the script goes on.</text>
+</svg>

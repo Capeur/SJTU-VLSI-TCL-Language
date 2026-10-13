@@ -1,14 +1,21 @@
 ---
-title: "Week 5 Lesson B"
+title: "foreach and lappend: walk and grow a list"
+description: "Week 5, Lesson B: visiting every element with foreach, taking several elements per pass, and building a list with lappend."
 milestone: "m10"
 week: 5
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Visit every element of a list with foreach
+  - Walk a list several elements at a time with foreach {a b c}
+  - Build a list one element at a time with lappend
+prerequisites: ["m10-w05-a"]
+glossary: [loop-variable, list, element]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Adding and deleting members of a list", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl15.html" }
+  - { title: "Tcl manual page: foreach", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/foreach.htm" }
+  - { title: "Tcl manual page: lappend", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lappend.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,218 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 5 (Lists I) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · foreach + diagram + worked example 1 + playground 8 ·
+    predict 3 · several variables + diagram + playground 5 · lappend + worked example 2 5 · faded 4 ·
+    traps 4 · exit quiz 4 · cheat card 1 = 40 min. The block table is a FLAT list of name/width/height
+    (nested lists are Week 6). */}
+
+<LessonMeta milestone="m10" week={5} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+The M10 capstone, the Mini Floorplan Checker, must check every block of {chip.name}. With lindex you could write five lines, one per block, but a chip with 500 blocks would need 500 lines. The command `foreach` visits every element of a list for you, however long the list is. A second command, `lappend`, builds a new list as you go: for example, the list of blocks that break a rule.
+
+<ChipMap caption={`The ${chip.name} floorplan. A foreach loop can visit all ${chip.blocks.length} blocks, one per pass, with the same few lines of code.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Visit every element of a list with foreach', 'Walk a list several elements at a time with foreach {a b c}', 'Build a list one element at a time with lappend']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 4, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w05" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04']} mode="warmup" count={3} mix={1 / 3} />
+
+## foreach: visit every item
+
+`foreach layer $layers {body}` runs the body once for every element of the list. On each pass, it first puts the next element in the <GlossaryTerm term="loop-variable">loop variable</GlossaryTerm>, here `layer`. When the list runs out, the loop ends.
+
+foreach is a loop, like while, but simpler: there is no condition and no incr to forget. It cannot run forever, because every list has an end. You can still keep a counter of your own, like `number` below, when you need one.
+
+<Diagram name="w05-foreach" alt="The list of layers drawn as boxes: ACTIVE, POLY, CONTACT, METAL1 and 3 more. An arrow goes from each box to one pass of the loop: pass 1, layer equals ACTIVE; pass 2, layer equals POLY; pass 3, layer equals CONTACT. On every pass, foreach puts the next element in the loop variable, then runs the body. After the last element, the loop ends: no counter and no condition are needed." />
+
+<WorkedExample
+  code={`set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+set number 1
+foreach layer $layers {
+    puts "Layer $number: $layer"
+    incr number
+}`}
+  notes={{
+    1: 'The seven layers of Lumen-1, from the bottom of the chip to the top.',
+    2: 'Our own counter, to number the lines. foreach does not need it.',
+    3: 'The loop variable is layer. On pass 1 it holds ACTIVE, on pass 2 POLY, and so on.',
+    4: 'Output on pass 1: Layer 1: ACTIVE',
+    5: 'The counter goes up by one on every pass.',
+    6: 'After pass 7, with TEXT, the list has run out, so the loop ends. Last line: Layer 7: TEXT'
+  }}
+/>
+
+<TclPlayground client:visible code={`set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+set number 1
+foreach layer $layers {
+    puts "Layer $number: $layer"
+    incr number
+}`} />
+
+## Predict → Run → Explain
+
+The widths of the five blocks, in µm, with an if inside the loop. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set widths {200 140 120 100 100}
+set total 0
+foreach width $widths {
+    if {$width > 110} {
+        incr total $width
+    }
+}
+puts $total`}
+  expected={`460`}
+  explanation="The loop variable width takes 200, 140, 120, 100 and 100, one per pass. The if runs on every pass, but only 200, 140 and 120 are more than 110, so total becomes 200 + 140 + 120 = 460. The two blocks of 100 µm are skipped."
+/>
+
+## Several variables at once
+
+Give foreach a list of variable names in braces, and it takes that many elements on every pass. Here is a table of block sizes as one flat list, where every three elements belong together: a name, a width and a height.
+
+`foreach {name width height} $blockSizes {…}` takes CORE, 200 and 160 on the first pass, then SRAM, 140 and 160, and so on. Check that the list length is a multiple of the number of variables: 15 elements and 3 variables give 5 passes.
+
+<Diagram name="w05-foreach-groups" alt="foreach with three loop variables, name, width and height, over a flat list of block sizes. The list is cut into groups of three: CORE 200 160, SRAM 140 160, ADC 120 80, and so on. Pass 1 sets name to CORE, width to 200 and height to 160; pass 2, SRAM, 140, 160; pass 3, ADC, 120, 80. 15 elements, 3 per pass: 5 passes, one per block." />
+
+<TclPlayground client:visible code={`set blockSizes {CORE 200 160 SRAM 140 160 ADC 120 80 SENSOR 100 80 PADS 100 80}
+foreach {name width height} $blockSizes {
+    puts "$name: [expr {$width * $height}] um2"
+}`} />
+
+## lappend: grow a list
+
+`lappend tall CORE` adds CORE to the end of the list in the variable `tall`. Like `set` and `incr`, lappend takes the variable's name, with no `$`, because it changes what is in the box. If the variable does not exist yet, lappend creates it.
+
+The usual pattern: start with an empty list, `set tall {}`, then lappend inside a loop whenever you find something. After the loop, llength tells you how many you found.
+
+<WorkedExample
+  code={`set blockSizes {CORE 200 160 SRAM 140 160 ADC 120 80 SENSOR 100 80 PADS 100 80}
+set tall {}
+foreach {name width height} $blockSizes {
+    if {$height > 100} {
+        lappend tall $name
+    }
+}
+puts "Tall blocks: $tall"
+puts "Count: [llength $tall]"`}
+  notes={{
+    1: 'Each block as name, width, height, all in one flat list.',
+    2: 'An empty list, ready to collect names.',
+    3: 'Three loop variables, so each pass takes one block: 5 passes.',
+    4: 'Is this block more than 100 µm tall?',
+    5: 'If so, add its name to the end of tall. No $ before tall: lappend needs the name.',
+    6: 'The end of the if.',
+    7: 'The end of the loop. Only CORE and SRAM are 160 µm tall; the others are 80.',
+    8: 'Output: Tall blocks: CORE SRAM',
+    9: 'Output: Count: 2'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`set blocks {CORE SRAM ADC}
+set signs {}
+# Must make signs hold: CORE-sign SRAM-sign ADC-sign
+___1___ block $blocks {
+    lappend ___2___ "$block-sign"
+}
+puts $signs
+# Must print: CORE is 200 wide, then: SRAM is 140 wide
+foreach {name ___3___} {CORE 200 SRAM 140} {
+    puts "$name is $width wide"
+}`}
+  answers={[['foreach'], ['signs'], ['width']]}
+  hints={['Which command visits every element of a list?', 'lappend needs the NAME of the list variable, without a $.', 'The body uses two loop variables: name and one more. Which one?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set tall {}
+lappend $tall CORE
+puts "Tall: $tall"`}
+  output={`Tall:`}
+  fix={`set tall {}
+lappend tall CORE
+puts "Tall: $tall"`}
+  why="lappend needs the variable's name. With $tall, Tcl first replaces it with its value, the empty list, so lappend adds CORE to a variable with an empty name, and tall never changes. No error appears, so always check your output."
+/>
+
+<Trap
+  wrong={`set blocks {CORE SRAM ADC}
+foreach block blocks {
+    puts "Block: $block"
+}`}
+  output={`Block: blocks`}
+  fix={`set blocks {CORE SRAM ADC}
+foreach block $blocks {
+    puts "Block: $block"
+}`}
+  why="Without the $, foreach walks through the word blocks itself: a list with one element. So the body runs once, with the word blocks. foreach needs the list's value: $blocks."
+/>
+
+<Trap
+  wrong={`foreach {name width height} {CORE 200 160 SRAM 140} {
+    puts "$name is $width by $height um"
+}`}
+  output={`CORE is 200 by 160 um
+SRAM is 140 by  um`}
+  fix={`foreach {name width height} {CORE 200 160 SRAM 140 160} {
+    puts "$name is $width by $height um"
+}`}
+  why="foreach takes three elements per pass, but the list has only five. On the second pass there is nothing left for height, so it is empty, and no error appears. Check that the list length is a multiple of the number of loop variables."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w05" lesson="b" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="foreach and lappend" lines={[
+  'foreach item $list {body}         run the body once per element',
+  'foreach {name w h} $list {body}   take 3 elements per pass',
+  'foreach always ends: no condition, no incr to forget',
+  'set found {}            start with an empty list',
+  'lappend found CORE      add to the end (the name, no $)',
+  'llength $found          how many you collected',
+  'Several variables? The list length must be a multiple of their number',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Adding and deleting members of a list (lappend and more)', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl15.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: foreach, including several loop variables', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/foreach.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: lappend', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/lappend.htm', kind: 'tcl-man' },
+]} />

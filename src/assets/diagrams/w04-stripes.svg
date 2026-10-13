@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 330">
+  <!-- Lumen-1, 400 by 300 um, at 1.4 px per um; origin (0,0) bottom-left at (40,280) -->
+  <text class="d-txt d-bold" x="40" y="22">Lumen-1 seen from above: METAL2 power stripes, one every 50 µm</text>
+  <rect class="d-chip" x="40" y="40" width="560" height="240" rx="3"/>
+  <rect class="d-box-info" x="106.5" y="40" width="7" height="240"/>
+  <rect class="d-box-info" x="176.5" y="40" width="7" height="240"/>
+  <rect class="d-box-info" x="246.5" y="40" width="7" height="240"/>
+  <rect class="d-box-info" x="316.5" y="40" width="7" height="240"/>
+  <rect class="d-box-info" x="386.5" y="40" width="7" height="240"/>
+  <rect class="d-box-info" x="456.5" y="40" width="7" height="240"/>
+  <rect class="d-box-info" x="526.5" y="40" width="7" height="240"/>
+  <text class="d-txt d-small" x="110" y="298" text-anchor="middle">50</text>
+  <text class="d-txt d-small" x="180" y="298" text-anchor="middle">100</text>
+  <text class="d-txt d-small" x="250" y="298" text-anchor="middle">150</text>
+  <text class="d-txt d-small" x="320" y="298" text-anchor="middle">200</text>
+  <text class="d-txt d-small" x="390" y="298" text-anchor="middle">250</text>
+  <text class="d-txt d-small" x="460" y="298" text-anchor="middle">300</text>
+  <text class="d-txt d-small" x="530" y="298" text-anchor="middle">350</text>
+  <text class="d-txt d-small" x="40" y="298" text-anchor="middle">0</text>
+  <text class="d-txt d-small" x="600" y="298" text-anchor="middle">400</text>
+  <text class="d-txt d-small d-muted" x="320" y="320" text-anchor="middle">x in µm: 7 stripes, from x = 50 to x = 350; none at 0 or 400, the chip's edges</text>
+  <line class="d-ink" x1="110" y1="160" x2="180" y2="160"/>
+  <line class="d-ink" x1="110" y1="152" x2="110" y2="168"/>
+  <line class="d-ink" x1="180" y1="152" x2="180" y2="168"/>
+  <rect class="d-box-code" x="115" y="116" width="60" height="26" rx="4"/>
+  <text class="d-txt d-small" x="145" y="134" text-anchor="middle">50 µm</text>
+</svg>
