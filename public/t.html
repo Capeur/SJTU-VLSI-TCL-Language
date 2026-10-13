@@ -1,6 +1,0 @@
-<pre id=o></pre><script>
-const w=new Worker('/SJTU-VLSI-TCL-Language/wacl/worker.js');let n=0;
-const log=m=>document.getElementById('o').textContent+=JSON.stringify(m)+'\n';
-w.onmessage=e=>{log(e.data);if(e.data.ready){w.postMessage({id:1,code:'puts "hi [info patchlevel]"; set x 5; puts {x is $x}; dict create a 1; lmap i {1 2 3} {expr {$i*2}}'});w.postMessage({id:2,code:'error boom'});w.postMessage({id:3,code:'puts [try {expr {1/0}} on error m {set m}]'});}};
-w.onerror=e=>log('ERR '+e.message);
-</script>

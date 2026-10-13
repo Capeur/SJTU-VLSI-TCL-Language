@@ -21,6 +21,7 @@
   --c-info-bg: #e6f0fb; --c-info-fg: #124a85; --c-info-border: #2f6db5;
   --c-code-bg: #f3f4f6; --c-code-fg: #1b1f24;
   --c-focus: #1a5fd0;
+  --c-primary-bg: #1a4fa0; --c-primary-fg: #ffffff;
 }
 :root[data-theme='dark'] {
   --c-ok-bg: #12301f; --c-ok-fg: #8be0ae; --c-ok-border: #3da86a;
@@ -29,4 +30,5 @@
   --c-info-bg: #12263d; --c-info-fg: #a9cdf7; --c-info-border: #4c8ad6;
   --c-code-bg: #161b22; --c-code-fg: #e6edf3;
   --c-focus: #7fb0ff;
+  --c-primary-bg: #8ab4ff; --c-primary-fg: #08152b;
 }

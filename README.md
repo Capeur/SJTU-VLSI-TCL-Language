@@ -2,7 +2,7 @@
 
 A free, static, open-source 40-week course (~3 h/week) that takes a complete beginner from **Tcl** to **VLSI layout scripting** in the style of Calibre DESIGNrev, using **DRV-Lite** (a teaching simulator written in pure Tcl) and **KLayout**. No commercial licence needed.
 
-> **Status:** Phase P0 (foundation). The site structure for all 40 weeks exists; lesson content arrives in later phases. See `PRD.md` §17.
+> **Status:** Phase P1 (core components). Try them all on `/demo/`. Lesson content arrives in later phases. See `PRD.md` §17.
 
 > DRV-Lite is an independent educational simulator. It is not affiliated with, endorsed by, or a replacement for Siemens EDA Calibre®. Calibre and DESIGNrev are trademarks of Siemens. Command forms marked ⚠️ are approximations for learning.
 
@@ -12,6 +12,7 @@ npm ci
 npm run dev        # http://localhost:4321/SJTU-VLSI-TCL-Language/
 npm run build      # also validates internal links
 npm run preview
+npm test           # validate quizzes/glossary + run snippets on the local tclsh
 ```
 Requires Node 20+ (developed on Node 24).
 

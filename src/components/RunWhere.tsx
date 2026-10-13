@@ -1,11 +1,13 @@
 import { useState, useRef } from 'preact/hooks';
 import TclPlayground from './TclPlayground';
 import { hostFeatureProblem } from '../lib/tclRuntime';
+import { useUid } from './useUid';
 
 interface Props { code: string; filename?: string; }
 
 /** Tabs: Playground / Terminal. The Playground tab is disabled when the code needs the real machine. */
 export default function RunWhere({ code, filename = 'script.tcl' }: Props) {
+    const uid = useUid('rw');
     const problem = hostFeatureProblem(code);
     const tabs = [
         { id: 'playground', label: 'Playground', disabled: problem !== null },
@@ -25,12 +27,12 @@ export default function RunWhere({ code, filename = 'script.tcl' }: Props) {
     };
 
     return (
-        <section class="tc-box tc-tabs" aria-label="Where to run this">
+        <section class="tc-box tc-tabs" aria-label={`Where to run ${filename}`}>
             <p class="tc-title">Where to run this</p>
             <div role="tablist" aria-label="Where to run this">
                 {tabs.map((tab, i) => (
                     <button
-                        type="button" role="tab" id={`rw-tab-${tab.id}`} aria-controls={`rw-panel-${tab.id}`}
+                        type="button" role="tab" id={`${uid}-tab-${tab.id}`} aria-controls={`${uid}-panel-${tab.id}`}
                         aria-selected={active === tab.id} aria-disabled={tab.disabled}
                         tabIndex={active === tab.id ? 0 : -1}
                         ref={(el) => { refs.current[tab.id] = el; }}
@@ -41,10 +43,10 @@ export default function RunWhere({ code, filename = 'script.tcl' }: Props) {
             </div>
             {problem && <p class="tc-feedback tc-warn" role="note">This code {problem}, so it cannot run in the browser. Use the Terminal tab.</p>}
             {active === 'playground' && !problem && (
-                <div role="tabpanel" id="rw-panel-playground" aria-labelledby="rw-tab-playground"><TclPlayground code={code} /></div>
+                <div role="tabpanel" id={`${uid}-panel-playground`} aria-labelledby={`${uid}-tab-playground`}><TclPlayground code={code} /></div>
             )}
             {active === 'terminal' && (
-                <div role="tabpanel" id="rw-panel-terminal" aria-labelledby="rw-tab-terminal">
+                <div role="tabpanel" id={`${uid}-panel-terminal`} aria-labelledby={`${uid}-tab-terminal`}>
                     <p>Save this as <code>{filename}</code>, then run <code>tclsh {filename}</code> in a terminal.</p>
                     <pre class="tc-code" tabindex={0}>{code}</pre>
                 </div>

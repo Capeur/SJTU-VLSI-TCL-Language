@@ -7,7 +7,7 @@
 .tc-btn { font: inherit; font-size: 0.875rem; padding: 0.35rem 0.9rem; border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg); color: var(--sl-color-text); cursor: pointer; }
 .tc-btn:hover:not(:disabled) { background: var(--sl-color-gray-6); }
 .tc-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.tc-btn.primary { background: var(--sl-color-accent); color: var(--sl-color-black); border-color: var(--sl-color-accent); font-weight: 600; }
+.tc-btn.primary { background: var(--c-primary-bg); color: var(--c-primary-fg); border-color: var(--c-primary-bg); font-weight: 600; }
 .tc-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0; }
 .tc-input, .tc-textarea { font-family: var(--sl-font-mono); font-size: 0.875rem; background: var(--sl-color-bg); color: var(--sl-color-text); border: 1px solid var(--sl-color-gray-4); border-radius: 0.35rem; padding: 0.3rem 0.5rem; }
 .tc-textarea { width: 100%; min-height: 7rem; resize: vertical; box-sizing: border-box; tab-size: 4; }

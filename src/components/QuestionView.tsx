@@ -1,4 +1,5 @@
 import { useState } from 'preact/hooks';
+import { useUid } from './useUid';
 import { grade, answerText, shuffle, type Question, type Response } from './quizLogic';
 
 interface Props {
@@ -24,7 +25,7 @@ export default function QuestionView({ question: q, onAnswered, locked = false }
     });
     const [result, setResult] = useState<boolean | null>(null);
     const done = result !== null;
-    const uid = q.id;
+    const uid = useUid(q.id);
 
     const submit = () => {
         const value: Response = q.type === 'order-steps' ? order : response;

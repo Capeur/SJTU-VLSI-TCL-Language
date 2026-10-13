@@ -12,6 +12,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - name: Validate quiz banks + glossary (predict-output answers checked against tclsh)
+        run: |
+          sudo apt-get update && sudo apt-get install -y tcl8.6
+          TCLSH=tclsh8.6 npm run validate
       - name: Build (includes content schema + internal link validation)
         run: npm run build
 
@@ -22,6 +26,9 @@ jobs:
         tcl: ['8.6', '9.0']
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
       - name: Install Tcl ${{ matrix.tcl }}
         run: |
           if [ "${{ matrix.tcl }}" = "8.6" ]; then
@@ -38,10 +45,13 @@ jobs:
           fi
       - name: Report Tcl version
         run: echo 'puts [info patchlevel]' | $TCLSH
-      # The steps below start working when the scripts/tests land (P1 and P5); they skip until then.
-      - name: Snippet tests
-        run: |
-          if [ -f scripts/run-snippets.tcl ]; then $TCLSH scripts/run-snippets.tcl; else echo "::notice::snippet runner not yet added (P1)"; fi
+      - name: Validate quizzes with this Tcl version
+        run: TCLSH=$TCLSH npm run validate
+      - name: Extract snippets
+        run: npm run snippets:extract
+      - name: Snippet tests (stdout compared exactly)
+        run: $TCLSH scripts/run-snippets.tcl
+      # DRV-Lite tests start working when the engine lands (P5); they skip until then.
       - name: DRV-Lite tests
         run: |
           if ls drvlite/tests/*.test >/dev/null 2>&1; then

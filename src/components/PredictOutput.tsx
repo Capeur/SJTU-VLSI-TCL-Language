@@ -1,11 +1,13 @@
 import { useState } from 'preact/hooks';
 import { useTclRun, TIMEOUT_MESSAGE } from './useTclRun';
 import { normaliseOutput } from '../lib/tclRuntime';
+import { useUid } from './useUid';
 
 interface Props { code: string; expected: string; explanation: string; }
 
 /** Predict → Run → Explain. Run stays locked until the learner has typed a prediction. */
 export default function PredictOutput({ code, expected, explanation }: Props) {
+    const uid = useUid('po');
     const [guess, setGuess] = useState('');
     const state = useTclRun();
     const busy = state.phase === 'loading' || state.phase === 'running';
@@ -17,8 +19,8 @@ export default function PredictOutput({ code, expected, explanation }: Props) {
             <p class="tc-title">Predict → Run → Explain</p>
             <p>Read the code. What will it print? Type your prediction before you run it.</p>
             <pre class="tc-code" tabindex={0}>{code}</pre>
-            <label for="po-guess"><strong>Your prediction</strong></label>
-            <textarea id="po-guess" class="tc-textarea" style="min-height:3.5rem" spellcheck={false} value={guess}
+            <label for={`${uid}-guess`}><strong>Your prediction</strong></label>
+            <textarea id={`${uid}-guess`} class="tc-textarea" style="min-height:3.5rem" spellcheck={false} value={guess}
                 onInput={(e) => setGuess((e.target as HTMLTextAreaElement).value)} />
             <div class="tc-row">
                 <button type="button" class="tc-btn primary" disabled={busy || guess.trim() === ''} onClick={() => state.run(code)}>▶ Run</button>

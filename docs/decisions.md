@@ -11,3 +11,25 @@
 | 2026-10-13 | Used Astro 7 + Starlight 0.42 (latest at scaffold time) with `@astrojs/markdown-remark` for KaTeX plugins | Required by Astro 7 for remark/rehype plugins |
 | 2026-10-13 | CI placeholders for snippet/quiz/DRV-Lite tests skip when scripts are absent | Those scripts arrive in P1/P5 |
 | 2026-10-13 | `.lyp` palette file not created in P0 | PRD assigns it to P5; `src/styles/layers.ts` holds the palette meanwhile |
+| 2026-10-13 | Preact (via `@astrojs/preact`) for stateful islands; static pieces are plain Astro components | Small bundles; the demo page with every component hydrated is ~140 KB raw / 49 KB gzip JS (excluding Wacl) |
+| 2026-10-13 | Wacl runs inside a Web Worker (`public/wacl/worker.js`); on timeout the worker is terminated and recreated on the next run | A busy loop in the main thread cannot be interrupted; killing a worker can. Cost: a timeout loses interpreter state and the next Run reloads Wacl |
+| 2026-10-13 | `worker.js` loads Wacl's text and removes `delete window.Module;` with `define`/`require` shims | Wacl is a 2017 AMD bundle needing `window`; patching at load keeps the vendored file untouched |
+| 2026-10-13 | Each run is isolated by deleting globals, procs and namespaces that were not present at start-up | Playgrounds on one page share a single interpreter (one Wacl download); this stops variable leaks between runs |
+| 2026-10-13 | Playground shows stdout, stderr and the Tcl error; the last command's result is not echoed | Matches `tclsh script.tcl`, so snippet tests and the browser agree. Known Wacl limit: output is line-buffered, so `puts -nonewline` text appears only after the next newline |
+| 2026-10-13 | `stdin` prop is exposed to Tcl as the variable `stdinText`; `gets stdin` is not supported in the browser | Wacl has no interactive stdin. `RunWhere` disables the Playground tab for code using `gets stdin` |
+| 2026-10-13 | `drvlite` prop on `TclPlayground` is accepted but does nothing until P5 | DRV-Lite does not exist yet |
+| 2026-10-13 | `RealCalibre` and `ChipScience` are not built in P1 | P1 phase list in PRD §17 omits them; P5 lists them |
+| 2026-10-13 | `PredictOutput` runs code itself (shares the hook with `TclPlayground`) instead of embedding a playground | Simpler, one text area less; behaviour matches §7 |
+| 2026-10-13 | Code in components is shown as plain monospace text (no Tcl syntax colours) | Expressive Code highlights only Markdown fences; adding Shiki to islands would cost bundle size. Revisit in P9 |
+| 2026-10-13 | Quiz banks and glossary are read directly from YAML by `src/lib/content.mjs` (zod schemas), not Astro content collections | One loader shared by the site and by Node scripts (`validate-quizzes`, `extract-snippets`) |
+| 2026-10-13 | Quiz `mix` = share of questions from the current lesson; `bank` = current bank(s), `earlier` = banks of earlier weeks, `lesson` filters the current bank | PRD §7 leaves `mix` open. Warm-up defaults: 3 earlier questions; exit: 4 current; weekly: 10, 80 % current; exam: 20, 50 % |
+| 2026-10-13 | Question types need extra fields: `choices` (mcq, multi-select), `steps` in correct order (order-steps), 1-based line number as `answer` (find-the-bug), list of accepted answers where `/regex/` strings are patterns (fill-blank) | PRD §8.2 only shows predict-output |
+| 2026-10-13 | Leitner cards: wrong answer → box 1 due now; correct review → next box (due after 1/3/7/14/30 days); quiz items with `review: true` enter box 1 when first answered or when `Flashcards` loads | Matches PRD §7. Boxes cap at 5 |
+| 2026-10-13 | Snippet files: `snippets/<page>/<n>.tcl` + `.expected` + optional `.only` (`8.6`/`9.0`) + optional `.drvlite`; `<VersionNote code86/code90/expect86/expect90>` are extracted as version-only snippets | Implements §15.2 "mismatch fails unless in a VersionNote with per-version outputs". Generated `snippets/*` is git-ignored; CI regenerates it |
+| 2026-10-13 | `tcl run` info-string `expect="…"` uses `\n` for new lines | Allows multi-line expectations on one line; blocks without `expect` only have to run without error |
+| 2026-10-13 | `/demo/` is hidden from sidebar and search, `noindex`, and its cheat card is excluded from `/reference/cheatsheets/` | Test page, not course content |
+| 2026-10-13 | `CheatCard`s are aggregated by scanning MDX at build time (`src/lib/cheatcards.mjs`) | Astro components cannot see each other across pages |
+| 2026-10-13 | Glossary page now renders `src/content/glossary/*.yaml`; a missing `<GlossaryTerm>` entry fails the build | Needed so `#term` anchors exist for the links validator; enforces "every glossary term used is defined" |
+| 2026-10-13 | Demo glossary entries and quiz bank (`demo.yaml`) are placeholders; the Week 3 bank (25 items) arrives in P2 | PRD §8.2 minimum applies to real weekly banks only |
+| 2026-10-13 | Local Tcl 9.0.1 was built from source in the scratchpad to run the 8.6/9.0 snippet tests; CI uses apt or builds 9.0.1 itself | No Tcl 9 package on this machine |
+| 2026-10-13 | `public/favicon.svg` added | Browser console showed a 404 for the default favicon |
