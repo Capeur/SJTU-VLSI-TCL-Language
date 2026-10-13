@@ -1,0 +1,89 @@
+# Week 1 — Hello, chip. SEED BANK written in P2 so Week 3 warm-ups and the weekly quiz have earlier
+# questions. P3 grows it to 25 items when Week 1 is written. Uses only Week 1 ideas: puts, comments,
+# commands as words, set and $.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  - id: m10-w01-q01
+    type: predict-output
+    lesson: a
+    tags: [puts, comments]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      # Print the name of our chip
+      puts Lumen-1
+    answer: "Lumen-1"
+    explanation: >
+      The first line is a comment, so Tcl skips it. puts prints its argument.
+
+  - id: m10-w01-q02
+    type: mcq
+    lesson: a
+    tags: [comments]
+    review: true
+    prompt: "Which line is a comment?"
+    choices: ['# chip passport', 'puts passport', 'set note passport', 'puts "# passport"']
+    answer: '# chip passport'
+    explanation: >
+      A comment starts with # where a command could start. Tcl skips the whole line.
+    distractor_feedback:
+      'puts "# passport"': 'Here # is inside a word given to puts, so it is printed, not skipped.'
+      'puts passport': 'This is a command: it prints passport.'
+      'set note passport': 'This is a command: it stores passport in the variable note.'
+
+  - id: m10-w01-q03
+    type: predict-output
+    lesson: b
+    tags: [set, variables]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set chipWidth 400
+      puts $chipWidth
+    answer: "400"
+    explanation: >
+      set stores 400 in chipWidth. The $ in $chipWidth asks Tcl for the value.
+
+  - id: m10-w01-q04
+    type: mcq
+    lesson: b
+    tags: [commands, words]
+    review: true
+    prompt: "In  set chipWidth 400  which word is the command name?"
+    choices: ['set', 'chipWidth', '400', 'There is no command name']
+    answer: 'set'
+    explanation: >
+      The first word of every command is its name. The other words are its arguments.
+    distractor_feedback:
+      'chipWidth': 'chipWidth is the first argument: the name of the variable to set.'
+      '400': '400 is the second argument: the value to store.'
+      'There is no command name': 'Every command has a name, and it is always the first word.'
+
+  - id: m10-w01-q05
+    type: predict-output
+    lesson: b
+    tags: [set, variables]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set block CORE
+      set block SRAM
+      puts $block
+    answer: "SRAM"
+    explanation: >
+      A variable holds one value at a time. The second set replaces CORE with SRAM.
+
+  - id: m10-w01-q06
+    type: find-the-bug
+    lesson: b
+    tags: [variables, dollar]
+    review: true
+    prompt: "This should print Lumen-1, but it prints chipName. Which line has the bug?"
+    code: |
+      set chipName Lumen-1
+      puts chipName
+    answer: 2
+    explanation: >
+      Without a $, chipName is just a word, so puts prints it. Write puts $chipName to get the value.

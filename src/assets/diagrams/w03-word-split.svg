@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 250">
+  <text class="d-txt d-bold" x="10" y="24">Without grouping</text>
+  <text class="d-txt d-mono" x="10" y="52">puts Hello chip</text>
+  <rect class="d-box-info" x="10" y="66" width="70" height="36" rx="5"/>
+  <text class="d-txt d-mono" x="45" y="89" text-anchor="middle">puts</text>
+  <rect class="d-box-bad" x="92" y="66" width="80" height="36" rx="5"/>
+  <text class="d-txt d-mono" x="132" y="89" text-anchor="middle">Hello</text>
+  <rect class="d-box-bad" x="184" y="66" width="70" height="36" rx="5"/>
+  <text class="d-txt d-mono" x="219" y="89" text-anchor="middle">chip</text>
+  <text class="d-txt" x="272" y="82">3 words. puts thinks Hello is the name</text>
+  <text class="d-txt" x="272" y="101">of a place to print to, and stops with an error.</text>
+
+  <text class="d-txt d-bold" x="10" y="150">With grouping</text>
+  <text class="d-txt d-mono" x="10" y="178">puts "Hello chip"</text>
+  <rect class="d-box-info" x="10" y="192" width="70" height="36" rx="5"/>
+  <text class="d-txt d-mono" x="45" y="215" text-anchor="middle">puts</text>
+  <rect class="d-box-ok" x="92" y="192" width="162" height="36" rx="5"/>
+  <text class="d-txt d-mono" x="173" y="215" text-anchor="middle">Hello chip</text>
+  <text class="d-txt" x="272" y="208">2 words. The quotes glue Hello and chip</text>
+  <text class="d-txt" x="272" y="227">into one word, so puts prints: Hello chip</text>
+</svg>

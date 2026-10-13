@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 330">
+  <text class="d-txt d-mono" x="10" y="24">set w 3</text>
+  <text class="d-txt d-mono" x="10" y="48">puts "Size {$w} is [expr {$w * 2}]"</text>
+
+  <rect class="d-box-info" x="10" y="66" width="620" height="170" rx="8"/>
+  <text class="d-txt d-bold d-fg-info" x="24" y="90">Outer quotes: one word, and $ [ ] \ are substituted inside</text>
+
+  <rect class="d-box-code" x="24" y="106" width="200" height="112" rx="6" stroke-dasharray="6 4"/>
+  <text class="d-txt d-mono d-bold" x="124" y="132" text-anchor="middle">{$w}</text>
+  <text class="d-txt d-small" x="34" y="158">Braces inside quotes are</text>
+  <text class="d-txt d-small" x="34" y="176">just characters. They are</text>
+  <text class="d-txt d-small" x="34" y="194">printed, and $w still</text>
+  <text class="d-txt d-small" x="34" y="212">becomes 3.</text>
+
+  <rect class="d-box-ok" x="240" y="106" width="376" height="112" rx="6"/>
+  <text class="d-txt d-mono d-bold d-fg-ok" x="254" y="132">[expr {$w * 2}]</text>
+  <text class="d-txt d-small" x="254" y="156">[ ] starts a brand-new command, so its words</text>
+  <text class="d-txt d-small" x="254" y="174">are grouped again from scratch.</text>
+  <rect class="d-box-warn" x="254" y="184" width="350" height="26" rx="5"/>
+  <text class="d-txt d-small d-fg-warn" x="264" y="202">{$w * 2} groups again: expr receives $w * 2</text>
+
+  <text class="d-txt" x="10" y="270">Result printed:</text>
+  <text class="d-txt d-mono d-bold" x="130" y="270">Size {3} is 6</text>
+  <text class="d-txt d-small" x="10" y="300">The outer grouping decides what braces mean. Each [ ] gets its own new grouping.</text>
+</svg>

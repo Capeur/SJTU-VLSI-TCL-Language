@@ -2,6 +2,7 @@
 # (trailing whitespace trimmed) with the .expected file (PRD §15.2).
 #   <n>.only     "8.6" or "9.0": run only on that Tcl version (used by <VersionNote>)
 #   <n>.drvlite  preload drvlite/drvlite.tcl (arrives in P5)
+#   <n>.error    the script must FAIL, and its error output must contain this text (used by <Trap>)
 # Usage: tclsh scripts/run-snippets.tcl ?snippetsDir? ?timeoutMs?
 set here [file dirname [file normalize [info script]]]
 set root [file dirname $here]
@@ -72,7 +73,14 @@ foreach file $files {
     if {$status eq "timeout"} {
         incr fail; puts "FAIL $name: timed out after ${timeoutMs} ms"; continue
     }
-    if {[file exists $base.expected]} {
+    if {[file exists $base.error]} {
+        set want [string trim [readFile $base.error]]
+        if {$status ne "error" || [string first $want $output] < 0} {
+            incr fail
+            puts "FAIL $name: expected an error containing [list $want]\n  status: $status\n  received: [list [trimLines $output]]"
+            continue
+        }
+    } elseif {[file exists $base.expected]} {
         set want [trimLines [readFile $base.expected]]
         set got [trimLines $output]
         if {$status ne "ok" || $got ne $want} {

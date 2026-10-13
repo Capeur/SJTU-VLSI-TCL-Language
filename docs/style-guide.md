@@ -16,3 +16,12 @@
 11. **Playground lessons must not use `gets stdin`.** The browser has no keyboard input for a script. Either pass the text with the playground's `stdin` prop and read the Tcl variable `stdinText` (for example `split $stdinText \n`), or mark the snippet as terminal-only with `runs_in: terminal` (page frontmatter, or ` ```tcl run runs_in=terminal ` on one block).
 12. Code that needs the real machine (`exec`, `open` on real files, `glob`, `socket`) is terminal-only too. `<RunWhere>` disables its Playground tab for these automatically.
 13. Every snippet on a page whose frontmatter lists `runs_in: [playground]` (and every M10 page by default) is also run in the real browser engine, Wacl (Tcl 8.6.6), by CI. A snippet that works on your tclsh but fails there is a bug in the lesson. Use only features that exist in Tcl 8.6.6.
+
+## Writing MDX safely (learned in P2)
+
+14. **Put `$`, `{`, `}` and `[ ]` in prose inside inline code.** In MDX, a bare `{` starts a JavaScript expression, and the KaTeX plugin reads `$…$` as maths.
+15. **Code containing backslashes goes in `String.raw`.** In a component prop, write ``code={String.raw`puts "a\tb"`}``. A plain template literal turns `\t` into a real tab before Tcl sees it.
+16. **`<Trap>` takes `error` (the real first line(s) of the error message) or `output` (what the wrong code really prints).** CI runs `wrong` and `fix` on Tcl 8.6, 9.0 and Wacl, and fails if the text does not match.
+17. **A `<TclPlayground>` that is meant to fail declares it:** ``fails={`can not find channel named "Hello"`}``. Every other playground and every `<WorkedExample>` must run without an error.
+18. **Error text that differs between Tcl 8.6 and 9.0 goes in a `<VersionNote>`** with `fails86` / `fails90`.
+19. **Use the chip's facts from `src/data/lumen-1.json`.** In prose write `{chip.name}`. In Tcl code, use the same numbers; `npm run validate` checks `chipName`, `chipWidth`, `chipHeight` and `{NAME x y w h}` blocks.

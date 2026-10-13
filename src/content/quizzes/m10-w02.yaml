@@ -1,0 +1,97 @@
+# Week 2 — Tcl as a calculator. SEED BANK written in P2 so Week 3 warm-ups and the weekly quiz have
+# earlier questions. P3 grows it to 25 items when Week 2 is written. Uses only Week 2 ideas: expr,
+# whole numbers and decimals, the integer-division trap, and [ ] command substitution.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  - id: m10-w02-q01
+    type: predict-output
+    lesson: a
+    tags: [expr, integer-division]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      puts [expr {7 / 2}]
+    answer: "3"
+    explanation: >
+      Dividing two whole numbers gives a whole number in Tcl: the part after the point is dropped.
+
+  - id: m10-w02-q02
+    type: predict-output
+    lesson: a
+    tags: [expr, decimals]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      puts [expr {7 / 2.0}]
+    answer: "3.5"
+    explanation: >
+      When one of the numbers has a decimal point, expr gives a decimal result.
+
+  - id: m10-w02-q03
+    type: mcq
+    lesson: a
+    tags: [expr, integer-division]
+    review: true
+    prompt: "What is the result of  expr {1 / 4}  ?"
+    choices: ['0', '0.25', '4', 'An error']
+    answer: '0'
+    explanation: >
+      1 and 4 are whole numbers, so the division is whole-number division: 0. Write 1 / 4.0 to get 0.25.
+    distractor_feedback:
+      '0.25': 'That needs a decimal number in the division, such as 1 / 4.0.'
+      '4': 'expr divides the first number by the second, not the other way round.'
+      'An error': 'Dividing by 4 is fine. Only dividing by zero gives an error.'
+
+  - id: m10-w02-q04
+    type: predict-output
+    lesson: b
+    tags: [brackets, expr]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set chipWidth 400
+      set half [expr {$chipWidth / 2}]
+      puts $half
+    answer: "200"
+    explanation: >
+      The brackets run expr first. Its result, 200, becomes the value that set stores.
+
+  - id: m10-w02-q05
+    type: predict-output
+    lesson: b
+    tags: [brackets, nesting]
+    review: false
+    prompt: "Brackets inside brackets. What does this print?"
+    code: |
+      puts [expr {[expr {2 + 3}] * 10}]
+    answer: "50"
+    explanation: >
+      The inner brackets run first and give 5. Then the outer expr works out 5 * 10.
+
+  - id: m10-w02-q06
+    type: fill-blank
+    lesson: b
+    tags: [brackets]
+    review: false
+    prompt: 'Fill the blank so area holds the result of the maths:   set area ___expr {400 * 300}]'
+    answer: ['[']
+    explanation: >
+      Square brackets run the command inside them and put its result in its place.
+
+  - id: m10-w02-q07
+    type: find-the-bug
+    lesson: b
+    tags: [brackets, expr]
+    review: true
+    prompt: 'This should print 120000, but Tcl says: invalid command name "400". Which line has the bug?'
+    code: |
+      set chipWidth 400
+      set chipHeight 300
+      set area [$chipWidth * $chipHeight]
+      puts $area
+    answer: 3
+    explanation: >
+      Brackets run a command, and the first word inside them, 400, is not a command. Maths
+      belongs to expr: set area [expr {$chipWidth * $chipHeight}].

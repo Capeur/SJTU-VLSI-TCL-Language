@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 330">
+  <defs><marker id="w03-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="10" y="22">set extra "4 + 1"</text>
+
+  <text class="d-txt d-bold" x="10" y="56">No braces</text>
+  <text class="d-txt d-mono" x="10" y="80">expr $extra * 2</text>
+  <rect class="d-box-code" x="10" y="94" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="20" y="116">Tcl substitutes first. expr receives:</text>
+  <text class="d-txt d-mono" x="20" y="140">4 + 1 * 2</text>
+  <line class="d-arrow" x1="160" y1="152" x2="160" y2="172" marker-end="url(#w03-arrow2)"/>
+  <rect class="d-box-code" x="10" y="176" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="20" y="198">expr reads that again as maths,</text>
+  <text class="d-txt d-small" x="20" y="218">and does * before +: 4 + 2</text>
+  <line class="d-arrow" x1="160" y1="234" x2="160" y2="254" marker-end="url(#w03-arrow2)"/>
+  <rect class="d-box-bad" x="10" y="258" width="300" height="58" rx="6"/>
+  <text class="d-txt d-bold d-fg-bad" x="20" y="282">6</text>
+  <text class="d-txt d-small d-fg-bad" x="20" y="304">A wrong number, and no warning.</text>
+
+  <text class="d-txt d-bold" x="330" y="56">Braces</text>
+  <text class="d-txt d-mono" x="330" y="80">expr {$extra * 2}</text>
+  <rect class="d-box-code" x="330" y="94" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="340" y="116">Braces freeze it. expr receives:</text>
+  <text class="d-txt d-mono" x="340" y="140">$extra * 2</text>
+  <line class="d-arrow" x1="480" y1="152" x2="480" y2="172" marker-end="url(#w03-arrow2)"/>
+  <rect class="d-box-code" x="330" y="176" width="300" height="58" rx="6"/>
+  <text class="d-txt d-small" x="340" y="198">expr looks up $extra itself and gets</text>
+  <text class="d-txt d-small" x="340" y="218">one value: "4 + 1". Not a number!</text>
+  <line class="d-arrow" x1="480" y1="234" x2="480" y2="254" marker-end="url(#w03-arrow2)"/>
+  <rect class="d-box-ok" x="330" y="258" width="300" height="58" rx="6"/>
+  <text class="d-txt d-bold d-fg-ok" x="340" y="282">An error message</text>
+  <text class="d-txt d-small d-fg-ok" x="340" y="304">It tells you the value is wrong.</text>
+</svg>

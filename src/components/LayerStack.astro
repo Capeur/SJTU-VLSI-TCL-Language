@@ -1,0 +1,42 @@
+---
+// "A chip is a city map drawn in layers" (PRD §12.4), drawn with the teaching layer colours
+// from src/styles/layers.ts (PRD §13.3), so diagrams, canvas and KLayout all match.
+import { layers } from '../styles/layers';
+interface Props { caption?: string; }
+const { caption } = Astro.props;
+// Bottom to top, with the city meaning of each layer.
+const stack = [
+  { name: 'ACTIVE', city: 'the ground where the tiny switches (transistors) are built' },
+  { name: 'POLY', city: 'the gates that turn each switch on and off' },
+  { name: 'METAL1', city: 'the local streets that connect neighbours' },
+  { name: 'VIA1', city: 'ramps from the streets up to the highways' },
+  { name: 'METAL2', city: 'the highways that cross the whole chip' },
+];
+const colour = (name: string) => layers.find((l) => l.name === name)!;
+const css = stack.map(({ name }) => {
+  const l = colour(name);
+  return `.d-layer-${name}{fill:${l.light}}:root[data-theme='dark'] .d-layer-${name}{fill:${l.dark}}`;
+}).join('');
+const sheetH = 52;
+const rows = [...stack].reverse(); // draw the top layer first, at the top of the picture
+const alt = 'A chip seen as a city map in five stacked sheets. From the bottom: ' +
+  stack.map((s) => `${s.name}, ${s.city}`).join('; ') + '.';
+---
+<style is:global set:html={css}></style>
+<figure class="tc-diagram">
+  <div role="img" aria-label={alt}>
+    <svg viewBox={`0 0 640 ${rows.length * sheetH + 20}`} aria-hidden="true" focusable="false">
+      {rows.map((s, i) => {
+        const y = 10 + i * sheetH;
+        return (
+          <g>
+            <polygon class={`d-layer-${s.name}`} points={`40,${y + 34} 80,${y + 6} 230,${y + 6} 190,${y + 34}`} opacity="0.85" />
+            <text class="d-txt d-bold d-mono" x="250" y={y + 20}>{s.name}</text>
+            <text class="d-txt d-small" x="250" y={y + 38}>{s.city}</text>
+          </g>
+        );
+      })}
+    </svg>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

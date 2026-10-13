@@ -1,0 +1,65 @@
+{
+  "_comment": "Single source of truth for the course's imaginary chip (PRD §3 P7). Pages import this file for prose and diagrams; scripts/check-chip.mjs checks that Tcl code uses the same facts (chipName, chipWidth, chipHeight, block sizes). Units: micrometres (um). Origin (0,0) = bottom-left corner.",
+  "name": "Lumen-1",
+  "tagline": "a small light-sensor chip that tells a street lamp when to switch on",
+  "width_um": 400,
+  "height_um": 300,
+  "blocks": [
+    {
+      "name": "CORE",
+      "x": 20,
+      "y": 20,
+      "w": 200,
+      "h": 160,
+      "job": "the tiny processor that makes the decisions"
+    },
+    {
+      "name": "SRAM",
+      "x": 240,
+      "y": 20,
+      "w": 140,
+      "h": 160,
+      "job": "the memory that stores light readings",
+      "full_name": "static random-access memory"
+    },
+    {
+      "name": "ADC",
+      "x": 20,
+      "y": 200,
+      "w": 120,
+      "h": 80,
+      "job": "turns the sensor's signal into numbers",
+      "full_name": "analog-to-digital converter"
+    },
+    {
+      "name": "SENSOR",
+      "x": 160,
+      "y": 200,
+      "w": 100,
+      "h": 80,
+      "job": "the light sensor itself"
+    },
+    {
+      "name": "PADS",
+      "x": 280,
+      "y": 200,
+      "w": 100,
+      "h": 80,
+      "job": "the connection points to the outside world"
+    }
+  ],
+  "layers": [
+    "ACTIVE",
+    "POLY",
+    "CONTACT",
+    "METAL1",
+    "VIA1",
+    "METAL2",
+    "TEXT"
+  ],
+  "tcl_names": {
+    "chipName": "name",
+    "chipWidth": "width_um",
+    "chipHeight": "height_um"
+  }
+}

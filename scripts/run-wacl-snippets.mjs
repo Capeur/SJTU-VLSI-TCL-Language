@@ -27,7 +27,7 @@ for (const page of fs.readdirSync(snipDir, { withFileTypes: true }).filter((d) =
         if (read('.runs_in')?.trim() !== 'playground') continue;
         if (read('.only') !== undefined && read('.only').trim() !== '8.6') continue;   // Wacl is Tcl 8.6.6
         if (fs.existsSync(base + '.drvlite')) continue;                                // DRV-Lite arrives in P5
-        jobs.push({ name: `${page.name}/${file}`, code: read('.tcl'), expected: read('.expected') });
+        jobs.push({ name: `${page.name}/${file}`, code: read('.tcl'), expected: read('.expected'), error: read('.error') });
     }
 }
 console.log(`Running ${jobs.length} playground snippet(s) in Wacl (headless Chrome)`);
@@ -67,6 +67,9 @@ for (const job of jobs) {
     const reply = await page.evaluate((code, t) => window.__run(code, t), job.code, TIMEOUT_MS);
     let problem = null;
     if (reply.timedOut) { problem = `timed out after ${TIMEOUT_MS} ms`; await page.evaluate(() => window.__start()); }
+    else if (job.error !== undefined) {
+        if (reply.ok || !reply.error.includes(job.error.trim())) problem = `expected an error containing ${JSON.stringify(job.error.trim())} but Wacl gave ${reply.ok ? 'no error' : JSON.stringify(reply.error.split('\n')[0])}`;
+    }
     else if (!reply.ok) problem = `Tcl error in Wacl: ${reply.error}`;
     else if (job.expected !== undefined && norm(reply.stdout) !== norm(job.expected)) {
         problem = `expected ${JSON.stringify(norm(job.expected))} but Wacl printed ${JSON.stringify(norm(reply.stdout))}`;

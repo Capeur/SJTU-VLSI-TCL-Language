@@ -3,10 +3,18 @@ import TclPlayground from './TclPlayground';
 import { hostFeatureProblem } from '../lib/tclRuntime';
 import { useUid } from './useUid';
 
-interface Props { code: string; filename?: string; }
+interface Props {
+    code: string;
+    filename?: string;
+    /** Lab grader, passed on to TclPlayground (PRD §11). */
+    check?: string;
+    checkId?: string;
+    /** Terminal tab: command to run instead of `tclsh <filename>`, e.g. "tclsh tests/test.tcl". */
+    terminalCommand?: string;
+}
 
 /** Tabs: Playground / Terminal. The Playground tab is disabled when the code needs the real machine. */
-export default function RunWhere({ code, filename = 'script.tcl' }: Props) {
+export default function RunWhere({ code, filename = 'script.tcl', check, checkId, terminalCommand }: Props) {
     const uid = useUid('rw');
     const problem = hostFeatureProblem(code);
     const tabs = [
@@ -43,11 +51,13 @@ export default function RunWhere({ code, filename = 'script.tcl' }: Props) {
             </div>
             {problem && <p class="tc-feedback tc-warn" role="note">This code {problem}, so it cannot run in the browser. Use the Terminal tab.</p>}
             {active === 'playground' && !problem && (
-                <div role="tabpanel" id={`${uid}-panel-playground`} aria-labelledby={`${uid}-tab-playground`}><TclPlayground code={code} /></div>
+                <div role="tabpanel" id={`${uid}-panel-playground`} aria-labelledby={`${uid}-tab-playground`}><TclPlayground code={code} check={check} checkId={checkId} /></div>
             )}
             {active === 'terminal' && (
                 <div role="tabpanel" id={`${uid}-panel-terminal`} aria-labelledby={`${uid}-tab-terminal`}>
-                    <p>Save this as <code>{filename}</code>, then run <code>tclsh {filename}</code> in a terminal.</p>
+                    {terminalCommand
+                        ? <p>In your copy of the lab folder, edit <code>{filename}</code>, then run <code>{terminalCommand}</code> in a terminal in that folder.</p>
+                        : <p>Save this as <code>{filename}</code>, then run <code>tclsh {filename}</code> in a terminal.</p>}
                     <pre class="tc-code" tabindex={0}>{code}</pre>
                 </div>
             )}

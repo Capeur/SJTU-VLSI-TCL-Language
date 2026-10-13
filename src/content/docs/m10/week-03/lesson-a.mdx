@@ -1,14 +1,23 @@
 ---
-title: "Week 3 Lesson A"
+title: "Quotes vs braces"
+description: "Week 3, Lesson A: how double quotes and braces group words, and what each one does to substitution."
 milestone: "m10"
 week: 3
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Predict what a word in double quotes becomes
+  - Predict what a word in braces becomes, even inside [ ]
+  - Choose quotes or braces for a given task
+prerequisites: ["m10-w02-b"]
+glossary: [grouping, double-quotes, braces, literal, word, argument, substitution, command-substitution]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl(n) manual page: the 12 rules of Tcl", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm" }
+  - { title: "Tcl tutorial: Grouping arguments with double quotes", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl3.html" }
+  - { title: "Tcl tutorial: Grouping arguments with braces", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl4.html" }
+  - { title: "Tcl tutorial: Grouping arguments with square brackets", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl5.html" }
+  - { title: "Tcler's Wiki: Dodekalogue", url: "https://wiki.tcl-lang.org/10259" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +25,216 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 3 (The quoting week) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · words and grouping 4 · double quotes 6 ·
+    braces 4 · inside [ ] 5 · faded 3 · predict ×2 4 · traps 3 · exit quiz 4 · cheat card 1 */}
+
+<LessonMeta milestone="m10" week={3} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+{chip.name} is a city map drawn in layers, and every neighbourhood on it needs a sign. Its five <GlossaryTerm term="block">blocks</GlossaryTerm> are about 100 to 200 <GlossaryTerm term="micrometre">µm</GlossaryTerm> across. Your teammate wrote a script to print the signs, but the sign for the processor says `Block $name` instead of `Block CORE`. A single character in the script decided that. This week you learn exactly which character, and why. By the end of the week, you will read any Tcl line the way Tcl reads it.
+
+<ChipMap highlight={['CORE']} caption="The Lumen-1 floorplan. The CORE block (highlighted) is the one with the broken sign." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Predict what a word in double quotes becomes', 'Predict what a word in braces becomes, even inside [ ]', 'Choose quotes or braces for a given task']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 and 2. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w03" earlier={['m10-w01', 'm10-w02']} mode="warmup" />
+
+## Words and grouping
+
+You already know that Tcl cuts every command into <GlossaryTerm term="word">words</GlossaryTerm> at the spaces. The first word is the command name. The other words are its <GlossaryTerm term="argument">arguments</GlossaryTerm>.
+
+That works until a sign needs a space in it. In `puts Hello chip`, puts gets two arguments, `Hello` and `chip`. When puts gets two arguments, it thinks the first one names the place to print to, so it stops with an error.
+
+The fix is <GlossaryTerm term="grouping" />: you tell Tcl that several pieces with spaces between them form one word. Tcl has two ways to group, double quotes and braces. They group in the same way but treat the inside very differently.
+
+<Diagram name="w03-word-split" alt="Two rows of word boxes. Without grouping, puts Hello chip is cut into three words, and puts fails because it takes Hello as the place to print to. With double quotes, puts Hello chip in quotes is cut into two words, and puts prints Hello chip." />
+
+Run this line and read the error. Then put double quotes around `Hello chip` and run it again.
+
+<TclPlayground client:visible code={`puts Hello chip`} fails={`can not find channel named "Hello"`} />
+
+## Double quotes: group, then substitute
+
+<GlossaryTerm term="double-quotes">Double quotes</GlossaryTerm> make one word from everything up to the next quote mark. Inside them, Tcl still does every <GlossaryTerm term="substitution" />: `$name` becomes the variable's value, and `[ ]` runs a command (<GlossaryTerm term="command-substitution" />). The quote marks themselves are not printed.
+
+Use double quotes when your text should contain values, like a sign that shows a block's real name and size.
+
+<WorkedExample
+  code={`set block CORE
+set width 200
+puts "Block $block is $width um wide"
+puts "Half of it: [expr {$width / 2}] um"`}
+  notes={{
+    1: 'set stores CORE in the variable block.',
+    2: 'set stores 200 in width. Lumen-1 measures everything in micrometres, written um in code.',
+    3: 'The quotes make one word. Inside it, $block becomes CORE and $width becomes 200, so puts gets one argument: Block CORE is 200 um wide.',
+    4: 'Inside the quotes, the brackets run expr first. Its result, 100, takes the place of the brackets: Half of it: 100 um.'
+  }}
+/>
+
+Run it and check that the output matches the notes:
+
+<TclPlayground client:visible code={`set block CORE
+set width 200
+puts "Block $block is $width um wide"
+puts "Half of it: [expr {$width / 2}] um"`} />
+
+## Braces freeze everything
+
+<GlossaryTerm term="braces">Braces</GlossaryTerm> also make one word, but nothing inside them changes. A `$` stays a dollar sign, brackets stay brackets. The result is <GlossaryTerm term="literal" /> text, exactly as you typed it.
+
+Use braces when you want text exactly as written: a price with a `$` in it, or a line of Tcl code you want to show. You have used braces since Week 2 in `expr {…}`. They freeze the maths so that expr, not the normal rules, works it out. Lesson B explains why that matters.
+
+Here is the same sign as before, now in braces. Predict the output, then run it:
+
+<TclPlayground client:visible code={`set block CORE
+set width 200
+puts {Block $block is $width um wide}`} />
+
+## Inside [ ], a new command starts
+
+Braces only group when they are the first character of a word. Inside double quotes, a brace is not the start of a word. It is just a character: it gets printed, and `$` next to it is still replaced. **The outer grouping decides.**
+
+Square brackets are different. When Tcl meets `[`, it reads what follows as a brand-new command, up to the matching `]`. That new command is cut into words from scratch, so braces inside the brackets group again. This is why `"[expr {$w * 2}]"` works inside quotes, while `"{$w}"` keeps its braces and still substitutes `$w`.
+
+<Diagram name="w03-outer-grouping" alt="The line puts, quote, Size brace dollar w brace is bracket expr brace dollar w times 2 brace bracket, quote, with w equal to 3. The outer quotes form one word where substitution happens. Inside it, the braces around dollar w are plain characters, so they are printed and dollar w becomes 3. The square brackets start a new command, where the braces group again, so expr receives dollar w times 2. The printed result is Size brace 3 brace is 6." />
+
+<WorkedExample
+  code={`set block CORE
+set width 200
+puts {Block $block, half width [expr {$width / 2}]}
+puts "Block {$block}, half width [expr {$width / 2}]"`}
+  notes={{
+    1: 'The same two variables as before.',
+    2: 'Width of CORE in um.',
+    3: 'Braces on the outside freeze everything, even the brackets. Output: Block $block, half width [expr {$width / 2}]',
+    4: 'Quotes on the outside. The braces around $block are just characters, so the output shows {CORE}. The brackets start a new command, where {$width / 2} is a real braced word for expr. Output: Block {CORE}, half width 100'
+  }}
+/>
+
+<TclPlayground client:visible code={`set block CORE
+set width 200
+puts {Block $block, half width [expr {$width / 2}]}
+puts "Block {$block}, half width [expr {$width / 2}]"`} />
+
+## Faded example
+
+Now you choose. Fill each blank with `"` or `{` so that each sign prints exactly what its comment asks for.
+
+<FadedExample
+  client:visible
+  template={`set block SRAM
+set width 140
+# Sign 1 must say: SRAM is 140 um wide
+puts ___1___$block is $width um wide"
+# Sign 2 must say exactly: Type $block to get the name
+puts ___2___Type $block to get the name}
+# Sign 3 must say: Area: 22400 um2
+puts "Area: [expr ___3___$width * 160}] um2"`}
+  answers={[['"'], ['{'], ['{']]}
+  hints={['Sign 1 needs the real values, so Tcl must substitute.', 'Sign 2 must keep the dollar sign exactly as typed.', 'Inside [ ] a new command starts, so braces group the maths for expr, even inside quotes.']}
+/>
+
+## Predict → Run → Explain
+
+Type your prediction first. The Run button unlocks when you have written something. A wrong prediction is useful: it shows you exactly which idea to fix.
+
+<PredictOutput
+  client:visible
+  code={`set block ADC
+puts "Sign: {$block}"
+puts {Sign: "$block"}`}
+  expected={`Sign: {ADC}
+Sign: "$block"`}
+  explanation="The outer grouping decides. In line 2 the quotes are on the outside, so the braces are only characters and $block becomes ADC. In line 3 the braces are on the outside, so nothing changes and the quote marks are printed too."
+/>
+
+<PredictOutput
+  client:visible
+  code={`set w 3
+puts "{$w} and [expr {$w * 2}]"`}
+  expected={`{3} and 6`}
+  explanation="Both pairs of braces sit inside the quotes, but they behave differently. The first pair is just two characters, so it is printed and $w becomes 3. The second pair is inside [ ], which starts a new command, so it groups $w * 2 into one word for expr, which works out 6."
+/>
+
+## Common traps
+
+Each trap shows the real message Tcl gives. Error messages are your friend: they usually name the exact problem.
+
+<Trap
+  wrong={`set block CORE
+puts "Block $block is ready`}
+  error={`missing "`}
+  fix={`set block CORE
+puts "Block $block is ready"`}
+  why="Every opening quote needs a closing quote. Without it, Tcl keeps reading to the end of the script, looking for the end of the word. The same goes for braces: every { needs a matching }."
+/>
+
+<Trap
+  wrong={`puts "Price: $5 per chip"`}
+  error={`can't read "5": no such variable`}
+  fix={`puts {Price: $5 per chip}`}
+  why="Inside double quotes, $5 asks for a variable named 5, which does not exist. Braces stop substitution, so the dollar sign is printed. Lesson B shows a second fix that works inside quotes."
+/>
+
+<Trap
+  wrong={`set label M1
+puts "Layer "$label" is metal 1"`}
+  error={`extra characters after close-quote`}
+  fix={`set label M1
+puts "Layer $label is metal 1"`}
+  why="A quote only groups at the start of a word, and a closing quote must be followed by a space or the end of the line. Here the second quote closes the word, and Tcl finds $label glued right after it. To print quote marks inside a quoted word, Lesson B shows you how."
+/>
+
+## Exit quiz
+
+Four questions on this lesson. You get feedback right after each answer.
+
+<Quiz bank="m10-w03" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Quotes vs braces" lines={[
+  '"..."   one word; $ [ ] and \\ still work inside',
+  '{...}   one word; nothing inside changes',
+  'Grouping counts only at the start of a word',
+  'The OUTER grouping decides',
+  '{ } inside "..." are just characters',
+  '[ ] starts a new command: braces group again inside it',
+  'Need the values? Use quotes. Need it exact? Use braces.',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl(n) manual page: rules 3, 4, 6 and 7 cover words, quotes, braces and brackets', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm', kind: 'tcl-man' },
+  { title: 'Tcl tutorial: Grouping arguments with double quotes', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl3.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Grouping arguments with braces', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl4.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Grouping arguments with square brackets', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl5.html', kind: 'tutorial' },
+  { title: "Tcler's Wiki: the Dodekalogue (the 12 rules), with discussion", url: 'https://wiki.tcl-lang.org/10259', kind: 'tutorial' },
+]} />

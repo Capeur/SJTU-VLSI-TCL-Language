@@ -1,8 +1,9 @@
 ---
 // Tcl 8.6 vs 9.0 difference (PRD §4, §7). `expect86`/`expect90` are the real outputs; the snippet
 // runner (PRD §15.2) checks each code sample only on the Tcl version it is written for.
-interface Props { since?: string; code86?: string; code90?: string; expect86?: string; expect90?: string; }
-const { since = '9.0', code86, code90, expect86, expect90 } = Astro.props;
+// `fails86`/`fails90` instead: the sample is meant to stop with this error message on that version.
+interface Props { since?: string; code86?: string; code90?: string; expect86?: string; expect90?: string; fails86?: string; fails90?: string; }
+const { since = '9.0', code86, code90, expect86, expect90, fails86, fails90 } = Astro.props;
 ---
 <aside class="tc-box tc-version" aria-label={`Tcl ${since} difference`}>
   <p class="tc-title"><span class="tc-badge tc-info">Tcl {since}+</span> Version note</p>
@@ -11,10 +12,12 @@ const { since = '9.0', code86, code90, expect86, expect90 } = Astro.props;
     <p><strong>Tcl 8.6</strong></p>
     <pre class="tc-code" tabindex="0">{code86}</pre>
     {expect86 !== undefined && <p>Prints: <code>{expect86}</code></p>}
+    {fails86 !== undefined && <p>Tcl says: <code>{fails86}</code></p>}
   </>)}
   {code90 && (<>
     <p><strong>Tcl {since}</strong></p>
     <pre class="tc-code" tabindex="0">{code90}</pre>
     {expect90 !== undefined && <p>Prints: <code>{expect90}</code></p>}
+    {fails90 !== undefined && <p>Tcl says: <code>{fails90}</code></p>}
   </>)}
 </aside>

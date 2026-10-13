@@ -86,7 +86,7 @@ These are product requirements, not suggestions. They come from the research cit
 
 | ID | Requirement | Rationale |
 |---|---|---|
-| P1 | Every lesson opens with a **3-question retrieval warm-up** drawn from *earlier* weeks | Practice testing and distributed practice are the two "high utility" techniques (Dunlosky et al., 2013) |
+| P1 | Every lesson opens with a **3-question retrieval warm-up** drawn from *earlier* weeks; **1 of the 3 may come from an earlier lesson of the same week** (e.g. Lesson B's warm-up may include one Lesson A item) | Practice testing and distributed practice are the two "high utility" techniques (Dunlosky et al., 2013) |
 | P2 | Every concept is taught with a **worked example** first, then a **faded example** (same task with blanks) | Worked-example effect; guidance fading (Sweller) |
 | P3 | **Predict → Run → Explain**: the learner commits to a predicted output *before* running code | Exposes wrong mental models of Tcl substitution immediately |
 | P4 | Every quiz question gives **immediate corrective feedback** (why the right answer is right, and why the chosen wrong answer is wrong) | Practice testing with feedback yields the strongest learning |
@@ -212,15 +212,19 @@ Grouped by milestone and collapsed by default, except the milestone containing t
 
 ### 6.3 Lesson page template (M10 full version)
 
-Sections appear **in this exact order**, each implemented with the components in §7.
+Sections appear **in this order**, each implemented with the components in §7. Two flexibilities (decided in P2, see `docs/decisions.md`):
+- **Concept + worked example (sections 4–5) may repeat** as pairs, one pair per new idea (e.g. 4a→5a, 4b→5b). M10 lessons still have two worked examples in total (§6.6).
+- **Predict → Run → Explain (section 7) may move up** to sit right after the concept it tests, before the faded example.
+
+`scripts/check-lessons.mjs` checks this order in CI.
 
 | # | Section | Component(s) | Rules |
 |---|---|---|---|
 | 0 | Header bar | `<LessonMeta>` | Milestone › Week › Lesson; estimated minutes; progress dots |
 | 1 | Chip Story | `<ChipStory>` | 1 paragraph + 1 image/diagram tying the topic to the imaginary chip |
 | 2 | You will be able to… | `<Goals>` | ≤ 3 goals, each an observable action ("predict the output of…") |
-| 3 | Warm-up | `<Quiz mode="warmup">` | 3 questions from earlier weeks (none in Week 1) |
-| 4 | Concept | prose + 1 diagram | ≤ 150 words between interactive elements; every new term links to the glossary |
+| 3 | Warm-up | `<Quiz mode="warmup">` | 3 questions from earlier weeks, 1 of which may come from an earlier lesson of the same week (none in Week 1 Lesson A) |
+| 4 | Concept | prose + 1 diagram | ≤ 150 words between interactive elements; every new term links to the glossary. May repeat with section 5 as concept/worked pairs |
 | 5 | Worked example | `<WorkedExample>` | Code with numbered, line-by-line annotations |
 | 6 | Faded example | `<FadedExample>` | The same task with 1–3 blanks; instant checking |
 | 7 | Predict → Run → Explain | `<PredictOutput>` + `<TclPlayground>` | Learner types a prediction, then runs; mismatch shows the explanation |

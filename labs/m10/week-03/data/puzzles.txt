@@ -1,0 +1,72 @@
+# Substitution detective: the 15 puzzles of the Week 3 lab.
+# "## " lines name a round. "### " lines start a puzzle: number | what to revisit if you miss it.
+# The grader runs each puzzle to get the real output, so no answers are stored here.
+
+## Round 1: Quotes or braces?
+
+### 1 | Lesson A, "Braces freeze everything"
+set block CORE
+puts "Block: $block"
+puts {Block: $block}
+
+### 2 | Lesson A, "Double quotes: group, then substitute"
+set chipName Lumen-1
+set chipWidth 400
+puts "$chipName is $chipWidth um wide"
+
+### 3 | Lesson A, "Double quotes: group, then substitute"
+set chipWidth 400
+puts "Half width: [expr {$chipWidth / 2}] um"
+
+### 4 | Lesson A, "Braces freeze everything"
+set chipWidth 400
+puts {Half width: [expr {$chipWidth / 2}] um}
+
+### 5 | Lesson A, "Inside [ ], a new command starts"
+set block SRAM
+puts "Name in braces: {$block}"
+
+## Round 2: Backslashes and the rules
+
+### 6 | Lesson B, "Backslash: switch off one character"
+set price 12
+puts "Cost: \$$price per chip"
+
+### 7 | Lesson B, "Backslash: switch off one character"
+set block ADC
+puts "Block \"$block\" is ready"
+
+### 8 | Lesson B, "Backslash: switch off one character"
+puts "Blocks:\nCORE\nSRAM"
+
+### 9 | Lesson B, "The rules in plain words" (one pass only)
+set a {$b}
+set b 7
+puts "a holds $a"
+
+### 10 | Lesson B, "Backslash: switch off one character"
+puts "Command: \[expr {1 + 1}\]"
+
+## Round 3: Mixed cases
+
+### 11 | Lesson A, "Inside [ ], a new command starts"
+set width 200
+set height 160
+puts "CORE area: [expr {$width * $height}] um2"
+
+### 12 | Lesson B, "Always brace your expr"
+set extra "4 + 1"
+puts [expr $extra * 2]
+
+### 13 | Lesson A, "Inside [ ], a new command starts"
+puts "{[expr {2 + 3}]}"
+
+### 14 | Lesson B, "The rules in plain words" (comments)
+puts "# CORE makes the decisions"
+
+### 15 | Lessons A and B
+set chipName Lumen-1
+set chipWidth 400
+set chipHeight 300
+puts "$chipName area: [expr {$chipWidth * $chipHeight}] um2"
+puts {Formula: $chipWidth * $chipHeight}

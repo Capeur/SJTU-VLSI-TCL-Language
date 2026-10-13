@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200">
+  <rect class="d-box-code" x="10" y="10" width="620" height="180" rx="8"/>
+  <text class="d-txt d-bold" x="30" y="40">Lumen-1 block report</text>
+  <text class="d-txt d-mono d-bold" x="30" y="76">Block</text>
+  <text class="d-txt d-mono d-bold" x="170" y="76">Status</text>
+  <text class="d-txt d-mono d-bold" x="330" y="76">Cost</text>
+  <text class="d-txt d-mono" x="30" y="106">"CORE"</text>
+  <text class="d-txt d-mono" x="170" y="106">ready</text>
+  <text class="d-txt d-mono" x="330" y="106">$12</text>
+  <text class="d-txt d-mono" x="30" y="136">"SRAM"</text>
+  <text class="d-txt d-mono" x="170" y="136">ready</text>
+  <text class="d-txt d-mono" x="330" y="136">$9</text>
+  <rect class="d-box-warn" x="420" y="56" width="196" height="96" rx="6"/>
+  <text class="d-txt d-small d-fg-warn" x="432" y="80">Columns need tabs.</text>
+  <text class="d-txt d-small d-fg-warn" x="432" y="102">Names need " marks.</text>
+  <text class="d-txt d-small d-fg-warn" x="432" y="124">Costs need a real $.</text>
+  <text class="d-txt d-small d-fg-warn" x="432" y="146">All three are special!</text>
+</svg>

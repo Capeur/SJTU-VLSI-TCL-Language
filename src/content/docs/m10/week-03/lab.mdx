@@ -1,14 +1,18 @@
 ---
-title: "Week 3 Lab"
+title: "Lab: Substitution detective"
+description: "Week 3 lab: predict the output of 15 short Tcl scripts about Lumen-1, then check your predictions automatically."
 milestone: "m10"
 week: 3
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Predict the exact output of a Tcl line that mixes quotes, braces, brackets and backslashes
+  - Explain each wrong prediction with one of Tcl's rules
+prerequisites: ["m10-w03-a", "m10-w03-b"]
+glossary: [substitution, grouping, braces, double-quotes, backslash-escape]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl(n) manual page: the 12 rules of Tcl", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +20,96 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import LabPuzzles from '../../../../components/LabPuzzles.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lab for week 3 (The quoting week) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={3} lesson="lab" minutes={60} />
+
+## Goal
+
+**Predict the exact output of 15 short scripts about {chip.name}, then let the checker tell you which predictions were right.**
+
+**This lab trains prediction. Predict first, run to check.** Running a puzzle before you predict skips the part that teaches you. A wrong prediction is the most useful thing you can get here, because it shows you exactly which rule to fix.
+
+Why it matters for chips: layout scripts build names, coordinates and commands out of text. One stray `$` or a missing brace puts a wrong shape on the wrong layer, and you may not notice until much later. People who can read a line the way Tcl reads it find those bugs in seconds.
+
+## What you'll practise
+
+- [Lesson A: Quotes vs braces](/SJTU-VLSI-TCL-Language/m10/week-03/lesson-a/): grouping, the outer grouping decides, a new command inside `[ ]`.
+- [Lesson B: Backslashes, the rules, and braced expr](/SJTU-VLSI-TCL-Language/m10/week-03/lesson-b/): `\` escapes, one-pass <GlossaryTerm term="substitution" />, comments, braced `expr`.
+
+## Specification
+
+- **Input:** 15 puzzles in three rounds (below). Each puzzle is a short script that prints something.
+- **Output:** in the starter file, one line per puzzle, `p01` to `p15`. Replace `???` with exactly what you think the puzzle prints.
+- **Write each prediction inside braces.** Braces keep your text exactly as typed, so `$`, `[ ]`, `\` and `"` in your prediction stay as they are. Every puzzle is designed so that its output can be written this way.
+- **Two lines of output?** Put both lines inside the braces, on two lines. Spaces at the start or end of a line, and empty lines before or after your text, are ignored, so you may indent.
+
+**Example.** This script is not one of the 15:
+
+```tcl run expect="Block: PADS"
+set block PADS
+puts "Block: $block"
+```
+
+For it you would write `set p00 {Block: PADS}`, because the quotes allow `$block` to become `PADS`.
+
+## Where to run this
+
+The Playground tab works in your browser. **Check my work** grades all 15 predictions with the same tests as the Terminal version. If you use the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-03/` contains `starter.tcl`, `data/puzzles.txt` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-03" />
+
+Your edits in the playground are not saved when you leave the page. Copy your predictions somewhere safe, or work in the terminal version.
+
+## The 15 puzzles
+
+Read each one slowly. Ask the same three questions every time: Where does each word start and end? What is the outer grouping? Is anything inside `[ ]`?
+
+<LabPuzzles lab="m10/week-03" />
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Look at the first character of each word. Quotes or braces only group when they come first, and the OUTER grouping decides what happens inside.',
+  'Tcl substitutes once, left to right. A value that arrives through substitution is never read again, even if it looks like $name or [command].',
+  'For anything inside [ ], start again: it is a new command, so braces group again. For expr, work out exactly which text expr receives.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per puzzle:
+
+- `PASS`: your prediction is right.
+- `FAIL`: you see what Tcl prints, what you wrote, and which lesson section to revisit.
+- `TODO`: you have not answered that puzzle yet.
+
+The last line is `RESULT: PASS 15/15` when every prediction is right. A result like `RESULT: FAIL 12/15` means 12 are right so far.
+
+For each `FAIL`, write one sentence that names the rule you missed before you change your answer. Fixing the idea matters more than fixing the line.
+
+## Stretch goal: the forger
+
+Now turn it around: write the code. In the playground below, add `puts` lines that print each target exactly. Use the variables, not the typed words, wherever you can.
+
+1. `Lumen-1 costs $3 per chip` (use `$chipName`)
+2. `Type {braces} to freeze $text` (one `puts` line)
+3. `"CORE"` on one line and `"SRAM"` on the next, quote marks included, with a single `puts`
+
+<TclPlayground client:visible code={`set chipName Lumen-1
+# Target 1:
+
+# Target 2:
+
+# Target 3:
+`} />

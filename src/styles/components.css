@@ -48,3 +48,24 @@
 .tc-blank[data-state='bad'] { border-color: var(--c-bad-border); background: var(--c-bad-bg); }
 .tc-order li { margin: 0.25rem 0; }
 @media (max-width: 40rem) { .tc-meta { flex-direction: column; align-items: flex-start; } }
+/* Diagrams (src/assets/diagrams/*.svg, ChipMap): theme-aware classes. */
+.tc-diagram { margin: 1.25rem 0; }
+.tc-diagram svg { width: 100%; height: auto; display: block; }
+.tc-diagram figcaption { font-size: 0.85rem; opacity: 0.85; margin-top: 0.4rem; }
+.tc-diagram .d-txt { fill: var(--sl-color-text); font-family: var(--sl-font, system-ui, sans-serif); font-size: 15px; }
+.tc-diagram .d-mono { font-family: var(--sl-font-mono, ui-monospace, monospace); }
+.tc-diagram .d-small { font-size: 12.5px; }
+.tc-diagram .d-bold { font-weight: 700; }
+.tc-diagram .d-muted { fill: var(--sl-color-gray-3); }
+.tc-diagram .d-ink { stroke: var(--sl-color-text); fill: none; stroke-width: 1.6; }
+.tc-diagram .d-arrow { stroke: var(--sl-color-gray-2); fill: none; stroke-width: 1.8; }
+.tc-diagram .d-chip { fill: var(--c-code-bg); stroke: var(--sl-color-gray-3); stroke-width: 2; }
+.tc-diagram .d-box-info { fill: var(--c-info-bg); stroke: var(--c-info-border); stroke-width: 1.6; }
+.tc-diagram .d-box-ok { fill: var(--c-ok-bg); stroke: var(--c-ok-border); stroke-width: 1.6; }
+.tc-diagram .d-box-warn { fill: var(--c-warn-bg); stroke: var(--c-warn-border); stroke-width: 1.6; }
+.tc-diagram .d-box-bad { fill: var(--c-bad-bg); stroke: var(--c-bad-border); stroke-width: 1.6; }
+.tc-diagram .d-box-code { fill: var(--c-code-bg); stroke: var(--sl-color-gray-4); stroke-width: 1.2; }
+.tc-diagram .d-fg-info { fill: var(--c-info-fg); }
+.tc-diagram .d-fg-ok { fill: var(--c-ok-fg); }
+.tc-diagram .d-fg-warn { fill: var(--c-warn-fg); }
+.tc-diagram .d-fg-bad { fill: var(--c-bad-fg); }

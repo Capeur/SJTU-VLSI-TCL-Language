@@ -1,0 +1,13 @@
+---
+// M10 lab in the browser (PRD §11, §6.4 steps 4–5): "Where to run this" tabs with the lab's
+// starter.tcl. The Playground tab has a "Check my work" button that runs the same tests/checker.tcl
+// as `tclsh tests/test.tcl` in the Terminal tab. Files are read at build time.
+import RunWhere from './RunWhere';
+import { labStarter, labCheckScript } from '../lib/labs.mjs';
+interface Props { lab: string; }   // e.g. "m10/week-03"
+const { lab } = Astro.props;
+const [ms, week] = lab.split('/');
+const checkId = `${ms}-w${week.replace('week-', '')}-lab`;
+---
+<RunWhere client:visible code={labStarter(lab)} filename="starter.tcl" check={labCheckScript(lab)} checkId={checkId} terminalCommand="tclsh tests/test.tcl" />
+<noscript><p>The Check button needs JavaScript. You can also run <code>tclsh tests/test.tcl</code> in the lab folder.</p></noscript>

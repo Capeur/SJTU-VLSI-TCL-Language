@@ -1,10 +1,14 @@
 ---
 title: "Week 3: The quoting week"
+description: "Week 3 overview: double quotes, braces, backslashes and Tcl's 12 rules, in about 3 hours."
 milestone: "m10"
 week: 3
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 180
+goals:
+  - Predict the output of any line that mixes quotes, braces, brackets and backslashes
+  - Use Tcl's rules to explain why a line prints what it prints
+  - Write every expr with braces, and know why
+prerequisites: ["m10-w01-b", "m10-w02-a", "m10-w02-b"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,29 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+This is the most important week of the first milestone. Every script you will write later, including the layout scripts in milestones M30 and M40, depends on knowing what Tcl does to a line before it runs it. That is why quoting gets a whole week.
+
+## This week you will
+
+<Goals items={['Predict the output of any line that mixes quotes, braces, brackets and backslashes', "Use Tcl's rules to explain why a line prints what it prints", 'Write every expr with braces, and know why']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: Quotes vs braces](/SJTU-VLSI-TCL-Language/m10/week-03/lesson-a/) | 40 min | Group words with quotes and braces; see why the outer grouping decides |
+| [Lesson B: Backslashes, the rules, and braced expr](/SJTU-VLSI-TCL-Language/m10/week-03/lesson-b/) | 40 min | Escape characters, read a line with the 12 rules, brace every expr |
+| [Lab: Substitution detective](/SJTU-VLSI-TCL-Language/m10/week-03/lab/) | 60 min | Predict the output of 15 puzzles, then check |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-03/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Review these first
+
+This week builds on three earlier lessons. If any of these feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 1, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-01/lesson-b/): commands are words separated by spaces; `set` and `$`.
+- [Week 2, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-a/): `expr` and the integer-division trap.
+- [Week 2, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-02/lesson-b/): `[ ]` command substitution and nesting.

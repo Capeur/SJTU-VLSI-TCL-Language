@@ -64,10 +64,20 @@ export function readYamlDir(dir) {
     }));
 }
 
+// PRD §0 rule 8: a course bank records who reviewed it. A bank file is either a plain list of
+// questions (demo only) or { ai_assisted, reviewed_by, review_date, questions: [...] }.
+export const bankMetaSchema = z.object({
+    ai_assisted: z.boolean(),
+    reviewed_by: z.string(),
+    review_date: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/),
+});
+
 export function loadQuizBanks() {
-    return readYamlDir('quizzes').map(({ name, data, file }) => ({
-        name, file, questions: (data ?? []).map((q) => questionSchema.parse(q)),
-    }));
+    return readYamlDir('quizzes').map(({ name, data, file }) => {
+        const list = Array.isArray(data) ? data : (data?.questions ?? []);
+        const meta = Array.isArray(data) || !data ? null : bankMetaSchema.parse(data);
+        return { name, file, meta, questions: list.map((q) => questionSchema.parse(q)) };
+    });
 }
 
 export function loadGlossary() {

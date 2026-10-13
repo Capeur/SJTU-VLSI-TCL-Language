@@ -51,6 +51,16 @@ jobs:
         run: npm run snippets:extract
       - name: Snippet tests (stdout compared exactly)
         run: $TCLSH scripts/run-snippets.tcl
+      # The browser "Check" button and its self-test run as snippets above (lab__* pages). This step
+      # checks the terminal wrapper too: on the untouched starter it must print a RESULT line.
+      - name: Lab checkers (terminal wrapper on each starter)
+        run: |
+          for t in labs/*/*/tests/test.tcl; do
+            [ -e "$t" ] || continue
+            out="$($TCLSH "$t" || true)"
+            echo "$out" | tail -1
+            echo "$out" | grep -Eq '^RESULT: (PASS|FAIL) [0-9]+/[0-9]+$' || { echo "::error::$t printed no RESULT line"; exit 1; }
+          done
       # DRV-Lite tests start working when the engine lands (P5); they skip until then.
       - name: DRV-Lite tests
         run: |

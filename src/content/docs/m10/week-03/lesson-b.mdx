@@ -1,14 +1,22 @@
 ---
-title: "Week 3 Lesson B"
+title: "Backslashes, the rules, and braced expr"
+description: "Week 3, Lesson B: backslash escapes, Tcl's 12 rules in plain words, and why expr is always braced."
 milestone: "m10"
 week: 3
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Use a backslash to print $ " [ \ and to write a new line or a tab
+  - Apply Tcl's rules to predict how a line is split and substituted
+  - Explain why expr is always braced, and spot an unbraced one
+prerequisites: ["m10-w03-a"]
+glossary: [backslash-escape, dodekalogue, comment, expression, literal, substitution]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl(n) manual page: the 12 rules of Tcl", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm" }
+  - { title: "Tcler's Wiki: Dodekalogue", url: "https://wiki.tcl-lang.org/10259" }
+  - { title: "Tcler's Wiki: Brace your expr-essions", url: "https://wiki.tcl-lang.org/page/Brace+your+expr-essions" }
+  - { title: "Tcl tutorial: Grouping arguments with double quotes (backslash sequences)", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl3.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,221 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import VersionNote from '../../../../components/VersionNote.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 3 (The quoting week) — content arrives in a later phase.
+{/* Time plan (40 min): story + goals 2 · warm-up 3 · backslash concept 4 · worked example 1 4 ·
+    the rules 5 (12-rule table is optional, "for the curious") · predict 3 · brace expr concept 3 ·
+    worked example 2 + version note 4 · faded 3 · traps 4 · exit quiz 4 · cheat card 1.
+    Backslash-newline lives in the cheat card and the rule table only, to stay within 40 min. */}
+
+<LessonMeta milestone="m10" week={3} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+The {chip.name} team wants a block report: one line per block, lined up in columns, with each name in quote marks and a cost in dollars. Every one of those wishes uses a character that Tcl treats as special. A tab is invisible, a quote mark ends a word, and a dollar sign reads a variable. Today you learn the one character that switches those meanings off: the backslash.
+
+<Diagram name="w03-report" alt="A sample Lumen-1 block report with three columns, Block, Status and Cost. The rows show CORE and SRAM in quote marks, the word ready, and costs of 12 and 9 dollars. A note says the columns need tabs, the names need quote marks and the costs need a real dollar sign, and all three are special characters in Tcl." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Use a backslash to print $ " [ \\ and to write a new line or a tab', "Apply Tcl's rules to predict how a line is split and substituted", 'Explain why expr is always braced, and spot an unbraced one']} />
+
+## Warm-up
+
+Two questions from Weeks 1 and 2, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w03" lesson="a" earlier={['m10-w01', 'm10-w02']} mode="warmup" count={3} mix={1 / 3} />
+
+## Backslash: switch off one character
+
+A <GlossaryTerm term="backslash-escape">backslash</GlossaryTerm> `\` changes the meaning of the character right after it. It has two jobs.
+
+First, it turns a special character into an ordinary one. `\$` is a real dollar sign, so no variable is read. Second, before some letters it makes an invisible character, such as a new line.
+
+| You type | You get |
+|---|---|
+| `\$` | a dollar sign; no variable is read |
+| `\"` | a quote mark that does not end the word |
+| `\[` | a square bracket; no command runs |
+| `\\` | one backslash |
+| `\n` | a new line |
+| `\t` | a tab, which jumps to the next column |
+
+Backslashes work inside double quotes and in plain words. Inside braces they stay exactly as typed, like everything else.
+
+<WorkedExample
+  code={String.raw`set block CORE
+set cost 12
+puts "Block\tCost"
+puts "\"$block\"\t\$$cost"`}
+  notes={{
+    1: 'The block name.',
+    2: 'Its cost, in dollars per chip.',
+    3: 'Each \\t becomes a tab, so the two titles start in different columns.',
+    4: 'Each \\" prints a quote mark without ending the word. $block still becomes CORE. Then \\t is a tab, \\$ prints a real dollar sign, and $cost becomes 12.'
+  }}
+/>
+
+Run it. The columns line up because of the tabs:
+
+<TclPlayground client:visible code={String.raw`set block CORE
+set cost 12
+puts "Block\tCost"
+puts "\"$block\"\t\$$cost"`} />
+
+## The rules in plain words
+
+The whole Tcl language rests on twelve rules, known as the <GlossaryTerm term="dodekalogue" />. You have met most of them already. The diagram puts them together as the five steps Tcl follows for every command.
+
+<Diagram name="w03-read-a-line" alt="A flow of five steps. Step 1: find where the command ends, at a new line or a semicolon; a hash where a command starts begins a comment. Step 2: cut the command into words at the spaces; quotes and braces keep a word together. Step 3, highlighted: substitute dollar names, square-bracket commands and backslashes in each word, left to right, exactly once; nothing inside braces changes; a value that comes in is never read again and never splits a word. Step 4: the first word names the command. Step 5: run the command with the other words; the command decides what they mean. Each step lists the matching rule numbers." />
+
+Step 3 holds the rule that surprises most people: **Tcl substitutes only once.** If a variable's value looks like `$name` or `[command]`, Tcl does not read it a second time. And a value with spaces in it stays one word.
+
+Step 1 explains <GlossaryTerm term="comment">comments</GlossaryTerm>: `#` starts a comment only where a new command could start. To add a note after a command, end the command first with a semicolon: `set width 200 ;# in um`.
+
+<details>
+<summary>For the curious: all 12 rules, one sentence each</summary>
+
+The numbers match the official Tcl(n) manual page (see Further reading). This is a summary in our own words, not the official text.
+
+| # | Rule | In plain words |
+|---|---|---|
+| 1 | Commands | A script is a list of commands, separated by new lines or semicolons, unless those are inside quotes or braces. |
+| 2 | Evaluation | Tcl splits a command into words and substitutes; the first word picks the command, which then decides what the other words mean. |
+| 3 | Words | Words are separated by spaces or tabs. |
+| 4 | Double quotes | A word that starts with `"` ends at the next `"`; inside, spaces and `;` are ordinary, and `$`, `[ ]` and `\` still substitute. |
+| 5 | Argument expansion | A word that starts with `{*}` is split into several words. You will meet it later in the course. |
+| 6 | Braces | A word that starts with `{` ends at the matching `}`; braces can nest, and nothing inside is substituted (except a backslash at the very end of a line). |
+| 7 | Command substitution | `[ … ]` runs what is inside as a new command, and its result replaces the brackets. |
+| 8 | Variable substitution | `$name` is replaced by the variable's value. |
+| 9 | Backslash substitution | `\` before a character makes it ordinary, or makes a special character such as `\n`; a `\` at the end of a line joins it to the next line. |
+| 10 | Comments | `#` where Tcl expects the first word of a command starts a comment that runs to the end of the line. |
+| 11 | Order of substitution | Tcl reads each character once, left to right, and never re-reads the result of a substitution. |
+| 12 | Substitution and word boundaries | Substitution never changes where words begin and end: a value with spaces stays one word. |
+
+</details>
+
+## Predict → Run → Explain
+
+Use the one-pass rule. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set a {[expr {1 + 1}]}
+puts "a is $a"`}
+  expected={`a is [expr {1 + 1}]`}
+  explanation="Braces stored the brackets as plain text in a. In line 2, $a is replaced by that text, and Tcl never reads a substituted value again, so the brackets do not run. That is rule 11: one pass, left to right."
+/>
+
+## Always brace your expr
+
+Since Week 2 you have written maths as `expr {…}` with braces. Now you can see why. The command `expr` is unusual: it does its own substitution when it reads an <GlossaryTerm term="expression" />.
+
+With braces, Tcl leaves the expression alone and expr reads each variable as one value. Without braces, Tcl substitutes first, then expr reads the result again as maths. That is two passes, and a value that looks like maths changes the answer. Braced expr is also faster.
+
+<Diagram name="w03-brace-expr" alt="Two columns for the variable extra holding the text 4 plus 1. Without braces, Tcl substitutes first, so expr receives 4 plus 1 times 2, does the times first, and gives 6: a wrong number with no warning. With braces, expr receives dollar extra times 2, looks up extra itself, gets the single value 4 plus 1, which is not a number, and gives an error message that tells you the value is wrong." />
+
+<WorkedExample
+  code={`set extra "4 + 1"
+puts [expr $extra * 2]`}
+  notes={{
+    1: 'Imagine a teammate typed this value as a formula instead of the number 5.',
+    2: 'No braces. Tcl substitutes first, so expr receives 4 + 1 * 2. It reads that as maths, does * before +, and prints 6. Not 10, and no warning.'
+  }}
+/>
+
+<VersionNote
+  since="9.0"
+  code86={`set extra "4 + 1"
+puts [expr {$extra * 2}]`}
+  fails86={`can't use non-numeric string as operand of "*"`}
+  code90={`set extra "4 + 1"
+puts [expr {$extra * 2}]`}
+  fails90={`cannot use a list as left operand of "*"`}
+>
+With braces, expr reads `$extra` as one value, `4 + 1`, which is not a number, so it stops with an error. The wording of the message changed in Tcl 9.0, but the point is the same on both versions: **an error, not a wrong number**. An error tells you that something is wrong. A wrong number hides it.
+</VersionNote>
+
+## Faded example
+
+Fill the blanks so that each line does what its comment says.
+
+<FadedExample
+  client:visible
+  template={String.raw`set cost 12
+# Must print: Cost: $12 per chip
+puts "Cost: ___1___$cost per chip"
+# Must print CORE and SRAM on two lines
+puts "CORE___2___SRAM"
+# Must store 36, with the maths braced
+set total [expr ___3___$cost * 3}]`}
+  answers={[[String.raw`\$`], [String.raw`\n`], ['{']]}
+  hints={['Which character prints a real dollar sign inside quotes?', 'Which backslash code makes a new line?', 'The expression needs an opening brace to match the closing one.']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={String.raw`puts {CORE\nSRAM}`}
+  output={String.raw`CORE\nSRAM`}
+  fix={String.raw`puts "CORE\nSRAM"`}
+  why="Braces freeze backslashes too, so \n stays as two characters. Use double quotes when you want \n to become a new line."
+/>
+
+<Trap
+  wrong={String.raw`puts "D:\temp\notes.txt"`}
+  output={"D:\temp\notes.txt"}
+  fix={String.raw`puts {D:\temp\notes.txt}`}
+  why="Windows folder names use backslashes, and inside quotes \t is a tab and \n is a new line. Put such paths in braces, or write them with forward slashes (D:/temp/notes.txt), which Tcl also understands on Windows."
+/>
+
+<Trap
+  wrong={`set width 200 # in um
+puts $width`}
+  error={`wrong # args: should be "set varName ?newValue?"`}
+  fix={`set width 200 ;# in um
+puts $width`}
+  why="A # starts a comment only where a command could start. Here it is just another word for set, and set takes at most two. The semicolon ends the command, so the # after it starts a comment."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w03" lesson="b" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Backslashes, the rules, braced expr" lines={[
+  String.raw`\$  \"  \[  \\   the character itself, without its special meaning`,
+  String.raw`\n new line    \t tab`,
+  String.raw`Backslashes work in "..." and plain words, not in {...}`,
+  'Tcl substitutes once, left to right; values are never re-read',
+  'A value with spaces stays one word',
+  '# starts a comment only where a command starts:  cmd ;# note',
+  'Always brace expr:  expr {$width * $height}',
+  String.raw`A \ at the very end of a line joins it to the next line`,
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl(n) manual page: the 12 rules (this lesson summarises them in its own words)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/Tcl.htm', kind: 'tcl-man' },
+  { title: "Tcler's Wiki: the Dodekalogue, with discussion", url: 'https://wiki.tcl-lang.org/10259', kind: 'tutorial' },
+  { title: "Tcler's Wiki: Brace your expr-essions (why braced expr is safer and faster)", url: 'https://wiki.tcl-lang.org/page/Brace+your+expr-essions', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Grouping arguments with double quotes, including backslash sequences', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl3.html', kind: 'tutorial' },
+]} />

@@ -111,7 +111,8 @@ Runaway code test: replace the code with `while {1} {}` and press Run. After 5 s
 <Trap
   wrong={`set a 3
 puts [expr $a +]`}
-  error={`syntax error in expression "3 +": premature end of expression`}
+  error={`missing operand at _@_
+in expression "3 +_@_"`}
   fix={`set a 3
 puts [expr {$a + 1}]`}
   why="The expression was cut short. Brace the expression and check that every operator has two sides."
@@ -192,4 +193,10 @@ This block needs the real machine, so it is marked for the terminal and skipped 
 
 ```tcl run runs_in=terminal expect="hi"
 puts [exec echo hi]
+```
+
+Unbalanced braces inside strings must work in the browser too (Wacl wraps scripts in braces internally; the worker escapes the code first):
+
+```tcl run expect="{ and }}"
+puts "{ and }}"
 ```

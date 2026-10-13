@@ -1,7 +1,124 @@
 ---
 title: "Start here"
+description: "How Tcl to Tapeout works: who it is for, the weekly rhythm, the imaginary chip Lumen-1, and why the course is built the way it is."
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+sources:
+  - { title: "Dunlosky et al. (2013), APS summary: which study strategies make the grade", url: "https://www.psychologicalscience.org/news/releases/which-study-strategies-make-the-grade.html" }
+  - { title: "Dunlosky et al. (2013), summary of the technique ratings", url: "https://texasldcenter.org/?p=346" }
+  - { title: "Sweller: cognitive load theory teaching strategies", url: "https://www.teachermagazine.com.au/articles/cognitive-load-theory-teaching-strategies" }
+  - { title: "Worked-example effect", url: "https://en.wikipedia.org/wiki/Worked-example_effect" }
+  - { title: "Kalyuga et al.: when problem solving is superior to studying worked examples", url: "https://www.academia.edu/1405548/When_problem_solving_is" }
 ---
 
-{/* P0 placeholder */}
+import ChipMap from '../../components/ChipMap.astro';
+import LayerStack from '../../components/LayerStack.astro';
+import GlossaryTerm from '../../components/GlossaryTerm.astro';
+import ProgressTracker from '../../components/ProgressTracker.tsx';
+import FurtherReading from '../../components/FurtherReading.astro';
+import chip from '../../data/lumen-1.json';
 
-Start here — content arrives in a later phase.
+## Welcome
+
+This course takes you from zero to writing scripts that build and check chip layouts. You need no programming and no science background: if you can do arithmetic and read an (x, y) point on a graph, you are ready.
+
+- **40 weeks, about 3 hours a week.** Free, with no sign-up.
+- **Nothing to install for the first 10 weeks.** All code runs in your browser.
+- **No paid software, ever.** You will use free tools only.
+
+## The big picture
+
+The course has four milestones. Each one ends with a project, called a capstone, and each capstone reuses the one before.
+
+| Milestone | Weeks | You learn | Your code runs in | Capstone |
+|---|---|---|---|---|
+| M10 | 1–10 | The Tcl language, from zero | your browser | Mini Floorplan Checker |
+| M20 | 11–20 | Fluent Tcl: files, text, objects | <GlossaryTerm term="tclsh" /> on your computer | TinyLayout, a small layout database |
+| M30 | 21–30 | Drawing layouts with scripts | tclsh + <GlossaryTerm term="drv-lite" /> + <GlossaryTerm term="klayout" /> | Cell Generator, which writes a <GlossaryTerm term="gds" /> file |
+| M40 | 31–40 | Checking real layouts in bulk | tclsh + DRV-Lite + KLayout | Layout Auditor, which finds planted errors and writes a report |
+
+By the end you work the way <GlossaryTerm term="vlsi" /> engineers do, in the scripting style of <GlossaryTerm term="calibre">Calibre DESIGNrev</GlossaryTerm>, and you have four projects in your own public portfolio.
+
+## Meet Lumen-1
+
+A <GlossaryTerm term="chip" /> is a city map drawn in <GlossaryTerm term="layer">layers</GlossaryTerm>. Every lab in this course works on the same imaginary chip: **{chip.name}**, {chip.tagline}. It measures {chip.width_um} × {chip.height_um} <GlossaryTerm term="micrometre">µm</GlossaryTerm> and has {chip.blocks.length} <GlossaryTerm term="block">blocks</GlossaryTerm>, the neighbourhoods of the city.
+
+<ChipMap caption="The Lumen-1 floorplan. Every block is a rectangle with a position and a size." />
+
+<ul>
+{chip.blocks.map((b) => <li><strong>{b.name}</strong>{b.full_name ? ` (${b.full_name})` : ''}: {b.job}.</li>)}
+</ul>
+
+Under the blocks, the city is built in layers, like sheets of a map stacked on top of each other:
+
+<LayerStack caption="The teaching layers used in this course, with their colours. These are teaching layer numbers, not any real factory's." />
+
+Over the year you will print Lumen-1's passport (Week 1), check that its blocks do not overlap (Week 10), store it in your own layout database (M20), draw it for real as a <GlossaryTerm term="layout" /> (M30), and audit it for errors (M40).
+
+## Your weekly rhythm
+
+| Step | Time | What it is |
+|---|---|---|
+| Lesson A | 40 min | One new idea, with examples you run |
+| Lesson B | 40 min | The next idea, building on Lesson A |
+| Lab | 60 min | A small project on Lumen-1, checked automatically |
+| Quiz + review | 20 min | 10 questions, then your review cards |
+
+## How a lesson page works
+
+Every lesson uses the same sections, in the same order, so you always know where you are:
+
+1. **Chip story**: why today's idea matters for Lumen-1.
+2. **You will be able to…**: at most three goals.
+3. **Warm-up**: three questions from earlier lessons.
+4. **Concept and worked example**: a short explanation, then fully explained code. These two can repeat for each new idea.
+5. **Faded example**: the same kind of code with a few blanks for you to fill in.
+6. **Predict → Run → Explain**: you write down what the code will print before you run it.
+7. **Common traps**: real error messages and how to fix them.
+8. **Exit quiz**, **cheat card** and **further reading**.
+
+## Why this course works
+
+The format is based on research about how people learn. It may feel harder than reading, and that is on purpose.
+
+**Quizzing beats rereading.** Pulling an answer out of your memory makes the memory stronger. In a large review of study methods, Dunlosky and colleagues (2013) rated practice testing as one of the two most useful techniques. Rereading and highlighting were rated much lower. That is why every lesson starts and ends with questions, and why every answer comes with an explanation.
+
+**Spacing beats cramming.** The other top technique in the same review is spreading practice out over time. So the warm-ups bring back earlier weeks, the weekly quiz mixes old and new, and your review cards return after 1, 3, 7, 14 and 30 days.
+
+**Worked examples first, then less help.** Beginners learn faster by studying a fully solved example than by struggling alone (the worked-example effect, from John Sweller's research). But as you improve, too much help starts to get in the way (Kalyuga and colleagues). So the help fades: Weeks 1–10 give two worked examples per lesson, M20 gives one plus a broken script to fix, and by M30 you get a short spec and tests.
+
+**Predict before you run.** Writing your prediction first is a small self-test. If you are wrong, you see it at once, together with the reason. Errors are not failures here. They are the fastest way to find a wrong idea and fix it.
+
+### How to study each week
+
+- [ ] Do the warm-up from memory, before you look anything up.
+- [ ] Type every prediction before you press Run.
+- [ ] When an error appears, read the message first. It usually names the problem.
+- [ ] Run the lab check until you see `RESULT: PASS`.
+- [ ] Take the weekly quiz a day or two after the lessons, without notes.
+- [ ] Spend 5 minutes on your [spaced review](/SJTU-VLSI-TCL-Language/review/) cards on two other days.
+- [ ] Before a new week, open its "Review these first" links.
+
+## Your progress stays in your browser
+
+There are no accounts and no tracking. Your progress and review cards are saved only in this browser. To move them to another device, export them here and import them there.
+
+<ProgressTracker client:visible />
+
+## Honest notes
+
+- **Made with AI, checked by people.** This course was produced with AI tools (Claude) as part of a VLSI course project. Every page names the person who reviewed it. Pages that are not reviewed yet show a "Draft" banner.
+- **Not affiliated with Siemens.** DRV-Lite is an independent teaching simulator, not Calibre. When a page shows a real Calibre command, a badge says how sure we are: ✅ means checked against a public source, ⚠️ means "DRV-Lite form; check the official manual".
+
+<a href="/SJTU-VLSI-TCL-Language/m10/week-01/" class="tc-btn primary" style="display:inline-block;text-decoration:none;margin-top:1rem">Start Week 1 →</a>
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Dunlosky et al. (2013): which study strategies make the grade (APS summary)', url: 'https://www.psychologicalscience.org/news/releases/which-study-strategies-make-the-grade.html', kind: 'other' },
+  { title: 'Dunlosky et al. (2013): the ten techniques and their ratings', url: 'https://texasldcenter.org/?p=346', kind: 'other' },
+  { title: 'Cognitive load theory: teaching strategies (Sweller)', url: 'https://www.teachermagazine.com.au/articles/cognitive-load-theory-teaching-strategies', kind: 'other' },
+  { title: 'The worked-example effect', url: 'https://en.wikipedia.org/wiki/Worked-example_effect', kind: 'other' },
+  { title: 'Kalyuga et al.: when problem solving beats studying worked examples', url: 'https://www.academia.edu/1405548/When_problem_solving_is', kind: 'other' },
+]} />

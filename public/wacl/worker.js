@@ -27,6 +27,14 @@ var SNAPSHOT_SCRIPT =
     'set ::__keepProcs [info procs ::*]\n' +
     'set ::__keepNs [namespace children ::]';
 
+// Wacl's interp.Eval(code) runs  catch {<code>} ::jsResult  so a brace inside a string in the code
+// (puts "{") unbalances that wrapper and the script fails before it starts. So the code is first
+// stored in a variable as one double-quoted word in which every special character, braces included,
+// is backslash-escaped (backslashes inside braces stop a brace from counting), then evaluated.
+function tclWord(text) {
+    return '"' + text.replace(/[\\$\[\]"{}]/g, '\\$&') + '"';
+}
+
 // Emscripten only hands a line to print() when it sees a newline, so `puts -nonewline x` stays
 // hidden in its buffer. Move whatever is left into our output list.
 function drainTty(tty, list) {
@@ -72,11 +80,15 @@ self.onmessage = function (event) {
     errBuf = [];
     var reply = { id: msg.id, ok: true, result: '', error: '' };
     try {
-        reply.result = waclInterp.Eval(msg.code);
+        waclInterp.Eval('set ::__waclCode ' + tclWord(msg.code));
+        reply.result = waclInterp.Eval('eval [set ::__waclCode][unset ::__waclCode]');
     } catch (e) {
         reply.ok = false;
         reply.error = (e && e.errorInfo) ? String(e.errorInfo) : String(e);
+        // Hide our own wrapper line from the learner; keep Tcl's line number of the error.
+        reply.error = reply.error.replace(/\n\s*invoked from within\n"eval \[set ::__waclCode\][\s\S]*$/, '');
     }
+    try { waclInterp.Eval('unset -nocomplain ::__waclCode'); } catch (e) { /* ignore */ }
     try { waclInterp.Eval('flush stdout; flush stderr'); } catch (e) { /* channel closed by the script */ }
     drainTty(self.__ttyOut, outBuf);
     drainTty(self.__ttyErr, errBuf);

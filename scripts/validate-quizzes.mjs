@@ -19,6 +19,11 @@ try { banks = loadQuizBanks(); } catch (e) { console.error('Quiz schema error:\n
 try { glossary = loadGlossary(); } catch (e) { console.error('Glossary schema error:\n', e.issues ? JSON.stringify(e.issues, null, 2) : e); process.exit(1); }
 
 const seen = new Map();
+for (const bank of banks) {
+    // Course banks (m10-w03 …) must carry review metadata; only the demo bank may omit it.
+    if (/^m\d0-w\d\d$/.test(bank.name) && !bank.meta) errors.push(`${bank.name}: missing ai_assisted / reviewed_by / review_date (PRD §0 rule 8)`);
+    if (bank.meta && !bank.meta.reviewed_by) console.warn(`validate-quizzes: note — ${bank.name} is not reviewed yet (reviewed_by is empty)`);
+}
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'quiz-'));
 for (const bank of banks) {
     for (const q of bank.questions) {

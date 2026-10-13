@@ -1,0 +1,33 @@
+---
+// The Lumen-1 floorplan, drawn from src/data/lumen-1.json so it can never disagree with the data.
+// `highlight` = block names to emphasise; `signs` shows each block's name like a street sign.
+import chip from '../data/lumen-1.json';
+interface Props { highlight?: string[]; caption?: string; }
+const { highlight = [], caption } = Astro.props;
+const pad = 34;
+const scale = 1.4;
+const W = chip.width_um * scale + pad * 2;
+const H = chip.height_um * scale + pad * 2;
+// Chip y grows upwards (origin bottom-left); SVG y grows downwards.
+const sx = (x: number) => pad + x * scale;
+const sy = (y: number) => pad + (chip.height_um - y) * scale;
+const alt = `Floorplan of ${chip.name}, a ${chip.width_um} by ${chip.height_um} micrometre chip with ${chip.blocks.length} blocks: ` +
+  chip.blocks.map((b) => `${b.name} (${b.job}) at x ${b.x}, y ${b.y}, ${b.w} by ${b.h}`).join('; ') + '.';
+---
+<figure class="tc-diagram">
+  <div role="img" aria-label={alt}>
+    <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true" focusable="false" style="max-width:36rem">
+      <rect class="d-chip" x={sx(0)} y={sy(chip.height_um)} width={chip.width_um * scale} height={chip.height_um * scale} rx="4" />
+      {chip.blocks.map((b) => (
+        <g>
+          <rect class={highlight.includes(b.name) ? 'd-box-warn' : 'd-box-info'} x={sx(b.x)} y={sy(b.y + b.h)} width={b.w * scale} height={b.h * scale} rx="3" />
+          <text class="d-txt d-bold" x={sx(b.x + b.w / 2)} y={sy(b.y + b.h / 2) + 5} text-anchor="middle">{b.name}</text>
+        </g>
+      ))}
+      <text class="d-txt d-small" x={sx(0)} y={H - 10}>(0, 0)</text>
+      <text class="d-txt d-small" x={sx(chip.width_um)} y={pad - 12} text-anchor="end">({chip.width_um}, {chip.height_um}) µm</text>
+      <text class="d-txt d-bold" x={sx(0)} y={pad - 12}>{chip.name}</text>
+    </svg>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

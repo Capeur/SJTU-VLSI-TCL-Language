@@ -96,7 +96,7 @@ export class WaclRuntime implements TclRuntime {
         const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
         let script = code;
         if (options.stdin !== undefined) {
-            script = `set stdinText {${options.stdin.replace(/[{}\\]/g, '\\$&')}}\n${code}`;
+            script = `set stdinText ${tclQuote(options.stdin)}\n${code}`;
         }
         const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), timeoutMs));
         const outcome = await Promise.race([this.send(script), timeout]);
@@ -123,6 +123,15 @@ export function getRuntime(): TclRuntime {
         shared = new WaclRuntime(`${base}wacl/worker.js`);
     }
     return shared;
+}
+
+/**
+ * Turn any text into one Tcl word that evaluates back to exactly that text. Inside double quotes,
+ * backslash substitution removes the backslashes again. (Escaping braces inside a braced word does
+ * NOT work: Tcl keeps the backslashes.) Keep in sync with tclQuote in src/lib/labs.mjs.
+ */
+export function tclQuote(text: string): string {
+    return `"${text.replace(/[\\$[\]"]/g, '\\$&')}"`;
 }
 
 /** Normalise output for comparison: trim trailing whitespace on every line and at the end. */

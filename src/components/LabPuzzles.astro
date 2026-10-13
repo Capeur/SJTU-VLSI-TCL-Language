@@ -1,0 +1,29 @@
+---
+// Shows a lab's puzzle file (labs/<lab>/data/puzzles.txt) as numbered code blocks grouped by round.
+// Same parsing rules as labPuzzles in the lab's tests/checker.tcl: "## " = round, "### n | revisit" = puzzle.
+import fs from 'node:fs';
+import path from 'node:path';
+interface Props { lab: string; }
+const { lab } = Astro.props;
+const text = fs.readFileSync(path.join(process.cwd(), 'labs', lab, 'data', 'puzzles.txt'), 'utf8').replace(/\r\n/g, '\n');
+const rounds: { title: string; puzzles: { number: string; code: string }[] }[] = [];
+let current: { number: string; code: string } | null = null;
+for (const line of text.split('\n')) {
+  if (line.startsWith('## ')) { rounds.push({ title: line.slice(3).trim(), puzzles: [] }); current = null; }
+  else if (line.startsWith('### ')) {
+    current = { number: line.slice(4).split('|')[0].trim(), code: '' };
+    rounds[rounds.length - 1].puzzles.push(current);
+  } else if (current) current.code += `${line}\n`;
+}
+---
+{rounds.map((round) => (
+  <section>
+    <h3>{round.title}</h3>
+    {round.puzzles.map((p) => (
+      <div class="tc-box">
+        <p class="tc-title">Puzzle {p.number} → write your prediction in <code>p{p.number.padStart(2, '0')}</code></p>
+        <pre class="tc-code" tabindex="0">{p.code.replace(/\n+$/, '')}</pre>
+      </div>
+    ))}
+  </section>
+))}

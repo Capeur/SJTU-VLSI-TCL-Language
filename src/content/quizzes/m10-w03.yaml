@@ -1,0 +1,445 @@
+# Week 3 — The quoting week. Lesson A: quotes vs braces. Lesson B: backslashes, the rules, braced expr.
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w03-q01
+    type: predict-output
+    lesson: a
+    tags: [quotes, braces]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set block CORE
+      set width 200
+      puts "Two $block blocks need [expr {$width * 2}] um"
+      puts {Two $block blocks need [expr {$width * 2}] um}
+    answer: |-
+      Two CORE blocks need 400 um
+      Two $block blocks need [expr {$width * 2}] um
+    explanation: >
+      Double quotes group the words and still substitute, so $block becomes CORE and the
+      brackets run expr. Braces freeze everything inside, even the brackets, so the second
+      line is printed exactly as typed.
+
+  - id: m10-w03-q02
+    type: mcq
+    lesson: a
+    tags: [quotes, braces, dollar]
+    review: true
+    prompt: "Which line prints exactly: Price: $5 per chip"
+    choices:
+      - 'puts {Price: $5 per chip}'
+      - 'puts "Price: $5 per chip"'
+      - 'puts "Price: {$5} per chip"'
+      - 'puts Price: $5 per chip'
+    answer: 'puts {Price: $5 per chip}'
+    explanation: >
+      Braces freeze the whole text, so the dollar sign is printed as it is.
+    distractor_feedback:
+      'puts "Price: $5 per chip"': 'Double quotes still substitute, so Tcl looks for a variable named 5 and stops with: can''t read "5": no such variable.'
+      'puts "Price: {$5} per chip"': 'The outer quotes decide. Braces inside quotes are just characters, so $5 is still substituted and you get: can''t read "5": no such variable.'
+      'puts Price: $5 per chip': 'Tcl substitutes before puts even runs, so the first error is can''t read "5": no such variable. Even without the $, puts would get four words instead of one.'
+
+  - id: m10-w03-q03
+    type: predict-output
+    lesson: a
+    tags: [quotes, braces, brackets]
+    review: true
+    prompt: "Braces appear twice inside the quotes. What does this print?"
+    code: |
+      set w 3
+      puts "A: {$w}"
+      puts "B: [expr {$w * 2}]"
+    answer: |-
+      A: {3}
+      B: 6
+    explanation: >
+      In line A the braces sit inside double quotes, so they are ordinary characters: they are
+      printed, and $w still becomes 3. In line B the brackets start a new command. Inside it,
+      grouping starts again from scratch, so {$w * 2} is a real braced word handed to expr.
+
+  - id: m10-w03-q04
+    type: mcq
+    lesson: a
+    tags: [brackets, braces]
+    review: true
+    prompt: 'Inside double quotes, {$w} does not freeze anything, yet [expr {$w * 2}] works. Why?'
+    choices:
+      - 'The brackets start a new command, and inside it the braces group again'
+      - 'Braces always freeze, but expr undoes the freezing'
+      - 'Tcl reads the braces only after it has finished the quotes'
+      - 'Braces inside quotes freeze numbers but not letters'
+    answer: 'The brackets start a new command, and inside it the braces group again'
+    explanation: >
+      Grouping only counts at the start of a word. Inside quotes, a brace is not at the start
+      of a word, so it is just a character. But [ ] makes Tcl read a brand-new command, whose
+      words are grouped from scratch, so {$w * 2} is a real braced word there.
+    distractor_feedback:
+      'Braces always freeze, but expr undoes the freezing': 'Braces inside quotes never freeze: "A: {$w}" prints A: {3}. Only the braces inside [ ] group.'
+      'Tcl reads the braces only after it has finished the quotes': 'Tcl reads the line once, left to right. The braces inside [ ] work because [ ] starts a new command.'
+      'Braces inside quotes freeze numbers but not letters': 'Braces never look at what is inside them. Inside quotes they are plain characters.'
+
+  - id: m10-w03-q05
+    type: multi-select
+    lesson: a
+    tags: [grouping, words]
+    review: false
+    prompt: "Each item below is the second word of a puts command. Which of them are ONE word? Pick all that apply."
+    choices:
+      - '"Block CORE"'
+      - '{Block CORE}'
+      - 'Block CORE'
+      - '[expr {2 + 3}]'
+    answer:
+      - '"Block CORE"'
+      - '{Block CORE}'
+      - '[expr {2 + 3}]'
+    explanation: >
+      Quotes and braces glue the pieces into one word. Spaces inside [ ] do not split the word
+      either: the whole bracket is replaced by one result. Block CORE with no grouping is two words.
+
+  - id: m10-w03-q06
+    type: fill-blank
+    lesson: a
+    tags: [braces]
+    review: false
+    prompt: 'Fill the blank so the line prints exactly: Total: $total     The line is:   puts ___Total: $total}'
+    answer: ['{']
+    explanation: >
+      An opening brace pairs with the closing brace at the end. Braces freeze the text, so
+      $total is printed as it is.
+
+  - id: m10-w03-q07
+    type: find-the-bug
+    lesson: a
+    tags: [braces, brackets]
+    review: true
+    prompt: "This should print CORE area: 32000 um2, but it prints the brackets and the dollar signs. Which line has the bug?"
+    code: |
+      set width 200
+      set height 160
+      puts {CORE area: [expr {$width * $height}] um2}
+    answer: 3
+    explanation: >
+      The outer braces freeze the brackets, so expr never runs. Use double quotes on the outside:
+      puts "CORE area: [expr {$width * $height}] um2".
+
+  - id: m10-w03-q08
+    type: predict-output
+    lesson: a
+    tags: [braces, quotes]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      puts {The block is called "CORE"}
+    answer: 'The block is called "CORE"'
+    explanation: >
+      Inside braces, double quote marks are ordinary characters, so they are printed.
+
+  - id: m10-w03-q09
+    type: predict-output
+    lesson: a
+    tags: [quotes, braces]
+    review: true
+    prompt: "Three lines, three groupings. What does this print?"
+    code: |
+      set layer METAL1
+      puts "Layer is $layer"
+      puts "Layer is {$layer}"
+      puts {Layer is "$layer"}
+    answer: |-
+      Layer is METAL1
+      Layer is {METAL1}
+      Layer is "$layer"
+    explanation: >
+      The outer grouping decides. Quotes on the outside: substitute, and inner braces are just
+      characters. Braces on the outside: nothing changes, and inner quotes are just characters.
+
+  - id: m10-w03-q10
+    type: mcq
+    lesson: a
+    tags: [braces, brackets]
+    review: false
+    prompt: "Which line prints exactly: Use [expr] for maths"
+    choices:
+      - 'puts {Use [expr] for maths}'
+      - 'puts "Use [expr] for maths"'
+      - 'puts "Use {[expr]} for maths"'
+      - 'puts Use [expr] for maths'
+    answer: 'puts {Use [expr] for maths}'
+    explanation: >
+      Only braces stop the brackets from running. Then [expr] is printed as plain text.
+    distractor_feedback:
+      'puts "Use [expr] for maths"': 'Inside quotes the brackets run expr with no maths to do, and Tcl says: wrong # args: should be "expr arg ?arg ...?"'
+      'puts "Use {[expr]} for maths"': 'Braces inside quotes are just characters, so the brackets still run expr and you get the wrong # args error.'
+      'puts Use [expr] for maths': 'Without grouping, the brackets still run expr first, so you get the wrong # args error.'
+
+  - id: m10-w03-q11
+    type: order-steps
+    lesson: a
+    tags: [brackets, braces, expr]
+    review: false
+    prompt: 'Put in order what Tcl does with:   puts "Area: [expr {$w * $h}]"   when w is 3 and h is 4.'
+    steps:
+      - "Split the line into two words: puts and the quoted text"
+      - "Find [ ] inside the quoted word and start a new command: expr"
+      - "expr receives $w * $h unchanged, because of the braces, and looks up w and h itself"
+      - "The result, 12, replaces the brackets"
+      - "puts receives one word and prints Area: 12"
+    explanation: >
+      Tcl first finds the words, then substitutes inside each one, left to right. The brackets
+      run a new command, where the braces group again, so expr does its own substitution.
+
+  - id: m10-w03-q12
+    type: predict-output
+    lesson: a
+    tags: [quotes, braces, brackets]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set w 4
+      puts "[expr {$w * $w}] {and} [expr {$w + $w}]"
+    answer: "16 {and} 8"
+    explanation: >
+      Each [ ] is a new command, so its braces group the maths for expr. The braces around
+      "and" are inside quotes, so they are just printed.
+
+  # ---------- Lesson B ----------
+  - id: m10-w03-q13
+    type: predict-output
+    lesson: b
+    tags: [backslash, dollar]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set price 12
+      puts "Cost: \$price"
+      puts "Cost: \$$price"
+    answer: |-
+      Cost: $price
+      Cost: $12
+    explanation: >
+      A backslash makes the next character ordinary. \$ is a real dollar sign, so in line 1 no
+      variable is read. In line 2, \$ prints a dollar sign and then $price is substituted.
+
+  - id: m10-w03-q14
+    type: find-the-bug
+    lesson: b
+    tags: [quotes, backslash]
+    review: true
+    prompt: 'Tcl says: extra characters after close-quote. Which line has the bug?'
+    code: |
+      set chipName Lumen-1
+      set label M1
+      puts "Chip: $chipName"
+      puts "Layer "$label" is metal 1"
+    answer: 4
+    explanation: >
+      The quote before $label closes the word, and Tcl expects a space or the end of the line
+      after a closing quote. To print quote marks inside a quoted word, write \" — for example
+      puts "Layer \"$label\" is metal 1".
+
+  - id: m10-w03-q15
+    type: fill-blank
+    lesson: b
+    tags: [backslash, dollar]
+    review: true
+    prompt: 'Fill the blank so it prints Cost: $3 per chip     The line is:   puts "Cost: ___3 per chip"'
+    answer: ['\$']
+    explanation: >
+      A backslash before $ switches off variable substitution for that one character, so Tcl
+      prints a real dollar sign and does not look for a variable named 3.
+
+  - id: m10-w03-q16
+    type: order-steps
+    lesson: b
+    tags: [dodekalogue]
+    review: true
+    prompt: "Put in order the steps Tcl follows for every command."
+    steps:
+      - "Find where the command ends: a new line or a semicolon"
+      - "Cut the command into words at the spaces, keeping quoted and braced groups together"
+      - "Substitute $, [ ] and \\ in each word, left to right, once"
+      - "Use the first word to find the command"
+      - "Run the command with the other words as its arguments"
+    explanation: >
+      This is the Dodekalogue in five steps. Words first, then substitution, then the command
+      runs. The command decides what its words mean.
+
+  - id: m10-w03-q17
+    type: predict-output
+    lesson: b
+    tags: [dodekalogue, one-pass]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set price {$cost}
+      set cost 12
+      puts "Price: $price"
+    answer: "Price: $cost"
+    explanation: >
+      $price is replaced by its value, the text $cost. Tcl substitutes only once, so it never
+      reads that value again. The variable cost is never used.
+
+  - id: m10-w03-q18
+    type: predict-output
+    lesson: b
+    tags: [backslash, newline]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      puts "CORE\nSRAM"
+    answer: |-
+      CORE
+      SRAM
+    explanation: >
+      Inside double quotes, \n becomes a new-line character, so the text is printed on two lines.
+
+  - id: m10-w03-q19
+    type: predict-output
+    lesson: b
+    tags: [backslash, braces]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      puts {CORE\nSRAM}
+    answer: 'CORE\nSRAM'
+    explanation: >
+      Braces freeze backslashes too, so \n stays as the two characters \ and n.
+
+  - id: m10-w03-q20
+    type: mcq
+    lesson: b
+    tags: [expr, braces]
+    review: true
+    prompt: "Why does this course always write expr {...} with braces?"
+    choices:
+      - 'So expr substitutes the values itself, once: a value like "4 + 1" then gives an error instead of a wrong number'
+      - 'Because expr cannot do maths without braces'
+      - 'Because without braces the $ signs are not substituted'
+      - 'Because braces round the result to a whole number'
+    answer: 'So expr substitutes the values itself, once: a value like "4 + 1" then gives an error instead of a wrong number'
+    explanation: >
+      Without braces, Tcl substitutes first and expr reads the result again as maths, so a value
+      that looks like maths changes the answer. With braces, expr reads each value as one value.
+      Braced expr is also faster.
+    distractor_feedback:
+      'Because expr cannot do maths without braces': 'expr {2 + 3} and expr 2 + 3 both give 5. The braces are about safety, not about whether expr works.'
+      'Because without braces the $ signs are not substituted': 'Without braces Tcl does substitute $ signs, and then expr reads the result a second time. That double reading is the danger.'
+      'Because braces round the result to a whole number': 'Braces never change numbers. Whole-number results come from dividing two whole numbers (Week 2).'
+
+  - id: m10-w03-q21
+    type: predict-output
+    lesson: b
+    tags: [expr, braces, one-pass]
+    review: true
+    prompt: "No braces around the maths. What does this print?"
+    code: |
+      set extra "2 + 3"
+      puts [expr $extra * 10]
+    answer: "32"
+    explanation: >
+      Without braces, Tcl substitutes first, so expr receives 2 + 3 * 10 and reads it as maths.
+      * comes before +, so it is 2 + 30 = 32, not 50. With braces you would get an error instead.
+
+  - id: m10-w03-q22
+    type: multi-select
+    lesson: b
+    tags: [expr, braces, style]
+    review: false
+    prompt: 'Which lines follow the rule "always brace expr"? Pick all that apply.'
+    choices:
+      - 'set area [expr {$width * $height}]'
+      - 'puts [expr {7 / 2}]'
+      - 'set area [expr $width * $height]'
+      - 'puts "Half: [expr $width / 2]"'
+    answer:
+      - 'set area [expr {$width * $height}]'
+      - 'puts [expr {7 / 2}]'
+    explanation: >
+      The braces must be inside the brackets, right after expr. Quotes around the whole line do
+      not count: in the last line expr still gets unbraced words.
+
+  - id: m10-w03-q23
+    type: predict-output
+    lesson: b
+    tags: [comments, dodekalogue]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set block CORE ;# the decision maker
+      puts "Block: $block" ;# show it
+    answer: "Block: CORE"
+    explanation: >
+      The semicolon ends the command, so the # that follows is where a new command could start.
+      That makes it a comment, and Tcl skips the rest of the line.
+
+  - id: m10-w03-q24
+    type: find-the-bug
+    lesson: b
+    tags: [comments, dodekalogue]
+    review: true
+    prompt: 'Tcl says: wrong # args: should be "set varName ?newValue?". Which line has the bug?'
+    code: |
+      set block CORE
+      set width 200 # in um
+      puts "$block is $width um wide"
+    answer: 2
+    explanation: >
+      A # only starts a comment where a command could start. Here it is just the fourth word of
+      set, and set accepts at most two. End the command first: set width 200 ;# in um
+
+  - id: m10-w03-q25
+    type: multi-select
+    lesson: b
+    tags: [backslash]
+    review: false
+    prompt: "Inside double quotes, which of these print exactly one visible character? Pick all that apply."
+    choices: ['\$', '\[', '\"', '\n', '\t']
+    answer: ['\$', '\[', '\"']
+    explanation: >
+      \$, \[ and \" print the character itself, without its special meaning. \n and \t make
+      invisible characters: a new line and a tab.
+
+  - id: m10-w03-q26
+    type: predict-output
+    lesson: b
+    tags: [backslash, quotes]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set block SRAM
+      puts "Block \"$block\" saved"
+    answer: 'Block "SRAM" saved'
+    explanation: >
+      \" puts a real quote mark into the text without ending the quoted word, and $block is
+      still substituted.
+
+  - id: m10-w03-q27
+    type: fill-blank
+    lesson: b
+    tags: [backslash, tab]
+    review: false
+    prompt: 'Fill the blank so the output has CORE, then a tab, then ready.     The line is:   puts "CORE___ready"'
+    answer: ['\t']
+    explanation: >
+      \t inside double quotes becomes a tab character, which lines text up in columns.
+
+  - id: m10-w03-q28
+    type: mcq
+    lesson: b
+    tags: [dodekalogue, words]
+    review: true
+    prompt: 'After  set name "CORE SRAM"  how many arguments does puts get in  puts $name ?'
+    choices: ['1', '2', '3', '0']
+    answer: '1'
+    explanation: >
+      Substitution never changes where words begin and end. $name becomes CORE SRAM, but it
+      stays one word, so puts gets one argument and prints CORE SRAM.
+    distractor_feedback:
+      '2': 'The words are found before substitution. The space inside the value does not split it into two words.'
+      '3': 'puts is the command name, not an argument, and the value of $name stays one word.'
+      '0': '$name is an argument. It is replaced by the value, but it is still there.'

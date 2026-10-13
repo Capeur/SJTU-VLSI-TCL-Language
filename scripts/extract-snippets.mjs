@@ -1,11 +1,14 @@
 // Collects every runnable Tcl snippet into snippets/<page-id>/<n>.tcl (+ .expected, .only, .drvlite).
-// Sources (PRD §15.2): ```tcl run blocks, <PredictOutput>, <VersionNote> samples, predict-output quiz items.
+// Sources (PRD §15.2): ```tcl run blocks, <PredictOutput>, <VersionNote> samples, <Trap> wrong/fix code,
+// <WorkedExample> and <TclPlayground> code (must run without error, or fail with `fails="…"`),
+// predict-output quiz items, and lab checker self-tests (labs/**/tests/selftest.tcl).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 import { walk, fencedBlocks, componentTags } from './lib/mdx-scan.mjs';
 import { loadQuizBanks } from '../src/lib/content.mjs';
+import { isGradable, labSelftestScript } from '../src/lib/labs.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const docsDir = path.join(root, 'src/content/docs');
@@ -25,12 +28,13 @@ function pageRunsIn(text) {
     if (Array.isArray(front.runs_in)) return front.runs_in.includes('playground') ? 'playground' : 'terminal';
     return front.milestone === 'm10' ? 'playground' : 'terminal';
 }
-function emit(pageId, n, { code, expected, only, drvlite, runsIn }) {
+function emit(pageId, n, { code, expected, error, only, drvlite, runsIn }) {
     const dir = path.join(outDir, pageId);
     fs.mkdirSync(dir, { recursive: true });
     const base = path.join(dir, String(n).padStart(2, '0'));
     fs.writeFileSync(`${base}.tcl`, code.endsWith('\n') ? code : `${code}\n`);
     if (expected !== undefined) fs.writeFileSync(`${base}.expected`, expected);
+    if (error !== undefined) fs.writeFileSync(`${base}.error`, error);   // must fail with this message
     if (only) fs.writeFileSync(`${base}.only`, only);
     if (drvlite) fs.writeFileSync(`${base}.drvlite`, '');
     fs.writeFileSync(`${base}.runs_in`, runsIn);
@@ -47,12 +51,19 @@ for (const file of walk(docsDir, ['.md', '.mdx'])) {
         const where = attrs.runs_in === 'terminal' || attrs.runs_in === 'playground' ? attrs.runs_in : runsIn;
         emit(pageId, ++n, { code, expected: typeof attrs.expect === 'string' ? attrs.expect : undefined, drvlite: !!attrs.drvlite, runsIn: where });
     }
-    for (const tag of componentTags(text, ['PredictOutput', 'VersionNote'])) {
+    for (const tag of componentTags(text, ['PredictOutput', 'VersionNote', 'Trap', 'WorkedExample', 'TclPlayground'])) {
         const p = tag.props;
         if (tag.name === 'PredictOutput') emit(pageId, ++n, { code: p.code, expected: p.expected, runsIn: 'playground' });
-        else {
-            if (p.code86) emit(pageId, ++n, { code: p.code86, expected: p.expect86, only: '8.6', runsIn });
-            if (p.code90) emit(pageId, ++n, { code: p.code90, expected: p.expect90, only: '9.0', runsIn });
+        else if (tag.name === 'WorkedExample') emit(pageId, ++n, { code: p.code, runsIn });
+        else if (tag.name === 'TclPlayground') {
+            if (typeof p.code === 'string' && p.code.trim()) emit(pageId, ++n, { code: p.code, error: p.fails, drvlite: !!p.drvlite, runsIn: 'playground' });
+        }
+        else if (tag.name === 'Trap') {
+            emit(pageId, ++n, { code: p.wrong, expected: p.output, error: p.error, runsIn });
+            emit(pageId, ++n, { code: p.fix, runsIn });
+        } else {
+            if (p.code86) emit(pageId, ++n, { code: p.code86, expected: p.expect86, error: p.fails86, only: '8.6', runsIn });
+            if (p.code90) emit(pageId, ++n, { code: p.code90, expected: p.expect90, error: p.fails90, only: '9.0', runsIn });
         }
     }
 }
@@ -60,6 +71,18 @@ for (const bank of loadQuizBanks()) {
     let n = 0;
     for (const q of bank.questions) {
         if (q.type === 'predict-output') emit(`quiz__${bank.name}`, ++n, { code: q.code, expected: q.answer, runsIn: 'terminal' });
+    }
+}
+// Lab checkers test themselves on every Tcl version and in Wacl (the browser "Check" button uses them).
+const labsDir = path.join(root, 'labs');
+for (const ms of fs.existsSync(labsDir) ? fs.readdirSync(labsDir).sort() : []) {
+    const msDir = path.join(labsDir, ms);
+    if (!fs.statSync(msDir).isDirectory()) continue;
+    for (const week of fs.readdirSync(msDir).sort()) {
+        const dir = path.join(msDir, week);
+        if (!isGradable(dir)) continue;
+        const script = labSelftestScript(dir);
+        if (script) emit(`lab__${ms}__${week}`, 1, { code: script, runsIn: ms === 'm10' ? 'playground' : 'terminal' });
     }
 }
 console.log(`extract-snippets: wrote ${total} snippet(s) to snippets/`);

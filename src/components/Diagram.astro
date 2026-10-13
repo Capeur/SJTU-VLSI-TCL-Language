@@ -1,0 +1,14 @@
+---
+// Hand-authored SVG diagram from src/assets/diagrams/<name>.svg, inlined so it follows the light/dark
+// theme (the SVGs use the .d-* classes from components.css). `alt` says what the diagram teaches (PRD §12.10).
+interface Props { name: string; alt: string; caption?: string; }
+const { name, alt, caption } = Astro.props;
+if (!alt) throw new Error(`<Diagram name="${name}">: alt text is required`);
+const svgs = import.meta.glob('../assets/diagrams/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const svg = svgs[`../assets/diagrams/${name}.svg`];
+if (!svg) throw new Error(`<Diagram>: no src/assets/diagrams/${name}.svg`);
+---
+<figure class="tc-diagram">
+  <div role="img" aria-label={alt}><Fragment set:html={svg.replace('<svg', '<svg aria-hidden="true" focusable="false"')} /></div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
