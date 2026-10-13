@@ -75,3 +75,4 @@
 | 2026-10-13 | Quiz banks m10-w01 (27 items) and m10-w02 (27 items) set `reviewed_by: ""` again: they now hold 41 new items next to the reviewed P2 seeds | PRD §0 rule 8; the human review covers the whole bank |
 | 2026-10-13 | The Week 2 lab's wafer (a square, 10000 µm a side, 1980 dollars) is a lab input, not a chip fact: it lives in `data/inputs.txt`, and the page says real wafers are round. Lessons, traps and quizzes avoid the lab's numbers (the cost trap uses 900 / 400), so they do not give away lab answers | Keep `lumen-1.json` about the chip; keep the lab worth doing |
 | 2026-10-13 | The Week 1 passport lists blocks and layers as typed text | Lists arrive in Week 5 |
+| 2026-10-13 | Phase P3, Weeks 1–2, approved by the user (reviewer: David). `reviewed_by`/`review_date` set on the 10 Week 1–2 pages (overview, Lesson A, Lesson B, Lab, Quiz for each week) and the quiz banks m10-w01 and m10-w02 | Human review sign-off required by PRD §0 rule 8 |

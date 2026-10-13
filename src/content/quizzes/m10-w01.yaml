@@ -2,8 +2,8 @@
 # q01–q06 are the P2 seed items (reviewed); q07–q27 were added in P3. Uses only Week 1 ideas.
 # Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-13"
 questions:
   - id: m10-w01-q01
     type: predict-output

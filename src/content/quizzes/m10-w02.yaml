@@ -4,8 +4,8 @@
 # q01–q07 are the P2 seed items (q05 rewritten in P3); q08–q27 were added in P3.
 # Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-13"
 questions:
   - id: m10-w02-q01
     type: predict-output
