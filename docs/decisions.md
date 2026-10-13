@@ -40,3 +40,4 @@
 | 2026-10-13 | RISK: Wacl is 8.6.6 and the check compares only stdout/errors; behaviour that differs without erroring (timing, `clock`, encodings, `file` on the virtual filesystem) is caught only when a snippet has an `expect` | Add `expect` to every playground snippet whose output matters; revisit if Wacl is replaced (the `TclRuntime` interface allows it) |
 | 2026-10-13 | RISK: `run-wacl-snippets` depends on a Chrome binary; if CI cannot find one the job fails (exit 2) rather than skipping | A silent skip would hide the very errors the check exists for |
 | 2026-10-13 | `preact` pinned to ^10 (was 11) | `@astrojs/preact` 6 requires Preact 10; npm refused further installs. The P1 checks were re-run on Preact 10 |
+| 2026-10-13 | Phase P1 approved by the user: CI green (including the Tcl 9.0 and Wacl jobs); manual checks done (keyboard-only, light/dark themes, mobile width, Firefox) | Human review sign-off required by PRD §17 before starting P2 |
