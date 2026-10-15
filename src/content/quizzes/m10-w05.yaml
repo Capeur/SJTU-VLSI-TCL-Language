@@ -4,8 +4,8 @@
 # Numbers: Lumen-1's real blocks and layers. The lab's METAL1 shapes are not used here (style rule 21).
 # Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-15"
 questions:
   # ---------- Lesson A ----------
   - id: m10-w05-q01
