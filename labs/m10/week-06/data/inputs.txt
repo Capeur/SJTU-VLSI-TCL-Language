@@ -1,0 +1,3 @@
+set cells {{INV {0 0 3 10}} {NAND2 {0 0 5 10}} {DFF {0 0 14 10}} {NOR2 {0 0 6 10}} {BUF {0 0 4 10}}}
+set topCount 3
+set findCell NOR2

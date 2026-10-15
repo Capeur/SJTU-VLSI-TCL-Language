@@ -41,3 +41,5 @@
 
 26. **Never write a component tag such as `<Trap>` in an MDX comment or in prose.** `scripts/lib/mdx-scan.mjs` reads it as a real tag with no props, and snippet extraction crashes. Write "Trap component" instead.
 27. **Quiz prompts and feedback quote only error messages that are the same on Tcl 8.6 and 9.0.** Quiz banks have no `VersionNote`; when the wording differs, describe the error in plain words.
+29. **No `\'` inside a JavaScript string in a component prop** (`Goals`, `CheatCard`, notes). The MDX scanners do not read escapes, so a `\'` silently hides the rest of the page from `check-lessons` and snippet extraction. Write a typographic apostrophe (’) or use double quotes around the string.
+30. **Quote a YAML frontmatter goal that contains `: `** (`- "Control what a proc can see: arguments…"`). Unquoted, YAML reads it as a mapping and the build fails.

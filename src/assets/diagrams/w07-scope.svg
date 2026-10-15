@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 270">
+  <defs><marker id="w07-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <!-- main script building -->
+  <path class="d-box-code" d="M20 80 L150 30 L280 80 L280 250 L20 250 Z"/>
+  <text class="d-txt d-bold" x="150" y="100" text-anchor="middle">main script</text>
+  <rect class="d-box-info" x="60" y="140" width="180" height="44" rx="4"/>
+  <text class="d-txt d-mono d-small" x="72" y="158">width</text>
+  <text class="d-txt d-mono" x="150" y="176" text-anchor="middle">999</text>
+  <text class="d-txt d-small d-muted" x="150" y="226" text-anchor="middle">never changes</text>
+
+  <!-- proc call building -->
+  <path class="d-box-warn" d="M380 100 L480 60 L580 100 L580 250 L380 250 Z"/>
+  <text class="d-txt d-bold" x="480" y="120" text-anchor="middle">a call of rectWidth</text>
+  <rect class="d-box-info" x="400" y="140" width="160" height="40" rx="4"/>
+  <text class="d-txt d-mono d-small" x="410" y="156">rect</text>
+  <text class="d-txt d-mono d-small" x="480" y="173" text-anchor="middle">20 20 220 180</text>
+  <rect class="d-box-info" x="400" y="190" width="160" height="40" rx="4"/>
+  <text class="d-txt d-mono d-small" x="410" y="206">width</text>
+  <text class="d-txt d-mono" x="480" y="223" text-anchor="middle">200</text>
+
+  <line class="d-arrow" x1="284" y1="150" x2="396" y2="158" marker-end="url(#w07-arrow2)"/>
+  <text class="d-txt d-small" x="340" y="140" text-anchor="middle">argument</text>
+  <line class="d-arrow" x1="396" y1="214" x2="284" y2="206" marker-end="url(#w07-arrow2)"/>
+  <text class="d-txt d-small" x="340" y="234" text-anchor="middle">return 200</text>
+  <text class="d-txt d-small d-muted" x="20" y="22">Two boxes called width: one in each building.</text>
+</svg>

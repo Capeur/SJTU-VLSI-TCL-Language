@@ -10,9 +10,10 @@ interface Props {
     earlier?: string[];
     count?: number;
     mix?: number;
+    require?: string;    // a tag: at least one current question with this tag is always drawn
 }
 const defaults = { warmup: { count: 3, mix: 0 }, exit: { count: 4, mix: 1 }, weekly: { count: 10, mix: 0.8 }, exam: { count: 20, mix: 0.5 } };
-const { bank, mode, lesson, earlier = [], count = defaults[mode].count, mix = defaults[mode].mix } = Astro.props;
+const { bank, mode, lesson, earlier = [], count = defaults[mode].count, mix = defaults[mode].mix, require: requireTag } = Astro.props;
 const banks = loadQuizBanks();
 const names = [bank].flat();
 const find = (ids: string[]) => ids.flatMap((id) => {
@@ -23,7 +24,9 @@ const find = (ids: string[]) => ids.flatMap((id) => {
 const currentAll = find(names);
 const current = lesson ? currentAll.filter((q) => q.lesson === lesson) : currentAll;
 const earlierPool = find(earlier);
+const required = requireTag ? current.filter((q) => q.tags.includes(requireTag)) : [];
+if (requireTag && !required.length) throw new Error(`<Quiz require="${requireTag}">: no question in ${names.join(', ')}${lesson ? ` (lesson ${lesson})` : ''} has this tag`);
 const quizId = `${names.join('+')}${lesson ? `-${lesson}` : ''}-${mode}`;
 ---
-<QuizApp client:visible quizId={quizId} mode={mode} count={count} mix={mix} current={current} earlier={earlierPool} />
+<QuizApp client:visible quizId={quizId} mode={mode} count={count} mix={mix} current={current} earlier={earlierPool} required={required} />
 <noscript><p>The quiz needs JavaScript. The questions are practice only; nothing is sent anywhere.</p></noscript>

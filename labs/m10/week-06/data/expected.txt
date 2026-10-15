@@ -1,0 +1,8 @@
+Cells: 5
+1. DFF: 140 um2
+2. NOR2: 60 um2
+3. NAND2: 50 um2
+4. BUF: 40 um2
+5. INV: 30 um2
+Largest 3: DFF, NOR2, NAND2
+NOR2: rank 2

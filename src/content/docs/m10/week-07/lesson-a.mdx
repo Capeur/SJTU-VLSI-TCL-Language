@@ -1,14 +1,22 @@
 ---
-title: "Week 7 Lesson A"
+title: "proc: your own commands"
+description: "Week 7, Lesson A: defining commands with proc, sending results back with return, a yes-or-no command for the touching rule, every pair of blocks with a loop inside a loop, and default values."
 milestone: "m10"
 week: 7
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Define a command with proc and call it with arguments
+  - Send a result back with return and use it in [ ], for example to test every pair of blocks
+  - Give an argument a default value
+prerequisites: ["m10-w04-a", "m10-w04-b", "m10-w06-b"]
+glossary: [procedure, argument, return-value, floorplan, abut, default-value]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Creating a new command, proc", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl19.html" }
+  - { title: "Tcl tutorial: Variations in proc arguments and return values", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl20.html" }
+  - { title: "Tcl manual page: proc", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/proc.htm" }
+  - { title: "Tcl manual page: return", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/return.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,278 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 7 (Your own commands) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · proc concept + diagram + worked example 1 + playground 6 ·
+    predict 3 · touching rule concept + diagram + worked example 2 6 · pair loop concept + diagram + worked example 3
+    + playground 5 · defaults concept + playground 3 · faded 3 · traps 3 · exit quiz 4 · cheat card 1 = 40 min.
+    The touching rule is taught on ONE axis (spansOverlap); the lab builds the 2-D rectOverlaps. The pair loop gets
+    a third worked example (user decision, P3 Weeks 6-7 review), so the lab practises it instead of introducing it.
+    Lessons use Lumen-1's real blocks; the lab's CORE floorplan is not used here (style rule 21). */}
+
+<LessonMeta milestone="m10" week={7} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+You have typed `[expr {[lindex $rect 2] - [lindex $rect 0]}]` many times by now. The capstone must do much more: compare every block of {chip.name} with every other block and report the ones that clash. Copying the same lines for each pair would be long and easy to get wrong. This week you give a piece of code a name, once, and then use that name like any Tcl command: `rectWidth $core`, `rectOverlaps $a $b`.
+
+<ChipMap caption={`The ${chip.name} floorplan. To check it, a script compares every pair of blocks: CORE with SRAM, CORE with ADC, and so on, 10 pairs in all.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Define a command with proc and call it with arguments', 'Send a result back with return and use it in [ ], for example to test every pair of blocks', 'Give an argument a default value']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 6. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w07" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06']} mode="warmup" />
+
+## proc: name a recipe
+
+`proc` creates a new command, called a <GlossaryTerm term="procedure" />. It takes three words: the name, the list of <GlossaryTerm term="argument">arguments</GlossaryTerm> in braces, and the body in braces. Think of a recipe card: a title, the ingredients, then the steps.
+
+Creating the proc runs nothing yet. Only a call runs the body. In `rectWidth $core`, Tcl puts the value of `$core` into the argument `rect`, then runs the body. `return` sends a value back, the <GlossaryTerm term="return-value">return value</GlossaryTerm>, and it takes the place of the call, just like the result of any command in `[ ]`.
+
+<Diagram name="w07-proc-parts" alt="Top: the definition proc rectWidth, then the argument list in braces with one argument, rect, then the body in braces, which returns x2 minus x1. Labels: name, arguments, body. Bottom: the call rectWidth with CORE's corners 20 20 220 180. An arrow carries the value into the argument rect; the body runs; return sends 200 back, and 200 takes the place of the call in the brackets." />
+
+<WorkedExample
+  code={`proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+proc rectHeight {rect} {
+    return [expr {[lindex $rect 3] - [lindex $rect 1]}]
+}
+set core {20 20 220 180}
+puts "CORE: [rectWidth $core] by [rectHeight $core] um"
+puts "SRAM: [rectWidth {240 20 380 180}] um wide"`}
+  notes={{
+    1: 'A new command, rectWidth, with one argument, rect. Nothing runs yet.',
+    2: 'The body: x2 - x1, as in Week 5. return sends the result back to the caller.',
+    3: 'The end of the body.',
+    4: 'A second command, the same way, for the height.',
+    5: 'y2 - y1.',
+    6: 'The end of rectHeight.',
+    7: 'CORE’s corners, as a list.',
+    8: 'Each call runs its body with rect = 20 20 220 180. Output: CORE: 200 by 160 um',
+    9: 'Any rectangle works, even one typed in braces. Output: SRAM: 140 um wide'
+  }}
+/>
+
+<TclPlayground client:visible code={`proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+proc rectHeight {rect} {
+    return [expr {[lindex $rect 3] - [lindex $rect 1]}]
+}
+set core {20 20 220 180}
+puts "CORE: [rectWidth $core] by [rectHeight $core] um"
+puts "SRAM: [rectWidth {240 20 380 180}] um wide"`} />
+
+## Predict → Run → Explain
+
+A proc can have more than one return. Our teaching rule says a METAL2 wire must be at least 4 µm wide. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`proc sizeLabel {width} {
+    if {$width < 4} {
+        return "too narrow"
+    }
+    return "ok"
+}
+puts [sizeLabel 3]
+puts [sizeLabel 4]`}
+  expected={`too narrow
+ok`}
+  explanation="return ends the proc at once. With 3, the test is true, so the first return sends back too narrow and the last line of the body never runs. With 4, the test is false (4 is not less than 4), so Tcl skips the if and reaches return ok."
+/>
+
+## A command that answers yes or no: the touching rule
+
+The capstone must find blocks of a <GlossaryTerm term="floorplan" /> that clash. Start with one axis. Block A covers x from a1 to a2, and block B covers b1 to b2. They clash when `a1 <= b2 && b1 <= a2`: neither one ends before the other starts.
+
+With `<=`, **touching counts**: two blocks that share an edge clash. With `<`, touching would be fine. That is a **design decision we make for floorplan blocks**: blocks must not touch, because they need space between them for wires.
+
+It is not a law of nature. Real layouts often <GlossaryTerm term="abut" /> shapes on purpose: standard cells sit side by side in their rows. And two touching shapes on the same layer simply merge into one bigger shape. So the rule fits our blocks, not every shape.
+
+<Diagram name="w07-spans" alt="Four pairs of spans on a number line, block A in blue and block B in green. Gap: A from 0 to 10, B from 20 to 30, space between them: no clash, 0. Touch: A from 0 to 10, B from 10 to 30, they share the point 10: a clash with less-than-or-equal, 1, but none with less-than. Overlap: A from 0 to 10, B from 5 to 30: a clash, 1. Inside: A from 0 to 30, B from 10 to 20: a clash, 1. The rule a1 <= b2 and b1 <= a2 means touching counts; with < instead, touching would be fine." />
+
+<WorkedExample
+  code={`proc spansOverlap {a1 a2 b1 b2} {
+    return [expr {$a1 <= $b2 && $b1 <= $a2}]
+}
+puts [spansOverlap 0 10 20 30]
+puts [spansOverlap 0 10 10 30]
+puts [spansOverlap 0 10 5 30]
+puts [spansOverlap 0 30 10 20]
+puts [spansOverlap 20 220 240 380]`}
+  notes={{
+    1: 'Four arguments: where A starts and ends, then where B starts and ends.',
+    2: 'Two comparisons joined with && (Week 4). expr gives 1 or 0, and return sends it back.',
+    3: 'The end of the proc.',
+    4: 'A gap: B starts at 20, after A ends at 10. Output: 0',
+    5: 'Touching at 10. With <=, touching counts. Output: 1',
+    6: 'Overlapping from 5 to 10. Output: 1',
+    7: 'B lies inside A. Neither ends before the other starts. Output: 1',
+    8: 'CORE (x 20 to 220) and SRAM (x 240 to 380): a 20 µm gap. Output: 0'
+  }}
+/>
+
+## Every pair, once
+
+To check a floorplan, compare every block with every other block, once. Use a loop inside a loop. The outer loop picks block number `i`. The inner loop picks every block **after** it: `j` starts at `i + 1`.
+
+That start value matters. If `j` started at 0, you would compare CORE with itself, and every pair would come up twice: CORE and SRAM, then SRAM and CORE. With 3 blocks there are 3 pairs; with {chip.blocks.length} blocks there are 10.
+
+<Diagram name="w07-pairs" alt="A table with the blocks CORE, SRAM and ADC along the top and down the side. Only the cells above the diagonal are filled: CORE and SRAM, CORE and ADC, SRAM and ADC. The diagonal, a block with itself, is greyed out, and the cells below it are greyed out as repeats. Caption: j starts at i plus 1, so each pair comes up exactly once." />
+
+<WorkedExample
+  code={`set names {CORE SRAM ADC}
+set count [llength $names]
+for {set i 0} {$i < $count} {incr i} {
+    for {set j [expr {$i + 1}]} {$j < $count} {incr j} {
+        puts "[lindex $names $i] and [lindex $names $j]"
+    }
+}`}
+  notes={{
+    1: 'Three blocks, so three pairs to check.',
+    2: 'count is 3.',
+    3: 'The outer loop: i takes 0, 1 and 2 (Week 4).',
+    4: 'The inner loop starts at i + 1, so it only looks at blocks AFTER block i. When i is 2, j starts at 3 and the inner loop runs zero times.',
+    5: 'Output: CORE and SRAM, CORE and ADC, SRAM and ADC',
+    6: 'The end of the inner loop.',
+    7: 'The end of the outer loop.'
+  }}
+/>
+
+Run it. Then add SENSOR and PADS to the list: do you get 10 pairs? Finally, change `[expr {$i + 1}]` to 0 and see what goes wrong.
+
+<TclPlayground client:visible code={`set names {CORE SRAM ADC}
+set count [llength $names]
+for {set i 0} {$i < $count} {incr i} {
+    for {set j [expr {$i + 1}]} {$j < $count} {incr j} {
+        puts "[lindex $names $i] and [lindex $names $j]"
+    }
+}`} />
+
+## Default values
+
+An argument can have a <GlossaryTerm term="default-value">default value</GlossaryTerm>: write it as a pair in the argument list, `{dy 0}`. If the caller leaves that argument out, Tcl uses the default. Arguments with a default go at the end of the list.
+
+Here, `rectShift` moves a rectangle by dx and dy. Most moves in a row of blocks are sideways, so dy defaults to 0.
+
+<TclPlayground client:visible code={`proc rectShift {rect dx {dy 0}} {
+    set x1 [expr {[lindex $rect 0] + $dx}]
+    set y1 [expr {[lindex $rect 1] + $dy}]
+    set x2 [expr {[lindex $rect 2] + $dx}]
+    set y2 [expr {[lindex $rect 3] + $dy}]
+    return [list $x1 $y1 $x2 $y2]
+}
+puts [rectShift {20 20 220 180} 10]
+puts [rectShift {20 20 220 180} 10 5]`} />
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`# Must print: 160
+___1___ rectHeight {rect} {
+    ___2___ [expr {[lindex $rect 3] - [lindex $rect 1]}]
+}
+puts [rectHeight {20 20 220 180}]
+# Must print: 1, because touching counts
+proc spansOverlap {a1 a2 b1 b2} {
+    return [expr {$a1 ___3___ $b2 && $b1 <= $a2}]
+}
+puts [spansOverlap 0 10 10 20]`}
+  answers={[['proc'], ['return'], ['<=']]}
+  hints={['Which command creates a new command?', 'Which command sends a value back to the caller?', 'A ends at 10 and B starts at 10. Which comparison makes touching count?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`puts [rectWidth {20 20 220 180}]
+proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}`}
+  error={`invalid command name "rectWidth"`}
+  fix={`proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+puts [rectWidth {20 20 220 180}]`}
+  why="Tcl runs a script from top to bottom, and proc is a command like any other. Until the proc line has run, rectWidth does not exist. Put your procs at the top of the script, before the first call."
+/>
+
+<Trap
+  wrong={`proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+puts [rectWidth 20 20 220 180]`}
+  error={`wrong # args: should be "rectWidth rect"`}
+  fix={`proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+puts [rectWidth {20 20 220 180}]`}
+  why="rectWidth takes ONE argument, a rectangle. Without braces, the four numbers are four words, so four arguments. The error message helps: it shows how the command should be called. Keep the rectangle together in braces, or in a variable."
+/>
+
+<Trap
+  wrong={`proc rectWidth {rect} {
+    puts [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+set width [rectWidth {20 20 220 180}]
+puts "Width: $width um"`}
+  output={`200
+Width:  um`}
+  fix={`proc rectWidth {rect} {
+    return [expr {[lindex $rect 2] - [lindex $rect 0]}]
+}
+set width [rectWidth {20 20 220 180}]
+puts "Width: $width um"`}
+  why="puts PRINTS the width, but it does not send it back. The proc's result is the result of its last command, and puts gives back an empty value. So width is empty. Use return for a value the caller needs."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w07" lesson="a" mode="exit" count={4} require="touching" />
+
+## Cheat card
+
+<CheatCard title="proc, return, default values" lines={[
+  'proc name {arg1 arg2} {body}    define a command (before you call it)',
+  'return $value          send a value back and end the proc',
+  'set w [rectWidth $core]   the return value replaces the call',
+  'proc rectShift {rect dx {dy 0}} {…}   dy defaults to 0',
+  'Touching counts:  a1 <= b2 && b1 <= a2   (with < touching is fine)',
+  'Every pair once: for i from 0, for j from i + 1',
+  'wrong # args: should be "…"   shows how to call it',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Creating a new command, proc', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl19.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Variations in proc arguments and return values', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl20.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: proc', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/proc.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: return (the options are for later weeks)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/return.htm', kind: 'tcl-man' },
+]} />

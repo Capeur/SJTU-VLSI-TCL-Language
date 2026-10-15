@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 270">
+  <defs><marker id="w06-arrow3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-bold" x="20" y="26">rects: a list whose elements are rectangles</text>
+  <rect class="d-box-info" x="20" y="40" width="600" height="104" rx="10"/>
+  <text class="d-txt d-small d-fg-info" x="34" y="60">rects</text>
+
+  <rect class="d-box-code" x="40" y="70" width="260" height="56" rx="8"/>
+  <text class="d-txt d-mono" x="170" y="104" text-anchor="middle">20 20 220 180</text>
+  <text class="d-txt d-small d-muted" x="170" y="140" text-anchor="middle">element 0 (CORE)</text>
+
+  <rect class="d-box-ok" x="340" y="70" width="260" height="56" rx="8"/>
+  <text class="d-txt d-mono" x="378" y="104" text-anchor="middle">240</text>
+  <text class="d-txt d-mono" x="436" y="104" text-anchor="middle">20</text>
+  <text class="d-txt d-mono d-bold" x="494" y="104" text-anchor="middle">380</text>
+  <text class="d-txt d-mono" x="556" y="104" text-anchor="middle">180</text>
+  <text class="d-txt d-small d-muted" x="378" y="120" text-anchor="middle">0</text>
+  <text class="d-txt d-small d-muted" x="436" y="120" text-anchor="middle">1</text>
+  <text class="d-txt d-small d-bold" x="494" y="120" text-anchor="middle">2</text>
+  <text class="d-txt d-small d-muted" x="556" y="120" text-anchor="middle">3</text>
+  <text class="d-txt d-small d-muted" x="470" y="140" text-anchor="middle">element 1 (SRAM)</text>
+
+  <text class="d-txt d-mono d-small" x="20" y="182">llength $rects</text>
+  <text class="d-txt d-small" x="230" y="182">2: two rectangles, not eight numbers</text>
+  <text class="d-txt d-mono d-small" x="20" y="212">lindex $rects 1</text>
+  <text class="d-txt d-small" x="230" y="212">the whole element 1: 240 20 380 180</text>
+  <text class="d-txt d-mono d-small" x="20" y="242">lindex $rects 1 2</text>
+  <text class="d-txt d-small" x="230" y="242">open element 1, then take its element 2: <tspan class="d-bold">380</tspan></text>
+  <text class="d-txt d-small d-muted" x="230" y="262">one index per level, from the outside in</text>
+</svg>

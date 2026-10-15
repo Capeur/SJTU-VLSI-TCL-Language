@@ -1,14 +1,22 @@
 ---
-title: "Week 7 Lesson B"
+title: "Scope: what a proc can see"
+description: "Week 7, Lesson B: each proc has its own local variables, global for chip-wide facts, one simple upvar to change the caller's variable, and args for any number of arguments."
 milestone: "m10"
 week: 7
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Explain why a proc cannot see the script's variables, and fix it with an argument or global
+  - Change a variable of the caller with upvar, by passing its name
+  - Accept any number of arguments with args
+prerequisites: ["m10-w07-a"]
+glossary: [local-variable, global-variable, procedure, argument]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Variable scope, global and upvar", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl21.html" }
+  - { title: "Tcl manual page: global", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/global.htm" }
+  - { title: "Tcl manual page: upvar", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/upvar.htm" }
+  - { title: "Tcl manual page: proc (the special argument args)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/proc.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,284 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 7 (Your own commands) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · scope concept + diagram + worked example 1 + playground 7 ·
+    predict 3 · global concept + playground 4 · upvar concept + diagram + worked example 2 5 · args concept + playground 3 ·
+    faded 3 · traps 4 · exit quiz 4 · cheat card 1 = 40 min. With args as a third worked example the plan reached
+    41 min, so args is a short concept + playground + cheat card lines (user rule, P3 Weeks 6-7 review); the exit quiz
+    always includes an args item (require="args"). upvar: one simple example only (PRD §9.1, M10 out of scope beyond). */}
+
+<LessonMeta milestone="m10" week={7} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+The capstone has a second job: find blocks that stick out of the chip. {chip.name} is {chip.width_um} µm wide and {chip.height_um} µm tall, and a proc that checks a block needs those two numbers. But a proc lives in its own small world. It cannot see the variables of the script around it unless you let it. This lesson shows the three ways in: pass a value as an argument, name a shared variable with global, or hand over a variable's name with upvar.
+
+<ChipMap caption={`The ${chip.name} floorplan: ${chip.width_um} by ${chip.height_um} µm. A block whose x2 is larger than ${chip.width_um} sticks out on the right.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Explain why a proc cannot see the script’s variables, and fix it with an argument or global', 'Change a variable of the caller with upvar, by passing its name', 'Accept any number of arguments with args']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 6, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w07" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06']} mode="warmup" count={3} mix={1 / 3} />
+
+## Each proc has its own variables
+
+In the city map, think of each proc as a building with its own rooms. Every call of a proc starts with an empty set of variable boxes: its arguments and nothing else. A variable you set inside it is a <GlossaryTerm term="local-variable">local variable</GlossaryTerm>. It disappears when the proc returns.
+
+So a proc cannot see the script's variables, and the script cannot see the proc's. Two variables with the same name, one inside and one outside, are two different boxes. That is a good thing: a proc cannot change your data by accident.
+
+The usual way in is an argument. The usual way out is return.
+
+<Diagram name="w07-scope" alt="Two buildings side by side. The big one is the main script, with a box called width holding 999. The small one is a call of rectWidth, with its own boxes: rect holding 20 20 220 180 and width holding 200. An arrow labelled argument carries the rectangle in, and an arrow labelled return carries 200 out. The two boxes called width are separate: the 999 outside never changes." />
+
+<WorkedExample
+  code={`set width 999
+proc rectWidth {rect} {
+    set width [expr {[lindex $rect 2] - [lindex $rect 0]}]
+    return $width
+}
+puts [rectWidth {20 20 220 180}]
+puts $width`}
+  notes={{
+    1: 'A variable of the main script.',
+    2: 'A proc with one argument, rect.',
+    3: 'This width is a LOCAL variable of the call: a new box, not the one outside.',
+    4: 'Send its value back.',
+    5: 'The end of the proc. The local width disappears when the call ends.',
+    6: 'Output: 200',
+    7: 'The script’s own width was never touched. Output: 999'
+  }}
+/>
+
+<TclPlayground client:visible code={`set width 999
+proc rectWidth {rect} {
+    set width [expr {[lindex $rect 2] - [lindex $rect 0]}]
+    return $width
+}
+puts [rectWidth {20 20 220 180}]
+puts $width`} />
+
+## Predict → Run → Explain
+
+The argument has the same name as a variable outside. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set total 5
+proc addTen {total} {
+    incr total 10
+    return $total
+}
+puts [addTen $total]
+puts $total`}
+  expected={`15
+5`}
+  explanation="The call passes the VALUE 5 into the proc's own argument, also called total. incr changes that local box to 15, and return sends 15 back. The script's total is a different box, so it still holds 5."
+/>
+
+## global: facts the whole script shares
+
+Some facts belong to the whole script, like the chip's size. Write `global chipWidth chipHeight` at the top of a proc's body. From then on, inside that proc, those two names mean the script's own variables, the <GlossaryTerm term="global-variable">global variables</GlossaryTerm>.
+
+Use global sparingly. A proc that gets everything through its arguments is easier to test and to reuse. Keep global for a few facts that never change while the script runs.
+
+This proc checks the right and top edges of a block. The capstone also checks the left and bottom ones.
+
+<TclPlayground client:visible code={`set chipWidth 400
+set chipHeight 300
+proc insideChip {rect} {
+    global chipWidth chipHeight
+    set rightOk [expr {[lindex $rect 2] <= $chipWidth}]
+    set topOk [expr {[lindex $rect 3] <= $chipHeight}]
+    return [expr {$rightOk && $topOk}]
+}
+puts [insideChip {20 20 220 180}]
+puts [insideChip {380 200 420 280}]`} />
+
+## upvar: change the caller's variable
+
+A proc gets copies of values, so it cannot change the caller's variables. But `incr` and `lappend` do change variables: you give them a variable's NAME, without `$`. Your own procs can work the same way with `upvar`.
+
+`upvar 1 $rectName rect` means: go 1 level up, to the caller, find the variable whose name is in `rectName`, and let me call it `rect` here. After that line, reading or setting `rect` reads or sets the caller's variable. M10 needs only this one pattern.
+
+<Diagram name="w07-upvar" alt="The main script has a box called sensor holding 160 200 260 280. The call moveRight sensor 10 passes the word sensor, a name, not the rectangle. Inside the proc, upvar 1 dollar rectName rect draws a link from the proc's name rect to the script's box sensor. When the proc sets rect, the script's sensor changes to 170 200 270 280." />
+
+<WorkedExample
+  code={`proc moveRight {rectName dx} {
+    upvar 1 $rectName rect
+    set x1 [expr {[lindex $rect 0] + $dx}]
+    set x2 [expr {[lindex $rect 2] + $dx}]
+    set rect [list $x1 [lindex $rect 1] $x2 [lindex $rect 3]]
+}
+set sensor {160 200 260 280}
+moveRight sensor 10
+puts "SENSOR: $sensor"`}
+  notes={{
+    1: 'The first argument is a variable NAME, like the first argument of incr.',
+    2: 'Link the local name rect to the caller’s variable whose name is in rectName.',
+    3: 'Reading rect reads the caller’s rectangle: 160 + 10 = 170.',
+    4: '260 + 10 = 270.',
+    5: 'Setting rect sets the caller’s variable.',
+    6: 'The end of the proc.',
+    7: 'SENSOR’s corners.',
+    8: 'Pass the name sensor, without a $.',
+    9: 'The script’s variable has changed. Output: SENSOR: 170 200 270 280'
+  }}
+/>
+
+## args: any number of arguments
+
+If the last argument in the list is called `args`, the proc accepts any number of values. They all arrive as one list in `args`, so you can walk it with foreach.
+
+<TclPlayground client:visible code={`proc largest {args} {
+    set best [lindex $args 0]
+    foreach value $args {
+        if {$value > $best} {
+            set best $value
+        }
+    }
+    return $best
+}
+puts [largest 200 140 120]
+puts [largest 80 160]`} />
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`set chipWidth 400
+proc fitsWidth {rect} {
+    ___1___ chipWidth
+    return [expr {[lindex $rect 2] <= $chipWidth}]
+}
+# Must print: 1
+puts [fitsWidth {20 20 220 180}]
+proc addOne {counterName} {
+    upvar 1 ___2___ counter
+    incr counter
+}
+set blocksSeen 4
+addOne blocksSeen
+# Must print: 5
+puts $blocksSeen
+proc countArgs {___3___} {
+    return [llength $args]
+}
+# Must print: 3
+puts [countArgs CORE SRAM ADC]`}
+  answers={[['global'], ['$counterName'], ['args']]}
+  hints={['Which command lets a proc use a variable of the main script?', 'upvar needs the NAME of the caller’s variable, which is stored in the argument counterName. How do you get the value of counterName?', 'Which special argument name collects any number of values?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set chipWidth 400
+proc fitsWidth {rect} {
+    return [expr {[lindex $rect 2] <= $chipWidth}]
+}
+puts [fitsWidth {20 20 220 180}]`}
+  error={`can't read "chipWidth": no such variable`}
+  fix={`set chipWidth 400
+proc fitsWidth {rect} {
+    global chipWidth
+    return [expr {[lindex $rect 2] <= $chipWidth}]
+}
+puts [fitsWidth {20 20 220 180}]`}
+  why="Inside the proc, chipWidth is a local name, and no local variable has that name. The script's chipWidth is in another building. Name it with global at the top of the body, or better, pass it as an argument."
+/>
+
+<Trap
+  wrong={`proc moveRight {rectName dx} {
+    upvar 1 $rectName rect
+    set x1 [expr {[lindex $rect 0] + $dx}]
+    set x2 [expr {[lindex $rect 2] + $dx}]
+    set rect [list $x1 [lindex $rect 1] $x2 [lindex $rect 3]]
+}
+set sensor {160 200 260 280}
+moveRight $sensor 10`}
+  error={`can't read "rect": no such variable`}
+  fix={`proc moveRight {rectName dx} {
+    upvar 1 $rectName rect
+    set x1 [expr {[lindex $rect 0] + $dx}]
+    set x2 [expr {[lindex $rect 2] + $dx}]
+    set rect [list $x1 [lindex $rect 1] $x2 [lindex $rect 3]]
+}
+set sensor {160 200 260 280}
+moveRight sensor 10`}
+  why="With $sensor, the proc receives the rectangle 160 200 260 280 instead of the name sensor. upvar then links rect to a caller's variable with that strange name. No such variable exists, so the first line that reads rect stops with an error. A proc that uses upvar wants the name, without $, just like incr and lappend."
+/>
+
+<Trap
+  wrong={`proc largest {args} {
+    set best [lindex $args 0]
+    foreach value $args {
+        if {$value > $best} {
+            set best $value
+        }
+    }
+    return $best
+}
+puts [largest {200 140 120}]`}
+  output={`200 140 120`}
+  fix={`proc largest {args} {
+    set best [lindex $args 0]
+    foreach value $args {
+        if {$value > $best} {
+            set best $value
+        }
+    }
+    return $best
+}
+puts [largest 200 140 120]`}
+  why="args collects the WORDS of the call. In braces, the three numbers are one word, so args holds one element: the whole list. foreach runs once and gives that list back. Pass the numbers as separate words."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w07" lesson="b" mode="exit" count={4} require="args" />
+
+## Cheat card
+
+<CheatCard title="Scope, global, upvar, args" lines={[
+  'Each call of a proc has its own local variables',
+  'In: arguments.  Out: return.  Outside variables: invisible',
+  'global chipWidth        use the script’s variable inside a proc',
+  'upvar 1 $rectName rect  rect now means the caller’s variable',
+  'Call it with the NAME: moveRight sensor 10 (no $)',
+  'proc largest {args} {…}  any number of values, as a list in args',
+  'largest 200 140 120     separate words, not one {list}',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Variable scope, global and upvar', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl21.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: global', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/global.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: upvar (levels beyond 1 come much later)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/upvar.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: proc, including args and default values', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/proc.htm', kind: 'tcl-man' },
+]} />

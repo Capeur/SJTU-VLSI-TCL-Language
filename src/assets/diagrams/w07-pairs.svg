@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240">
+  <text class="d-txt d-small d-muted" x="20" y="22">Rows: block i. Columns: block j. Only j &gt; i is checked.</text>
+  <text class="d-txt d-mono d-small" x="200" y="56" text-anchor="middle">CORE</text>
+  <text class="d-txt d-mono d-small" x="300" y="56" text-anchor="middle">SRAM</text>
+  <text class="d-txt d-mono d-small" x="400" y="56" text-anchor="middle">ADC</text>
+  <text class="d-txt d-mono d-small" x="140" y="94" text-anchor="end">CORE</text>
+  <text class="d-txt d-mono d-small" x="140" y="144" text-anchor="end">SRAM</text>
+  <text class="d-txt d-mono d-small" x="140" y="194" text-anchor="end">ADC</text>
+
+  <rect class="d-box-code" x="150" y="66" width="100" height="46"/>
+  <text class="d-txt d-small d-muted" x="200" y="94" text-anchor="middle">itself</text>
+  <rect class="d-box-ok" x="250" y="66" width="100" height="46"/>
+  <text class="d-txt d-small d-bold" x="300" y="94" text-anchor="middle">pair 1</text>
+  <rect class="d-box-ok" x="350" y="66" width="100" height="46"/>
+  <text class="d-txt d-small d-bold" x="400" y="94" text-anchor="middle">pair 2</text>
+
+  <rect class="d-box-code" x="150" y="116" width="100" height="46"/>
+  <text class="d-txt d-small d-muted" x="200" y="144" text-anchor="middle">repeat</text>
+  <rect class="d-box-code" x="250" y="116" width="100" height="46"/>
+  <text class="d-txt d-small d-muted" x="300" y="144" text-anchor="middle">itself</text>
+  <rect class="d-box-ok" x="350" y="116" width="100" height="46"/>
+  <text class="d-txt d-small d-bold" x="400" y="144" text-anchor="middle">pair 3</text>
+
+  <rect class="d-box-code" x="150" y="166" width="100" height="46"/>
+  <text class="d-txt d-small d-muted" x="200" y="194" text-anchor="middle">repeat</text>
+  <rect class="d-box-code" x="250" y="166" width="100" height="46"/>
+  <text class="d-txt d-small d-muted" x="300" y="194" text-anchor="middle">repeat</text>
+  <rect class="d-box-code" x="350" y="166" width="100" height="46"/>
+  <text class="d-txt d-small d-muted" x="400" y="194" text-anchor="middle">itself</text>
+
+  <text class="d-txt d-small" x="470" y="94">j starts at i + 1,</text>
+  <text class="d-txt d-small" x="470" y="114">so each pair comes</text>
+  <text class="d-txt d-small" x="470" y="134">up exactly once.</text>
+  <text class="d-txt d-small d-muted" x="470" y="174">3 blocks: 3 pairs</text>
+  <text class="d-txt d-small d-muted" x="470" y="194">5 blocks: 10 pairs</text>
+</svg>

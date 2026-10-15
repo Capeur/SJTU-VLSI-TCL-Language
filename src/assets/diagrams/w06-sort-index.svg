@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 290">
+  <defs><marker id="w06-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-bold" x="20" y="26">Before: floorplan order</text>
+  <text class="d-txt d-bold" x="400" y="26">After: smallest area first</text>
+  <text class="d-txt d-small d-muted" x="20" y="46">index 0: name · index 1: area</text>
+
+  <rect class="d-box-code" x="20" y="58" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="81">CORE</text><text class="d-txt d-mono d-bold d-fg-info" x="196" y="81" text-anchor="end">32000</text>
+  <rect class="d-box-code" x="20" y="100" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="123">SRAM</text><text class="d-txt d-mono d-bold d-fg-info" x="196" y="123" text-anchor="end">22400</text>
+  <rect class="d-box-code" x="20" y="142" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="165">ADC</text><text class="d-txt d-mono d-bold d-fg-info" x="196" y="165" text-anchor="end">9600</text>
+  <rect class="d-box-code" x="20" y="184" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="207">SENSOR</text><text class="d-txt d-mono d-bold d-fg-info" x="196" y="207" text-anchor="end">8000</text>
+  <rect class="d-box-code" x="20" y="226" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="249">PADS</text><text class="d-txt d-mono d-bold d-fg-info" x="196" y="249" text-anchor="end">8000</text>
+
+  <line class="d-arrow" x1="230" y1="160" x2="384" y2="160" marker-end="url(#w06-arrow2)"/>
+  <text class="d-txt d-mono d-small" x="307" y="140" text-anchor="middle">lsort -integer -index 1</text>
+  <text class="d-txt d-small d-muted" x="307" y="184" text-anchor="middle">compares the areas only;</text>
+  <text class="d-txt d-small d-muted" x="307" y="202" text-anchor="middle">each name moves with its area</text>
+
+  <rect class="d-box-ok" x="400" y="58" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="414" y="81">SENSOR</text><text class="d-txt d-mono d-bold" x="576" y="81" text-anchor="end">8000</text>
+  <rect class="d-box-ok" x="400" y="100" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="414" y="123">PADS</text><text class="d-txt d-mono d-bold" x="576" y="123" text-anchor="end">8000</text>
+  <rect class="d-box-code" x="400" y="142" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="414" y="165">ADC</text><text class="d-txt d-mono d-bold" x="576" y="165" text-anchor="end">9600</text>
+  <rect class="d-box-code" x="400" y="184" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="414" y="207">SRAM</text><text class="d-txt d-mono d-bold" x="576" y="207" text-anchor="end">22400</text>
+  <rect class="d-box-code" x="400" y="226" width="190" height="34" rx="6"/>
+  <text class="d-txt d-mono" x="414" y="249">CORE</text><text class="d-txt d-mono d-bold" x="576" y="249" text-anchor="end">32000</text>
+  <text class="d-txt d-small d-fg-ok" x="400" y="280">Equal areas: SENSOR stays before PADS.</text>
+</svg>

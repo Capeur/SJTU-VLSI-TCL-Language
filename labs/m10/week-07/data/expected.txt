@@ -1,0 +1,9 @@
+ALU: 3000 um2
+REGS: 2500 um2
+CTRL: 2891 um2
+CACHE: 5400 um2
+FPU: 9200 um2
+Conflict: ALU and REGS
+Conflict: REGS and CACHE
+Conflict: CACHE and FPU
+Conflicts: 3

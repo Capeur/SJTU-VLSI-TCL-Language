@@ -1,0 +1,459 @@
+# Week 6 — Lists II. Lesson A: lrange (both ends included), lsearch (-1 when missing, and why it must be
+# tested with != -1), lsort (-integer, -decreasing, -index on a list of pairs, a new list, equal elements
+# keep their order). Lesson B: nested lists (lindex with several indexes, lappend [list …]), lmap,
+# split and join.
+# Numbers: Lumen-1's real blocks, layers and areas. The lab's standard cells are not used here (style rule 21).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w06-q01
+    type: predict-output
+    lesson: a
+    tags: [lsort, integer]
+    review: true
+    prompt: "Sorting numbers two ways. What does this print?"
+    code: |
+      set widths {200 140 1000 90}
+      puts [lsort $widths]
+      puts [lsort -integer $widths]
+    answer: |-
+      1000 140 200 90
+      90 140 200 1000
+    explanation: >
+      Without -integer, lsort compares text, character by character: 1000 starts with 1, so it comes
+      first, and 90 starts with 9, so it comes last. With -integer, lsort compares the numbers by size.
+
+  - id: m10-w06-q02
+    type: predict-output
+    lesson: a
+    tags: [lrange, lsearch]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+      puts [lrange $layers 3 5]
+      puts [lsearch $layers VIA1]
+      puts [lsearch $layers METAL3]
+    answer: |-
+      METAL1 VIA1 METAL2
+      4
+      -1
+    explanation: >
+      lrange includes both ends: indexes 3, 4 and 5. VIA1 is the fifth layer, so its index is 4.
+      There is no METAL3, so lsearch gives -1.
+
+  - id: m10-w06-q03
+    type: find-the-bug
+    lesson: a
+    tags: [lsort, set]
+    review: true
+    prompt: "This should print  Smallest: 100,  but it prints  Smallest: 200.  Which line has the bug?"
+    code: |
+      set widths {200 140 120 100}
+      lsort -integer $widths
+      puts "Smallest: [lindex $widths 0]"
+    answer: 2
+    explanation: >
+      lsort gives back a new, sorted list and never changes the variable. On a line of its own, the
+      sorted list is thrown away. Keep it: set widths [lsort -integer $widths].
+
+  - id: m10-w06-q04
+    type: mcq
+    lesson: a
+    tags: [lsearch]
+    review: true
+    prompt: "What does lsearch give when the element is NOT in the list?"
+    choices: ['-1', '0', 'An empty value', 'An error message']
+    answer: '-1'
+    explanation: >
+      lsearch gives the index of the element, or -1 when it is missing. -1 can never be an index,
+      because indexes start at 0.
+    distractor_feedback:
+      '0': '0 is the index of the FIRST element, so it means "found, at the start".'
+      'An empty value': 'That is what lindex gives past the end of a list. lsearch gives a number: -1.'
+      'An error message': 'A missing element is not an error for lsearch. It gives -1.'
+
+  - id: m10-w06-q05
+    type: predict-output
+    lesson: a
+    tags: [lsort, index, decreasing]
+    review: true
+    prompt: "Pairs of a block name and its area. What does this print?"
+    code: |
+      set pairs {{ADC 9600} {CORE 32000} {SRAM 22400}}
+      puts [lsort -integer -decreasing -index 1 $pairs]
+    answer: "{CORE 32000} {SRAM 22400} {ADC 9600}"
+    explanation: >
+      -index 1 compares element 1 of each pair, the area. -integer compares them as numbers, and
+      -decreasing puts the largest first. Each name moves with its area.
+
+  - id: m10-w06-q06
+    type: fill-blank
+    lesson: a
+    tags: [lrange]
+    review: false
+    prompt: 'blocks holds CORE SRAM ADC SENSOR PADS. Fill the blank so the line prints the first three blocks:     puts [lrange $blocks 0 ___]'
+    answer: ['2']
+    explanation: >
+      lrange includes both ends. The first three elements have the indexes 0, 1 and 2.
+
+  - id: m10-w06-q07
+    type: mcq
+    lesson: a
+    tags: [lrange]
+    review: false
+    prompt: "layers holds ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT. Which line prints  METAL1 VIA1 ?"
+    choices:
+      - 'puts [lrange $layers 3 4]'
+      - 'puts [lrange $layers 4 5]'
+      - 'puts [lrange $layers 3 5]'
+      - 'puts [lindex $layers 3 4]'
+    answer: 'puts [lrange $layers 3 4]'
+    explanation: >
+      METAL1 has index 3 and VIA1 has index 4, and lrange includes both ends.
+    distractor_feedback:
+      'puts [lrange $layers 4 5]': 'That counts from 1. Counting from 0, index 4 is VIA1 and index 5 is METAL2.'
+      'puts [lrange $layers 3 5]': 'lrange includes both ends, so this gives three layers: METAL1 VIA1 METAL2.'
+      'puts [lindex $layers 3 4]': 'lindex with two indexes goes one level DEEPER: element 4 of METAL1, which does not exist. You need lrange.'
+
+  - id: m10-w06-q08
+    type: predict-output
+    lesson: a
+    tags: [lsort, index, integer]
+    review: true
+    prompt: "-index without -integer. What does this print?"
+    code: |
+      set pairs {{ADC 9600} {SRAM 22400}}
+      puts [lsort -index 1 $pairs]
+    answer: "{SRAM 22400} {ADC 9600}"
+    explanation: >
+      Without -integer, the areas are compared as text. The text 22400 starts with 2, which comes
+      before 9, so SRAM comes first even though its area is larger. Add -integer to compare sizes.
+
+  - id: m10-w06-q09
+    type: predict-output
+    lesson: a
+    tags: [lsearch, if, trap]
+    review: true
+    prompt: "CORE is in the list. What does this print?"
+    code: |
+      set blocks {CORE SRAM ADC}
+      if {[lsearch $blocks CORE]} {
+          puts "CORE found"
+      } else {
+          puts "CORE missing"
+      }
+    answer: "CORE missing"
+    explanation: >
+      CORE is the first element, so lsearch gives 0, and if treats 0 as false. A missing block would
+      give -1, which if treats as true. Both are wrong, so test with != -1:
+      if {[lsearch $blocks CORE] != -1}.
+
+  - id: m10-w06-q10
+    type: mcq
+    lesson: a
+    tags: [lsearch, if]
+    review: false
+    prompt: "Which test is right for \"METAL1 is in layers\"?"
+    choices:
+      - 'if {[lsearch $layers METAL1] != -1} {…}'
+      - 'if {[lsearch $layers METAL1]} {…}'
+      - 'if {[lsearch $layers METAL1] > 0} {…}'
+      - 'if {[lsearch $layers METAL1] == 1} {…}'
+    answer: 'if {[lsearch $layers METAL1] != -1} {…}'
+    explanation: >
+      lsearch gives an index from 0 up, or -1 when the element is missing. Only != -1 is true for
+      every index, including 0, and false for -1.
+    distractor_feedback:
+      'if {[lsearch $layers METAL1]} {…}': 'if treats 0 as false and -1 as true: wrong for an element at index 0, and wrong for a missing one.'
+      'if {[lsearch $layers METAL1] > 0} {…}': 'Close, but an element at index 0 is found too. Use != -1, or >= 0.'
+      'if {[lsearch $layers METAL1] == 1} {…}': 'That only says METAL1 is the second element.'
+
+  - id: m10-w06-q11
+    type: order-steps
+    lesson: a
+    tags: [lsort, brackets]
+    review: false
+    prompt: 'areas holds 9600 32000 8000. Put in order what Tcl does with:   puts [lsort -integer -decreasing $areas]'
+    steps:
+      - "Meet the brackets and start a new command: lsort"
+      - "Replace $areas with its value, the three areas"
+      - "lsort compares them as numbers and gives back a new list, largest first"
+      - "The new list replaces the brackets, and puts prints 32000 9600 8000"
+    explanation: >
+      The brackets run lsort first. Inside them, $areas is substituted, then lsort builds a NEW list.
+      The variable areas itself does not change.
+
+  - id: m10-w06-q12
+    type: predict-output
+    lesson: a
+    tags: [lsort, index, tie]
+    review: false
+    prompt: "SENSOR and PADS have the same area. What does this print?"
+    code: |
+      set pairs {{PADS 8000} {ADC 9600} {SENSOR 8000}}
+      puts [lsort -integer -index 1 $pairs]
+    answer: "{PADS 8000} {SENSOR 8000} {ADC 9600}"
+    explanation: >
+      Smallest first: the two 8000s come before 9600. PADS and SENSOR tie, so they keep the order they
+      had: PADS was first, so it stays first.
+
+  - id: m10-w06-q13
+    type: predict-output
+    lesson: a
+    tags: [lsort]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      puts [lsort {SRAM ADC CORE PADS SENSOR}]
+    answer: "ADC CORE PADS SENSOR SRAM"
+    explanation: >
+      Without options, lsort sorts in alphabetical order. SENSOR and SRAM both start with S; E comes
+      before R, so SENSOR comes first.
+
+  - id: m10-w06-q14
+    type: mcq
+    lesson: a
+    tags: [lsort, set]
+    review: false
+    prompt: "areas holds 32000 22400 9600. After the line  lsort -integer $areas  on its own, what does areas hold?"
+    choices: ['32000 22400 9600', '9600 22400 32000', 'An empty list', 'Only 9600']
+    answer: '32000 22400 9600'
+    explanation: >
+      lsort never changes a variable. It gives back a new list, and on a line of its own nothing keeps
+      it. Write set areas [lsort -integer $areas] to keep the sorted list.
+    distractor_feedback:
+      '9600 22400 32000': 'That is the list lsort gives back, but nothing stored it, so areas did not change.'
+      'An empty list': 'lsort does not empty the variable. It does not touch it at all.'
+      'Only 9600': 'lsort gives a whole list, not one element.'
+
+  # ---------- Lesson B ----------
+  - id: m10-w06-q15
+    type: predict-output
+    lesson: b
+    tags: [nested-list, lindex]
+    review: true
+    prompt: "A list of two rectangles. What does this print?"
+    code: |
+      set rects {{20 20 220 180} {240 20 380 180}}
+      puts [llength $rects]
+      puts [lindex $rects 1]
+      puts [lindex $rects 1 0]
+    answer: |-
+      2
+      240 20 380 180
+      240
+    explanation: >
+      The outer list has two elements, two rectangles. Index 1 is the second rectangle. With a second
+      index, lindex goes one level deeper: element 0 of that rectangle, its x1.
+
+  - id: m10-w06-q16
+    type: predict-output
+    lesson: b
+    tags: [lappend, list, nested-list]
+    review: true
+    prompt: "Two ways to add four numbers. What does this print?"
+    code: |
+      set flat {}
+      lappend flat 0 0 10 5
+      set nested {}
+      lappend nested [list 0 0 10 5]
+      puts "[llength $flat] [llength $nested]"
+    answer: "4 1"
+    explanation: >
+      lappend adds each of its values as a separate element: four numbers, four elements. With
+      [list …], the four numbers are ONE value, so lappend adds one element: a whole rectangle.
+
+  - id: m10-w06-q17
+    type: predict-output
+    lesson: b
+    tags: [lmap]
+    review: true
+    prompt: "ADC and SENSOR's rectangles. What does this print?"
+    code: |
+      set rects {{20 200 140 280} {160 200 260 280}}
+      puts [lmap rect $rects {expr {[lindex $rect 2] - [lindex $rect 0]}}]
+    answer: "120 100"
+    explanation: >
+      lmap runs the body once per rectangle and collects each result: 140 - 20 = 120 and
+      260 - 160 = 100.
+
+  - id: m10-w06-q18
+    type: mcq
+    lesson: b
+    tags: [split, join]
+    review: true
+    prompt: 'What does this print?     set layers [split "ACTIVE,POLY,CONTACT" ,]     puts [join $layers " > "]'
+    choices:
+      - 'ACTIVE > POLY > CONTACT'
+      - 'ACTIVE,POLY,CONTACT'
+      - 'ACTIVE, > POLY, > CONTACT'
+      - '{ACTIVE POLY CONTACT}'
+    answer: 'ACTIVE > POLY > CONTACT'
+    explanation: >
+      split cuts the text at each comma and drops the commas: a list of three layers. join glues them
+      back together with " > " between them.
+    distractor_feedback:
+      'ACTIVE,POLY,CONTACT': 'join does not put the old commas back. It uses the separator you give it: " > ".'
+      'ACTIVE, > POLY, > CONTACT': 'split removes the separator itself, so no commas are left in the parts.'
+      '{ACTIVE POLY CONTACT}': 'join makes plain text, with no braces. The braces belong to the way you WRITE a list.'
+
+  - id: m10-w06-q19
+    type: predict-output
+    lesson: b
+    tags: [split, trap]
+    review: true
+    prompt: "Look closely at the text. What does this print?"
+    code: |
+      set parts [split "CORE, SRAM" ,]
+      puts "<[lindex $parts 1]>"
+    answer: "< SRAM>"
+    explanation: >
+      split cuts only at the comma. The space after it stays at the start of the second part, so the
+      element is " SRAM", with a space in front.
+
+  - id: m10-w06-q20
+    type: fill-blank
+    lesson: b
+    tags: [nested-list, lindex]
+    review: false
+    prompt: 'rects holds three rectangles {x1 y1 x2 y2}. Fill the blank so the line prints y1 of the third rectangle:     puts [lindex $rects 2 ___]'
+    answer: ['1']
+    explanation: >
+      Index 2 is the third rectangle. Inside it, counting from 0, y1 is element 1.
+
+  - id: m10-w06-q21
+    type: find-the-bug
+    lesson: b
+    tags: [lmap, puts]
+    review: false
+    prompt: "This should print  Widths: 200 140,  but it prints two numbers and then  Widths: {} {}.  Which line has the bug?"
+    code: |
+      set rects {{20 20 220 180} {240 20 380 180}}
+      set widths [lmap rect $rects {
+          puts [expr {[lindex $rect 2] - [lindex $rect 0]}]
+      }]
+      puts "Widths: $widths"
+    answer: 3
+    explanation: >
+      lmap keeps the result of the body's last command. puts prints the width but gives back an empty
+      result, so lmap collects two empty values. End the body with the value itself:
+      expr {[lindex $rect 2] - [lindex $rect 0]}.
+
+  - id: m10-w06-q22
+    type: mcq
+    lesson: b
+    tags: [join]
+    review: false
+    prompt: 'What does  join {CORE SRAM ADC} ", "  give?'
+    choices: ['CORE, SRAM, ADC', 'CORE SRAM ADC', 'CORE, SRAM, ADC, ', '{CORE, SRAM, ADC}']
+    answer: 'CORE, SRAM, ADC'
+    explanation: >
+      join puts the separator BETWEEN the elements: two separators for three elements, none at the end.
+    distractor_feedback:
+      'CORE SRAM ADC': 'That would be join with a single space, the separator join uses when you give none.'
+      'CORE, SRAM, ADC, ': 'join puts the separator only between elements, not after the last one.'
+      '{CORE, SRAM, ADC}': 'join gives plain text, without braces.'
+
+  - id: m10-w06-q23
+    type: multi-select
+    lesson: b
+    tags: [nested-list, list]
+    review: true
+    prompt: "Which lines make rects hold TWO rectangles, {0 0 10 5} and {10 0 30 5}? Pick all that apply."
+    choices:
+      - 'set rects [list {0 0 10 5} {10 0 30 5}]'
+      - 'set rects {{0 0 10 5} {10 0 30 5}}'
+      - 'set rects {0 0 10 5 10 0 30 5}'
+      - 'lappend rects 0 0 10 5 10 0 30 5'
+    answer:
+      - 'set rects [list {0 0 10 5} {10 0 30 5}]'
+      - 'set rects {{0 0 10 5} {10 0 30 5}}'
+    explanation: >
+      Each rectangle must be ONE element: in its own braces, or given to list as one word. The other
+      two lines make a flat list of eight numbers.
+
+  - id: m10-w06-q24
+    type: predict-output
+    lesson: b
+    tags: [nested-list, foreach]
+    review: false
+    prompt: "Each element is a name and a rectangle. What does this print?"
+    code: |
+      set blocks {{ADC {20 200 140 280}} {PADS {280 200 380 280}}}
+      foreach block $blocks {
+          set rect [lindex $block 1]
+          puts "[lindex $block 0]: x1 = [lindex $rect 0]"
+      }
+    answer: |-
+      ADC: x1 = 20
+      PADS: x1 = 280
+    explanation: >
+      foreach takes one block per pass. Element 0 of the block is its name and element 1 is its
+      rectangle; element 0 of the rectangle is x1.
+
+  - id: m10-w06-q25
+    type: order-steps
+    lesson: b
+    tags: [nested-list, lindex]
+    review: false
+    prompt: 'rects holds {20 20 220 180} {240 20 380 180}. Put in order what lindex does with:   lindex $rects 1 2'
+    steps:
+      - "Take element 1 of rects: the rectangle 240 20 380 180"
+      - "Take element 2 of that rectangle: 380"
+      - "Give back 380"
+    explanation: >
+      Each index goes one level deeper, from the outside in: first the rectangle, then the number
+      inside it.
+
+  - id: m10-w06-q26
+    type: predict-output
+    lesson: b
+    tags: [split, lsort, join]
+    review: false
+    prompt: "split, then lsort, then join. What does this print?"
+    code: |
+      set names [split "SRAM,CORE,ADC" ,]
+      puts [join [lsort $names] " "]
+    answer: "ADC CORE SRAM"
+    explanation: >
+      split gives the list SRAM CORE ADC. lsort puts it in alphabetical order, and join glues the
+      names together with a space between them.
+
+  - id: m10-w06-q27
+    type: mcq
+    lesson: b
+    tags: [lmap, foreach]
+    review: false
+    prompt: "What is the difference between foreach and lmap?"
+    choices:
+      - 'lmap also collects the result of every pass into a new list'
+      - 'lmap can only walk lists of numbers'
+      - 'lmap changes the list it walks'
+      - 'There is none: lmap is another name for foreach'
+    answer: 'lmap also collects the result of every pass into a new list'
+    explanation: >
+      Both run the body once per element. foreach gives back nothing; lmap gives back the list of the
+      body's results, one per element.
+    distractor_feedback:
+      'lmap can only walk lists of numbers': 'lmap walks any list: names, rectangles, pairs.'
+      'lmap changes the list it walks': 'Like lsort, lmap gives back a NEW list. The old one does not change.'
+      'There is none: lmap is another name for foreach': 'They walk the list the same way, but only lmap collects the results.'
+
+  - id: m10-w06-q28
+    type: predict-output
+    lesson: b
+    tags: [lmap, lsort, index]
+    review: true
+    prompt: "Sort the pairs, then keep only the names. What does this print?"
+    code: |
+      set pairs {{SENSOR 8000} {CORE 32000} {ADC 9600}}
+      set sorted [lsort -integer -decreasing -index 1 $pairs]
+      puts [lmap pair $sorted {lindex $pair 0}]
+    answer: "CORE ADC SENSOR"
+    explanation: >
+      The pairs are sorted by area, largest first: CORE, ADC, SENSOR. Then lmap takes element 0, the
+      name, of every pair.

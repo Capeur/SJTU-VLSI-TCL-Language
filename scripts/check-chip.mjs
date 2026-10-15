@@ -3,6 +3,8 @@
 //   - set chipName / chipWidth / chipHeight <value>  must match the JSON
 //   - any "Lumen-<n>" must be the chip's real name
 //   - a block written as {NAME x y w h} must match the block's numbers
+//   - a block's corners {x1 y1 x2 y2} (Weeks 5+), written as {NAME {x1 y1 x2 y2}} or as
+//     set core|sram|adc|sensor|pads {x1 y1 x2 y2}, must match the block's corners
 //   - "<w> x <h> um" and "<w> × <h>" must be the chip's size or a block's size (also in diagrams)
 //   - "Blocks: …" and "Layers: …" lists must match the JSON (all names, same order)
 //   - the channel between CORE and SRAM (Week 4 lab): `set channelWidth <n>` and "<n> µm channel/gap
@@ -48,6 +50,14 @@ for (const file of files) {
             const b = blocks[m[1]];
             if (b && [b.x, b.y, b.w, b.h].join(' ') !== m.slice(2, 6).join(' ')) {
                 errors.push(`${where}: block ${m[0]} differs from Lumen-1 {${b.name} ${b.x} ${b.y} ${b.w} ${b.h}}`);
+            }
+        }
+        // Corners: {CORE {20 20 220 180}} and set core {20 20 220 180}.
+        const corners = (b) => [b.x, b.y, b.x + b.w, b.y + b.h].join(' ');
+        for (const m of [...line.matchAll(/\{([A-Z]+) \{(\d+) (\d+) (\d+) (\d+)\}\}/g), ...line.matchAll(/\bset ([a-z]+) \{(\d+) (\d+) (\d+) (\d+)\}/g)]) {
+            const b = blocks[m[1].toUpperCase()];
+            if (b && corners(b) !== m.slice(2, 6).join(' ')) {
+                errors.push(`${where}: corners of ${b.name} written as {${m.slice(2, 6).join(' ')}}, but Lumen-1 says {${corners(b)}}`);
             }
         }
         // "400 x 300 um" (code) or "400 × 300" (prose, diagrams): the chip's size or one block's size.

@@ -1,14 +1,19 @@
 ---
-title: "Week 7 Lab"
+title: "Lab: rectArea and rectOverlaps"
+description: "Week 7 lab: write the procs rectArea and rectOverlaps with the course's touching rule, then check every pair of blocks in a floorplan inside CORE."
 milestone: "m10"
 week: 7
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Write two procs that return a value, and pass the checker's own tests for them
+  - Check every pair of blocks of a floorplan once, with a loop inside a loop
+prerequisites: ["m10-w07-a", "m10-w07-b", "m10-w06-b"]
+glossary: [procedure, floorplan, abut, return-value]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: proc", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/proc.htm" }
+  - { title: "Tcl manual page: for", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/for.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,94 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Diagram from '../../../../components/Diagram.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-07/data/expected.txt?raw';
 
-Lab for week 7 (Your own commands) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={7} lesson="lab" minutes={60} />
+
+## Goal
+
+**Write the two procs at the heart of the M10 capstone, `rectArea` and `rectOverlaps`, and use them to find the blocks that clash in a floorplan.**
+
+Why it matters for chips: a teammate has drawn a <GlossaryTerm term="floorplan" /> for the inside of {chip.name}'s CORE block. It splits the processor into five smaller blocks: ALU (the arithmetic unit, which adds and compares), REGS (registers, tiny fast stores), CTRL (control), CACHE (a small fast memory) and FPU (the unit for decimal maths). Before anyone draws the shapes inside them, the plan must be clean: no two blocks may overlap or touch. Your script checks it. The capstone, TinyLayout in M20, and your Week 37 checks all reuse these two procs.
+
+## What you'll practise
+
+- [Lesson A: proc, your own commands](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-a/): `proc`, `return`, the touching rule and the pair loop.
+- [Week 6, Lesson B: Lists inside lists](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-b/): reading `{name {x1 y1 x2 y2}}` pairs.
+- [Week 4, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-a/): comparisons and `&&`.
+
+## Specification
+
+- **Input.** The starter gives you one line: `set plan {…}`, a nested list with one `{name {x1 y1 x2 y2}}` pair per block, in µm. **Keep this line exactly as it is.** The checker changes it twice and runs your script again.
+- **`rectArea rect`** returns the area of one rectangle, (x2 − x1) × (y2 − y1).
+- **`rectOverlaps a b`** returns `1` if the two rectangles clash and `0` if there is space between them. **Touching counts as a clash**, along an edge or at a single corner: our blocks need space between them. Use the course rule, `x1a <= x2b && x1b <= x2a && y1a <= y2b && y1b <= y2a`, where a is `{x1a y1a x2a y2a}` and b is `{x1b y1b x2b y2b}`. A gap of even 1 µm means no clash, and `rectOverlaps $a $b` must give the same answer as `rectOverlaps $b $a`.
+- **Output.** With this input, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- **One area line per block**, in the order of `plan`.
+- **One Conflict line per clashing pair**, each pair once. The first name comes before the second in `plan`. Then the number of conflicts.
+- Words, capitals and punctuation must match. Extra spaces are forgiven.
+
+The checker does not only read your output. It also **calls your two procs** with its own test rectangles: touching edges, touching corners, 1 µm gaps, one rectangle inside another, identical rectangles, each pair in both orders. So use exactly these names, with one argument for rectArea and two for rectOverlaps.
+
+<Diagram name="w07-lab-plan" alt="The five blocks of the plan drawn to scale inside CORE. ALU and REGS sit side by side and share the edge at x equals 90: conflict 1. REGS and CACHE touch only at the corner 140, 80: conflict 2. FPU, a wide block at the top left, overlaps CACHE by 5 micrometres: conflict 3. CTRL sits 1 micrometre from REGS and 1 micrometre below CACHE: no conflict. The 1 micrometre gaps are drawn wider so that they can be seen." />
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-07/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-07" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step. For steps 1 and 2, test your proc with a few calls of your own, such as `puts [rectOverlaps {0 0 10 10} {10 0 20 10}]`, then delete those test lines.
+
+1. **rectArea.** Write `proc rectArea {rect} {…}`. Use lindex for the corners and return the area.
+2. **rectOverlaps.** Write `proc rectOverlaps {a b} {…}`. Test the x spans like `spansOverlap` in Lesson A, then the y spans, and return both joined with `&&`.
+3. **Areas.** `foreach block $plan {…}`: the name is `lindex $block 0` and the rectangle is `lindex $block 1`. Print one line per block.
+4. **Every pair.** Use the pair loop from Lesson A: i from 0, j from i + 1. Get the two rectangles with `lindex $plan $i 1` and `lindex $plan $j 1`. If rectOverlaps gives 1, print the Conflict line and count it.
+5. **Count.** After both loops, print the number of conflicts.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Step 2: start with set xClash [expr {[lindex $a 0] <= [lindex $b 2] && [lindex $b 0] <= [lindex $a 2]}]. That is spansOverlap on x: x1a <= x2b and x1b <= x2a. Write yClash the same way with indexes 1 and 3, then return [expr {$xClash && $yClash}].',
+  'If the checker says your procs fail only when rectangles touch, look at your comparisons: < means touching is fine, <= means touching counts. This course uses <=.',
+  'Step 4: put set conflicts 0 before the loops. Inside the inner loop: if {[rectOverlaps [lindex $plan $i 1] [lindex $plan $j 1]]} {…}. Print with lindex $plan $i 0 and lindex $plan $j 0, then incr conflicts.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed or returned, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 15/15` when everything is right. Tests 2 to 9 call your procs directly. The last two tests change the floorplan: first three blocks with 1 µm gaps and no conflict, then a block with two identical blocks inside it.
+
+## Stretch goal: inside the boundary
+
+The capstone also checks that every block stays inside its boundary. Paste your finished lab script below, then write `proc rectInside {rect boundary} {…}`. It returns 1 when the rectangle lies completely inside the boundary rectangle (touching the boundary's edge is allowed here), and 0 when it sticks out. Test it on every block of `plan`, with CORE's corners `{20 20 220 180}` as the boundary. This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+
+# Then write rectInside and test it:
+set core {20 20 220 180}
+`} />

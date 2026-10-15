@@ -1,10 +1,14 @@
 ---
 title: "Week 7: Your own commands"
+description: "Week 7 overview: proc, return and default values, the touching rule for floorplan blocks, every pair with a loop inside a loop, scope, global, upvar and args, and the procs rectArea and rectOverlaps, in about 3 hours."
 milestone: "m10"
 week: 7
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 180
+goals:
+  - Define your own commands with proc, and send results back with return
+  - Decide whether two rectangles clash, with touching counted as a clash, and test every pair once
+  - "Control what a proc can see: arguments, global, upvar and args"
+prerequisites: ["m10-w04-a", "m10-w04-b", "m10-w06-b"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,30 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+Until now you used the commands Tcl gave you. This week you make your own. A proc gives a piece of code a name, so you write it once and call it everywhere. You will write the two commands at the heart of the M10 capstone: `rectArea`, and `rectOverlaps`, which decides whether two blocks of {chip.name} clash. It follows one clear rule: in this course, blocks that touch count as a clash.
+
+## This week you will
+
+<Goals items={['Define your own commands with proc, and send results back with return', 'Decide whether two rectangles clash, with touching counted as a clash, and test every pair once', 'Control what a proc can see: arguments, global, upvar and args']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: proc, your own commands](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-a/) | 40 min | proc and return, the touching rule, every pair once, default values |
+| [Lesson B: Scope](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-b/) | 40 min | Local variables, global, one simple upvar, and args |
+| [Lab: rectArea and rectOverlaps](/SJTU-VLSI-TCL-Language/m10/week-07/lab/) | 60 min | Write both procs and check a floorplan inside CORE |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-07/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Review these first
+
+This week builds on three earlier lessons. If any of these feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 4, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-a/): `<=`, `&&` and `if`. The touching rule is four comparisons joined with `&&`.
+- [Week 4, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-b/): the `for` loop. This week you put one for loop inside another.
+- [Week 6, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-b/): nested lists. The lab's floorplan is a list of `{name {x1 y1 x2 y2}}` pairs.

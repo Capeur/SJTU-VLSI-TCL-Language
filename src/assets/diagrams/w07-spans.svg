@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300">
+  <!-- 8 px per unit, x = 0 at 120 -->
+  <text class="d-txt d-mono d-small" x="20" y="22">clash when  a1 &lt;= b2 &amp;&amp; b1 &lt;= a2</text>
+  <text class="d-txt d-small d-muted" x="430" y="22">&lt;=: touching counts</text>
+
+  <text class="d-txt d-bold" x="20" y="66">Gap</text>
+  <rect class="d-box-info" x="120" y="48" width="80" height="14"/>
+  <rect class="d-box-ok" x="280" y="66" width="80" height="14"/>
+  <text class="d-txt d-small d-muted" x="120" y="96">A 0–10, B 20–30</text>
+  <text class="d-txt d-bold d-fg-ok" x="460" y="70">0: no clash</text>
+
+  <text class="d-txt d-bold" x="20" y="132">Touch</text>
+  <rect class="d-box-info" x="120" y="114" width="80" height="14"/>
+  <rect class="d-box-ok" x="200" y="132" width="160" height="14"/>
+  <line class="d-ink" x1="200" y1="108" x2="200" y2="150"/>
+  <text class="d-txt d-small d-muted" x="120" y="166">A 0–10, B 10–30: they share 10</text>
+  <text class="d-txt d-bold d-fg-bad" x="460" y="130">1 with &lt;=</text>
+  <text class="d-txt d-small d-muted" x="460" y="148">(0 with &lt;)</text>
+
+  <text class="d-txt d-bold" x="20" y="198">Overlap</text>
+  <rect class="d-box-info" x="120" y="180" width="80" height="14"/>
+  <rect class="d-box-ok" x="160" y="198" width="200" height="14"/>
+  <text class="d-txt d-small d-muted" x="120" y="228">A 0–10, B 5–30</text>
+  <text class="d-txt d-bold d-fg-bad" x="460" y="202">1: clash</text>
+
+  <text class="d-txt d-bold" x="20" y="264">Inside</text>
+  <rect class="d-box-info" x="120" y="246" width="240" height="14"/>
+  <rect class="d-box-ok" x="200" y="264" width="80" height="14"/>
+  <text class="d-txt d-small d-muted" x="120" y="294">A 0–30, B 10–20</text>
+  <text class="d-txt d-bold d-fg-bad" x="460" y="268">1: clash</text>
+</svg>

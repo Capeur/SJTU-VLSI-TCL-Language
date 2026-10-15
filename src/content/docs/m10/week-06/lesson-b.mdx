@@ -1,14 +1,22 @@
 ---
-title: "Week 6 Lesson B"
+title: "Lists inside lists"
+description: "Week 6, Lesson B: storing many rectangles in one nested list and reading them with lindex, building new lists with lmap, and turning text into lists with split and back with join."
 milestone: "m10"
 week: 6
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Build a list of rectangles and read any number in it with lindex $rects 1 2
+  - Build a new list from an old one with lmap
+  - Turn text into a list with split, and a list into text with join
+prerequisites: ["m10-w06-a", "m10-w05-b"]
+glossary: [nested-list, separator, list, element]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Tcl data structures 101, the list (lists inside lists)", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl14.html" }
+  - { title: "Tcl manual page: lmap", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lmap.htm" }
+  - { title: "Tcl manual page: split", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/split.htm" }
+  - { title: "Tcl manual page: join", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/join.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,206 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 6 (Lists II) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · nested lists concept + diagram + worked example 1 + playground 8 ·
+    predict 3 · lmap concept + playground 5 · split/join concept + diagram + worked example 2 6 · faded 4 ·
+    traps 3 · exit quiz 4 · cheat card 1 = 40 min. Rectangles are Lumen-1's real block corners {x1 y1 x2 y2}. */}
+
+<LessonMeta milestone="m10" week={6} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+In Week 5, one variable held one rectangle: `set core {20 20 220 180}`. {chip.name} has {chip.blocks.length} blocks, and a real chip has millions of shapes, so one variable per shape cannot work. The answer is a list whose elements are rectangles: a list of lists. Then one foreach visits every shape. This is how the capstone stores the floorplan, and how layout tools hand you shapes in Week 28.
+
+<ChipMap caption={`The ${chip.name} floorplan. Each block is a list of four corners, and all ${chip.blocks.length} of them fit in one list of rectangles.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Build a list of rectangles and read any number in it with lindex $rects 1 2', 'Build a new list from an old one with lmap', 'Turn text into a list with split, and a list into text with join']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 5, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w06" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05']} mode="warmup" count={3} mix={1 / 3} />
+
+## A list of rectangles
+
+An element of a list can itself be a list. Then the outer list is a <GlossaryTerm term="nested-list">nested list</GlossaryTerm>. In Lesson A, each element was a pair. Here, each element is a whole rectangle, `{x1 y1 x2 y2}`.
+
+To build one, start with an empty list and add each rectangle with `lappend rects [list 20 20 220 180]`. The list command makes the four numbers into ONE element.
+
+To read it, give lindex more than one index. `lindex $rects 1` is the second rectangle. `lindex $rects 1 2` goes one level deeper: element 2 of the second rectangle, its x2. And `foreach rect $rects` takes one whole rectangle per pass.
+
+<Diagram name="w06-nested" alt="A big box labelled rects holds two smaller boxes side by side. Box 0 holds CORE's corners 20 20 220 180; box 1 holds SRAM's corners 240 20 380 180, and inside box 1 the numbers are numbered 0 to 3. lindex rects 1 gives the whole box 1. lindex rects 1 2 first opens box 1, then takes its element 2: 380, SRAM's x2. llength rects is 2: two rectangles, not eight numbers." />
+
+<WorkedExample
+  code={`set rects {}
+lappend rects [list 20 20 220 180]
+lappend rects [list 240 20 380 180]
+puts "Rectangles: [llength $rects]"
+puts "SRAM: [lindex $rects 1]"
+puts "SRAM's x2: [lindex $rects 1 2]"
+foreach rect $rects {
+    puts "Width: [expr {[lindex $rect 2] - [lindex $rect 0]}] um"
+}`}
+  notes={{
+    1: 'An empty list, ready to hold rectangles.',
+    2: 'list makes CORE’s four corners into one element, and lappend adds it.',
+    3: 'The same for SRAM. rects now holds two elements.',
+    4: 'Two rectangles, not eight numbers. Output: Rectangles: 2',
+    5: 'Index 1 is the second element: a whole rectangle. Output: SRAM: 240 20 380 180',
+    6: 'Two indexes: element 1, then its element 2, x2. Output: SRAM’s x2: 380',
+    7: 'One whole rectangle per pass, in the loop variable rect.',
+    8: 'x2 - x1, as in Week 5. Output: Width: 200 um, then Width: 140 um'
+  }}
+/>
+
+<TclPlayground client:visible code={`set rects {}
+lappend rects [list 20 20 220 180]
+lappend rects [list 240 20 380 180]
+puts "Rectangles: [llength $rects]"
+puts "SRAM: [lindex $rects 1]"
+puts "SRAM's x2: [lindex $rects 1 2]"
+foreach rect $rects {
+    puts "Width: [expr {[lindex $rect 2] - [lindex $rect 0]}] um"
+}`} />
+
+## Predict → Run → Explain
+
+Now each element is a pair: a block's name, then its rectangle. That makes three levels. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set blocks {{CORE {20 20 220 180}} {ADC {20 200 140 280}}}
+puts [llength $blocks]
+puts [lindex $blocks 1 0]
+puts [lindex $blocks 1 1]
+puts [lindex $blocks 1 1 3]`}
+  expected={`2
+ADC
+20 200 140 280
+280`}
+  explanation="The outer list has two elements, one per block. lindex $blocks 1 0 opens the second block and takes its element 0, the name ADC. Element 1 of that block is its rectangle. One more index, 3, opens the rectangle and takes y2: 280. Each index goes one level deeper."
+/>
+
+## lmap: a new list from an old one
+
+Often you want one new value for each element: the width of every rectangle, or the name of every pair. With foreach, you would start an empty list and lappend inside the loop. `lmap` does both for you.
+
+`lmap rect $rects {body}` works like foreach, but it collects the result of the body on every pass and gives back the list of results. The body's last command gives the value to keep, so end it with `expr {…}` or `lindex …`, not with puts.
+
+<TclPlayground client:visible code={`set rects {{20 20 220 180} {240 20 380 180} {20 200 140 280}}
+set widths [lmap rect $rects {expr {[lindex $rect 2] - [lindex $rect 0]}}]
+puts $widths
+set names [lmap pair {{CORE 32000} {SRAM 22400}} {lindex $pair 0}]
+puts $names`} />
+
+## split and join: text and lists
+
+Data often arrives as one line of text, with a <GlossaryTerm term="separator" /> character between the parts, like the commas in `ACTIVE,POLY,CONTACT`. `split $text ,` cuts the text at every comma and gives a list of the parts. You will read such lines from files in Week 13.
+
+`join` does the opposite. `join $names ", "` glues the elements together into one piece of text, with `, ` between them. That makes reports easy to read.
+
+<Diagram name="w06-split-join" alt="At the top, the text ACTIVE,POLY,CONTACT as one strip. split with a comma cuts it at each comma into a list of three boxes: ACTIVE, POLY, CONTACT. At the bottom, join with a comma and a space glues the three boxes back into one strip of text: ACTIVE, POLY, CONTACT. split turns text into a list; join turns a list into text." />
+
+<WorkedExample
+  code={`set text "CORE 20 20 220 180;SRAM 240 20 380 180"
+set rows [split $text ";"]
+puts "Rows: [llength $rows]"
+puts [lindex $rows 1]
+set names [lmap row $rows {lindex $row 0}]
+puts [join $names ", "]`}
+  notes={{
+    1: 'One line of text: two blocks, each a name and four corners, with a semicolon between them.',
+    2: 'Cut at every semicolon. The quotes stop Tcl from reading ; as the end of the command.',
+    3: 'Two parts, so two rows. Output: Rows: 2',
+    4: 'Each row is text with spaces, so it works as a list too. Output: SRAM 240 20 380 180',
+    5: 'lmap takes element 0, the name, of every row. names holds CORE SRAM.',
+    6: 'Glue the names with a comma and a space. Output: CORE, SRAM'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`set rects {}
+# Must make rects hold two rectangles: {0 0 10 5} {10 0 30 5}
+lappend rects [___1___ 0 0 10 5]
+lappend rects [list 10 0 30 5]
+# Must print: 30   (x2 of the second rectangle)
+puts [lindex $rects 1 ___2___]
+# Must print: METAL1 + VIA1 + METAL2
+puts [join [split "METAL1,VIA1,METAL2" ___3___] " + "]`}
+  answers={[['list'], ['2'], [',', '","', '{,}']]}
+  hints={['Which command makes the four numbers into ONE element?', 'In {x1 y1 x2 y2}, counting from 0, which index is x2?', 'Which character separates the layer names in the text?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set rects {}
+lappend rects 20 20 220 180
+lappend rects 240 20 380 180
+puts "Rectangles: [llength $rects]"`}
+  output={`Rectangles: 8`}
+  fix={`set rects {}
+lappend rects [list 20 20 220 180]
+lappend rects [list 240 20 380 180]
+puts "Rectangles: [llength $rects]"`}
+  why="lappend adds each of its values as a separate element. Four numbers become four elements, so two rectangles become eight numbers in one flat list. Wrap the four numbers with list: then lappend adds ONE element, the whole rectangle."
+/>
+
+<Trap
+  wrong={`set layers [split "METAL1, VIA1, METAL2" ,]
+puts "Second: <[lindex $layers 1]>"`}
+  output={`Second: < VIA1>`}
+  fix={`set layers [split "METAL1,VIA1,METAL2" ,]
+puts "Second: <[lindex $layers 1]>"`}
+  why="split cuts at the commas and nowhere else. The space after each comma stays in the next part, so the second element is ' VIA1', with a space in front, and it is no longer equal to VIA1. Here the text was ours to fix; Week 8 shows how to trim spaces off text you cannot change."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w06" lesson="b" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Nested lists, lmap, split, join" lines={[
+  'lappend rects [list 20 20 220 180]   add ONE rectangle',
+  'lindex $rects 1         the second rectangle',
+  'lindex $rects 1 2       its element 2 (x2): one index per level',
+  'foreach rect $rects {…}   one rectangle per pass',
+  'lmap r $rects {expr {…}}  a new list: one result per element',
+  'split "A,B,C" ,         text → list {A B C}',
+  'join $names ", "        list → text "A, B, C"',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Tcl data structures 101, the list', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl14.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: lmap, including several loop variables', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/lmap.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: split, including splitting into single characters', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/split.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: join', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/join.htm', kind: 'tcl-man' },
+]} />

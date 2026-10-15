@@ -1,10 +1,14 @@
 ---
 title: "Week 6: Lists II"
+description: "Week 6 overview: slicing, searching and sorting lists, lists inside lists, lmap, split and join, and sorting standard cells by area, in about 3 hours."
 milestone: "m10"
 week: 6
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 180
+goals:
+  - Take part of a list, find an element and sort a list, by number or by one field
+  - Store many rectangles in one nested list and read any number from it
+  - Turn text into a list and back, and build a new list from an old one with lmap
+prerequisites: ["m10-w05-a", "m10-w05-b", "m10-w03-a"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,30 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+Last week a list held the names of {chip.name}'s {chip.blocks.length} blocks, or the four corners of one rectangle. This week you put lists to work. You cut a piece out of a list, look for an element, and sort a list so that the biggest block comes first. Then you put lists inside a list, so that one variable holds every rectangle of the chip. The M10 capstone report needs all of this.
+
+## This week you will
+
+<Goals items={['Take part of a list, find an element and sort a list, by number or by one field', 'Store many rectangles in one nested list and read any number from it', 'Turn text into a list and back, and build a new list from an old one with lmap']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: Slice, search, sort](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-a/) | 40 min | lrange, lsearch and lsort, including -integer, -decreasing and -index |
+| [Lesson B: Lists inside lists](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-b/) | 40 min | Nested lists of rectangles, lmap, split and join |
+| [Lab: Sort cells by area](/SJTU-VLSI-TCL-Language/m10/week-06/lab/) | 60 min | Rank a library of standard cells from the largest to the smallest |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-06/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Review these first
+
+This week builds on three earlier lessons. If any of these feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 5, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-05/lesson-a/): `llength`, `lindex` counting from 0, and rectangles as `{x1 y1 x2 y2}`.
+- [Week 5, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-05/lesson-b/): `foreach` and `lappend`. You use both in every example this week.
+- [Week 3, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-03/lesson-a/): braces keep a group together. A list inside a list is just a group in braces.

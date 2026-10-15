@@ -12,20 +12,25 @@ interface Props {
     mix: number;                 // share of questions taken from the current lesson (0–1)
     current: Question[];         // the current lesson's pool
     earlier: Question[];         // earlier weeks' pool
+    required?: Question[];       // at least one of these is always drawn (Quiz `require` tag)
 }
 
 const TITLES: Record<QuizMode, string> = { warmup: 'Warm-up', exit: 'Exit quiz', weekly: 'Weekly quiz', exam: 'Exam' };
 
-export function pick(current: Question[], earlier: Question[], count: number, mix: number, random = Math.random): Question[] {
+export function pick(current: Question[], earlier: Question[], count: number, mix: number, random = Math.random, required: Question[] = []): Question[] {
     const wantCurrent = Math.min(current.length, Math.round(count * mix));
-    const chosen = shuffle(current, random).slice(0, wantCurrent);
+    let chosen = shuffle(current, random).slice(0, wantCurrent);
+    // A required question (Quiz `require` tag) takes the place of one current question if none was drawn.
+    if (required.length && wantCurrent > 0 && !chosen.some((q) => required.includes(q))) {
+        chosen = [shuffle(required, random)[0], ...chosen.slice(1)];
+    }
     const rest = shuffle(earlier, random).slice(0, count - chosen.length);
     const filler = chosen.length + rest.length < count
         ? shuffle(current.filter((q) => !chosen.includes(q)), random).slice(0, count - chosen.length - rest.length) : [];
     return shuffle([...chosen, ...rest, ...filler], random);
 }
 
-export default function QuizApp({ quizId, mode, count, mix, current, earlier }: Props) {
+export default function QuizApp({ quizId, mode, count, mix, current, earlier, required = [] }: Props) {
     const [questions, setQuestions] = useState<Question[] | null>(null);
     const [index, setIndex] = useState(0);
     const [answers, setAnswers] = useState<boolean[]>([]);
@@ -33,7 +38,7 @@ export default function QuizApp({ quizId, mode, count, mix, current, earlier }: 
     const [round, setRound] = useState(0);
 
     // Picked in the browser only, so the static HTML never disagrees with what the learner sees.
-    useEffect(() => { setQuestions(pick(current, earlier, count, mix)); }, [round]);
+    useEffect(() => { setQuestions(pick(current, earlier, count, mix, Math.random, required)); }, [round]);
 
     if (!questions) return <div class="tc-box"><p>Loading quiz… (This quiz needs JavaScript.)</p></div>;
     if (questions.length === 0) return <div class="tc-box"><p>No questions available yet for this quiz.</p></div>;

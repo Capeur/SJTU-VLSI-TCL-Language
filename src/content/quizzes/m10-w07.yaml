@@ -1,0 +1,555 @@
+# Week 7 — Your own commands. Lesson A: proc, arguments, return (also early), default values, the touching
+# rule for floorplan blocks (closed rectangles: <= means touching counts, < would mean touching is fine; a
+# design decision, not physics), every pair once (j starts at i + 1). Lesson B: local variables, global,
+# one simple upvar, args.
+# Tags used by the exit quizzes: "touching" (Lesson A, require="touching") and "args" (Lesson B, require="args").
+# The touching items cover edge, corner, a 1 um gap, inside, identical and argument order (user decision, P3
+# Weeks 6-7). The lab's floorplan and test rectangles are not used here (style rule 21).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w07-q01
+    type: predict-output
+    lesson: a
+    tags: [touching, proc, return]
+    review: true
+    prompt: "The touching rule on one axis. What does this print?"
+    code: |
+      proc spansOverlap {a1 a2 b1 b2} {
+          return [expr {$a1 <= $b2 && $b1 <= $a2}]
+      }
+      puts [spansOverlap 0 10 10 20]
+      puts [spansOverlap 0 10 11 20]
+      puts [spansOverlap 0 30 10 20]
+    answer: |-
+      1
+      0
+      1
+    explanation: >
+      0 to 10 and 10 to 20 touch at 10, and with <= touching counts: 1. With 11, there is a 1 µm gap:
+      0. 10 to 20 lies inside 0 to 30: 1.
+
+  - id: m10-w07-q02
+    type: mcq
+    lesson: a
+    tags: [touching]
+    review: true
+    prompt: "rectOverlaps uses <= in all four comparisons. What changes if every <= becomes < ?"
+    choices:
+      - 'Rectangles that only touch, along an edge or at a corner, no longer count as a conflict'
+      - 'Overlapping rectangles no longer count as a conflict'
+      - 'Rectangles with a 1 µm gap start to count as a conflict'
+      - 'Nothing: < and <= give the same answers for rectangles'
+    answer: 'Rectangles that only touch, along an edge or at a corner, no longer count as a conflict'
+    explanation: >
+      <= means "touching counts"; < means "touching is fine". The two differ only when an edge of one
+      rectangle is exactly on an edge of the other. Real overlaps and real gaps give the same answer either way.
+    distractor_feedback:
+      'Overlapping rectangles no longer count as a conflict': 'For a real overlap, each comparison is true with < too. Only the equal case changes.'
+      'Rectangles with a 1 µm gap start to count as a conflict': 'A gap makes one comparison false with both < and <=. Neither counts a gap as a conflict.'
+      'Nothing: < and <= give the same answers for rectangles': 'They differ exactly when two edges meet: 10 <= 10 is true, but 10 < 10 is false.'
+
+  - id: m10-w07-q03
+    type: multi-select
+    lesson: a
+    tags: [touching, rectOverlaps]
+    review: true
+    prompt: "rectOverlaps uses the course rule: touching counts. a is {0 0 10 10}. For which b does  rectOverlaps $a $b  give 1? Pick all that apply."
+    choices:
+      - '{10 0 20 10}: shares the edge x = 10'
+      - '{10 10 20 20}: touches only the corner (10, 10)'
+      - '{11 0 20 10}: a 1 µm gap'
+      - '{2 2 8 8}: lies inside a'
+      - '{0 0 10 10}: identical to a'
+    answer:
+      - '{10 0 20 10}: shares the edge x = 10'
+      - '{10 10 20 20}: touches only the corner (10, 10)'
+      - '{2 2 8 8}: lies inside a'
+      - '{0 0 10 10}: identical to a'
+    explanation: >
+      With <=, touching along an edge and touching at a single corner both count. A rectangle inside
+      another, or identical to it, overlaps it completely. Only the 1 µm gap leaves space between them.
+
+  - id: m10-w07-q04
+    type: mcq
+    lesson: a
+    tags: [touching, rectOverlaps]
+    review: true
+    prompt: "rectOverlaps $a $b gives 1. What does  rectOverlaps $b $a  give?"
+    choices:
+      - 'Always 1'
+      - 'Always 0'
+      - 'It depends on which rectangle is bigger'
+      - 'It depends on which rectangle is further left'
+    answer: 'Always 1'
+    explanation: >
+      Swap a and b in x1a <= x2b && x1b <= x2a && y1a <= y2b && y1b <= y2a and you get the same four
+      comparisons in a different order. "Does A clash with B?" is the same question as "does B clash
+      with A?", and a correct rectOverlaps gives the same answer both ways.
+    distractor_feedback:
+      'Always 0': 'Clashing is not one-way: if A touches or overlaps B, then B touches or overlaps A.'
+      'It depends on which rectangle is bigger': 'A rule that tests whether a corner of A lies inside B would depend on size. The course rule does not: it tests the spans on both axes.'
+      'It depends on which rectangle is further left': 'The rule compares both ways on each axis (x1a <= x2b AND x1b <= x2a), so the order does not matter.'
+
+  - id: m10-w07-q05
+    type: mcq
+    lesson: a
+    tags: [touching, abut]
+    review: true
+    prompt: "In real layouts, standard cells are placed touching, side by side. Why does our checker still flag two floorplan blocks that touch?"
+    choices:
+      - 'It is our design rule for floorplan blocks: they need space between them'
+      - 'Touching shapes always break the chip'
+      - 'Tcl cannot compare equal numbers'
+      - 'Touching blocks have zero area'
+    answer: 'It is our design rule for floorplan blocks: they need space between them'
+    explanation: >
+      Touching is not a physical error in general: cells abut on purpose, and touching shapes on the same
+      layer simply merge into one. For floorplan blocks, this course chooses that touching counts as a
+      conflict, because blocks must keep space between them.
+    distractor_feedback:
+      'Touching shapes always break the chip': 'No. Standard cells touch on purpose, and touching shapes on one layer merge into one shape. The rule is a choice for blocks.'
+      'Tcl cannot compare equal numbers': 'Tcl compares equal numbers fine: 10 <= 10 is 1. The question is which comparison we CHOOSE.'
+      'Touching blocks have zero area': 'Each block keeps its area. It is the shared edge between them that has no width.'
+
+  - id: m10-w07-q06
+    type: predict-output
+    lesson: a
+    tags: [return, proc]
+    review: true
+    prompt: "return ends the proc at once. What does this print?"
+    code: |
+      proc wireLabel {width} {
+          if {$width < 4} {
+              return "too narrow"
+          } elseif {$width > 20} {
+              return "very wide"
+          }
+          return "ok"
+      }
+      puts [wireLabel 2]
+      puts [wireLabel 30]
+      puts [wireLabel 4]
+    answer: |-
+      too narrow
+      very wide
+      ok
+    explanation: >
+      With 2, the first return sends "too narrow" back and the proc ends. With 30, the elseif branch
+      returns. With 4, both tests are false, so Tcl reaches the last line.
+
+  - id: m10-w07-q07
+    type: find-the-bug
+    lesson: a
+    tags: [proc, order]
+    review: true
+    prompt: 'This stops with  invalid command name "rectHeight".  Which line is in the wrong place?'
+    code: |
+      puts [rectHeight {20 20 220 180}]
+      proc rectHeight {rect} {
+          return [expr {[lindex $rect 3] - [lindex $rect 1]}]
+      }
+    answer: 1
+    explanation: >
+      Tcl runs the script from top to bottom. The call on line 1 comes before the proc command that
+      creates rectHeight. Move the call below the proc.
+
+  - id: m10-w07-q08
+    type: mcq
+    lesson: a
+    tags: [return, puts]
+    review: false
+    prompt: "This proc ends with  puts [expr {$x2 - $x1}]  instead of return. After  set w [rectWidth $core],  what does w hold?"
+    choices: ['An empty value', 'The width', 'The text puts', 'The rectangle']
+    answer: 'An empty value'
+    explanation: >
+      puts prints the width, but the proc gives back the result of its last command, and puts gives back
+      an empty value. Use return to send the width to the caller.
+    distractor_feedback:
+      'The width': 'The width is printed on the screen, but it is not sent back. Only return (or a last command that gives a value) does that.'
+      'The text puts': 'puts is run, not stored. Its result is empty.'
+      'The rectangle': 'The argument stays inside the proc. The caller gets the result of the last command.'
+
+  - id: m10-w07-q09
+    type: predict-output
+    lesson: a
+    tags: [default-value, proc]
+    review: true
+    prompt: "margin has a default value. What does this print?"
+    code: |
+      proc grow {size {margin 2}} {
+          return [expr {$size + 2 * $margin}]
+      }
+      puts [grow 10]
+      puts [grow 10 5]
+    answer: |-
+      14
+      20
+    explanation: >
+      With one value, margin takes its default, 2: 10 + 2 * 2 = 14. With two values, margin is 5:
+      10 + 2 * 5 = 20.
+
+  - id: m10-w07-q10
+    type: mcq
+    lesson: a
+    tags: [default-value, error]
+    review: false
+    prompt: 'A call stops with  wrong # args: should be "rectShift rect dx ?dy?".  What do the question marks around dy mean?'
+    choices:
+      - 'dy is optional: it has a default value'
+      - 'dy is unknown'
+      - 'dy must be a question'
+      - 'dy is the wrong argument'
+    answer: 'dy is optional: it has a default value'
+    explanation: >
+      The message shows how to call the proc. Arguments in ?…? may be left out, because they have a
+      default value. rect and dx are required.
+    distractor_feedback:
+      'dy is unknown': 'Tcl knows dy: it is the third argument, and it has a default.'
+      'dy must be a question': 'The question marks are only a way of writing "optional".'
+      'dy is the wrong argument': 'The message describes the correct call. The mistake is in how many values the call gave.'
+
+  - id: m10-w07-q11
+    type: predict-output
+    lesson: a
+    tags: [pair-loop, for]
+    review: true
+    prompt: "Every pair of four blocks, once. What does this print?"
+    code: |
+      set pairs 0
+      for {set i 0} {$i < 4} {incr i} {
+          for {set j [expr {$i + 1}]} {$j < 4} {incr j} {
+              incr pairs
+          }
+      }
+      puts $pairs
+    answer: "6"
+    explanation: >
+      When i is 0, j takes 1, 2 and 3: three pairs. When i is 1, two pairs; when i is 2, one; when i is 3,
+      none. 3 + 2 + 1 = 6 pairs.
+
+  - id: m10-w07-q12
+    type: mcq
+    lesson: a
+    tags: [pair-loop]
+    review: false
+    prompt: "In the pair loop, the inner loop starts with  set j 0  instead of  set j [expr {$i + 1}].  What goes wrong?"
+    choices:
+      - 'Each block is compared with itself, and every pair comes up twice'
+      - 'The loop never ends'
+      - 'The last block is never checked'
+      - 'Nothing: the result is the same'
+    answer: 'Each block is compared with itself, and every pair comes up twice'
+    explanation: >
+      With j from 0, the pair (i, j) also meets i = j, a block with itself, which always "clashes", and
+      each pair comes once as (A, B) and once as (B, A).
+    distractor_feedback:
+      'The loop never ends': 'Both loops still count up to the end and stop. They just check too many pairs.'
+      'The last block is never checked': 'All blocks are checked, too many times.'
+      'Nothing: the result is the same': 'Run it: CORE and CORE appears, and CORE and SRAM appears twice.'
+
+  - id: m10-w07-q13
+    type: predict-output
+    lesson: a
+    tags: [touching, proc]
+    review: false
+    prompt: "SENSOR is x 160 to 260, y 200 to 280. PADS is x 280 to 380, y 200 to 280. What does this print?"
+    code: |
+      proc spansOverlap {a1 a2 b1 b2} {
+          return [expr {$a1 <= $b2 && $b1 <= $a2}]
+      }
+      puts [spansOverlap 160 260 280 380]
+      puts [spansOverlap 200 280 200 280]
+    answer: |-
+      0
+      1
+    explanation: >
+      On x there is a 20 µm gap between them: 0. On y the two spans are identical: 1. Two blocks clash
+      only if BOTH axes overlap, so SENSOR and PADS do not clash.
+
+  - id: m10-w07-q14
+    type: fill-blank
+    lesson: a
+    tags: [touching]
+    review: true
+    prompt: 'Touching counts. Fill the blank:     return [expr {$a1 ___ $b2 && $b1 <= $a2}]'
+    answer: ['<=']
+    explanation: >
+      <= makes touching count: when A ends exactly where B starts, $a1 <= $b2 and $b1 <= $a2 are both
+      true. With <, touching would be fine.
+
+  - id: m10-w07-q15
+    type: mcq
+    lesson: a
+    tags: [touching, rectOverlaps]
+    review: false
+    prompt: "Two blocks are side by side with a 1 µm gap between them. What does rectOverlaps return?"
+    choices: ['0', '1', 'It depends on the order of the arguments', 'An error']
+    answer: '0'
+    explanation: >
+      A gap, even of 1 µm, is space between the blocks. On that axis, one block ends before the other
+      starts, so one comparison is false and the whole rule gives 0.
+    distractor_feedback:
+      '1': 'Only touching or overlapping counts. 1 µm is small, but it is real space.'
+      'It depends on the order of the arguments': 'A correct rectOverlaps gives the same answer in both orders.'
+      'An error': 'Comparing numbers never fails here. The answer is just 0.'
+
+  # ---------- Lesson B ----------
+  - id: m10-w07-q16
+    type: predict-output
+    lesson: b
+    tags: [scope, local-variable]
+    review: true
+    prompt: "The argument has the same name as a variable outside. What does this print?"
+    code: |
+      set total 5
+      proc addTen {total} {
+          incr total 10
+          return $total
+      }
+      puts [addTen $total]
+      puts $total
+    answer: |-
+      15
+      5
+    explanation: >
+      The call passes the value 5 into the proc's own total. incr changes that local box to 15, which
+      return sends back. The script's total is a different box and still holds 5.
+
+  - id: m10-w07-q17
+    type: predict-output
+    lesson: b
+    tags: [scope, local-variable]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set area 0
+      proc blockArea {width height} {
+          set area [expr {$width * $height}]
+          return $area
+      }
+      puts [blockArea 120 80]
+      puts $area
+    answer: |-
+      9600
+      0
+    explanation: >
+      The area inside the proc is a local variable: 120 * 80 = 9600, sent back with return. The script's
+      area is another variable, still 0.
+
+  - id: m10-w07-q18
+    type: find-the-bug
+    lesson: b
+    tags: [global, scope]
+    review: true
+    prompt: 'This stops with  can''t read "chipHeight": no such variable.  Which line uses a variable that the proc cannot see?'
+    code: |
+      set chipHeight 300
+      proc fitsHeight {rect} {
+          return [expr {[lindex $rect 3] <= $chipHeight}]
+      }
+      puts [fitsHeight {20 200 140 280}]
+    answer: 3
+    explanation: >
+      Inside the proc, chipHeight is a local name, and no local variable has it. Add  global chipHeight
+      at the top of the body, before line 3, or pass the height as an argument.
+
+  - id: m10-w07-q19
+    type: mcq
+    lesson: b
+    tags: [global]
+    review: false
+    prompt: "What does  global chipWidth  do at the top of a proc's body?"
+    choices:
+      - 'Inside this proc, chipWidth now means the main script''s variable'
+      - 'It creates chipWidth for every proc at once'
+      - 'It copies the value of chipWidth into the proc'
+      - 'It makes chipWidth impossible to change'
+    answer: 'Inside this proc, chipWidth now means the main script''s variable'
+    explanation: >
+      global links the name inside this one proc to the script's variable. Reading it reads the script's
+      value; setting it changes the script's variable.
+    distractor_feedback:
+      'It creates chipWidth for every proc at once': 'Every proc that needs it must say global itself.'
+      'It copies the value of chipWidth into the proc': 'It is a link, not a copy: setting chipWidth inside the proc changes the script''s variable.'
+      'It makes chipWidth impossible to change': 'global does not protect anything. The proc can even change the script''s value.'
+
+  - id: m10-w07-q20
+    type: predict-output
+    lesson: b
+    tags: [upvar]
+    review: true
+    prompt: "upvar with a variable's name. What does this print?"
+    code: |
+      proc addTwo {name} {
+          upvar 1 $name value
+          incr value 2
+      }
+      set tracks 3
+      addTwo tracks
+      puts $tracks
+    answer: "5"
+    explanation: >
+      The call passes the NAME tracks. upvar links the local name value to the caller's tracks, so
+      incr value 2 changes tracks from 3 to 5.
+
+  - id: m10-w07-q21
+    type: mcq
+    lesson: b
+    tags: [upvar]
+    review: true
+    prompt: "moveRight {rectName dx} uses  upvar 1 $rectName rect.  Which call moves the rectangle stored in sensor?"
+    choices:
+      - 'moveRight sensor 10'
+      - 'moveRight $sensor 10'
+      - 'moveRight {sensor} $10'
+      - 'set sensor [moveRight 10]'
+    answer: 'moveRight sensor 10'
+    explanation: >
+      A proc that uses upvar wants the variable's NAME, without $, just like incr and lappend.
+    distractor_feedback:
+      'moveRight $sensor 10': '$sensor passes the rectangle itself, not the name. upvar finds no variable with that name, and reading rect fails.'
+      'moveRight {sensor} $10': 'There is no variable called 10, so $10 fails. The distance is a plain number.'
+      'set sensor [moveRight 10]': 'moveRight needs two values, and it changes the variable itself; it does not return the new rectangle.'
+
+  - id: m10-w07-q22
+    type: predict-output
+    lesson: b
+    tags: [args]
+    review: true
+    prompt: "args collects the words of the call. What does this print?"
+    code: |
+      proc countBlocks {args} {
+          return [llength $args]
+      }
+      puts [countBlocks CORE SRAM ADC]
+      puts [countBlocks {CORE SRAM ADC}]
+    answer: |-
+      3
+      1
+    explanation: >
+      In the first call, three words arrive, so args holds three elements. In the second, the braces
+      make one word, so args holds one element: the whole list.
+
+  - id: m10-w07-q23
+    type: mcq
+    lesson: b
+    tags: [args]
+    review: true
+    prompt: "proc largest {args} {…} is called as  largest 200 140 120.  What does args hold inside the proc?"
+    choices: ['The list 200 140 120', 'Only 200', 'Only 120', 'The number 3']
+    answer: 'The list 200 140 120'
+    explanation: >
+      args collects all the values of the call into one list, so you can walk it with foreach.
+    distractor_feedback:
+      'Only 200': 'That would be an ordinary first argument. args takes ALL the values.'
+      'Only 120': 'args keeps every value, not only the last one.'
+      'The number 3': 'That is llength $args. args itself holds the values.'
+
+  - id: m10-w07-q24
+    type: predict-output
+    lesson: b
+    tags: [args]
+    review: false
+    prompt: "A normal argument first, then args. What does this print?"
+    code: |
+      proc report {title args} {
+          puts "$title: [llength $args] blocks"
+      }
+      report Digital CORE SRAM
+      report Outside ADC SENSOR PADS
+    answer: |-
+      Digital: 2 blocks
+      Outside: 3 blocks
+    explanation: >
+      The first value goes to title. args collects the rest: two names in the first call, three in the
+      second.
+
+  - id: m10-w07-q25
+    type: multi-select
+    lesson: b
+    tags: [scope, global]
+    review: true
+    prompt: "chipWidth is set in the main script. Which ways let a proc use its value? Pick all that apply."
+    choices:
+      - 'Pass it as an argument: insideChip $rect $chipWidth'
+      - 'Write  global chipWidth  at the top of the body'
+      - 'Nothing: every proc sees the script''s variables'
+      - 'Define the proc before the line that sets chipWidth'
+    answer:
+      - 'Pass it as an argument: insideChip $rect $chipWidth'
+      - 'Write  global chipWidth  at the top of the body'
+    explanation: >
+      A proc only sees its arguments and its own local variables, unless global (or upvar) links a name
+      to an outside variable. Where the proc is defined does not matter: its body never sees the
+      script's variables on its own.
+
+  - id: m10-w07-q26
+    type: order-steps
+    lesson: b
+    tags: [upvar]
+    review: false
+    prompt: 'sensor holds 160 200 260 280. Put in order what happens in:   moveRight sensor 10'
+    steps:
+      - "The proc starts with rectName = sensor and dx = 10"
+      - "upvar links the local name rect to the caller's variable sensor"
+      - "The proc reads rect, which is the caller's rectangle, and adds 10 to x1 and x2"
+      - "set rect stores the new rectangle, so the caller's sensor now holds 170 200 270 280"
+    explanation: >
+      The name travels in, upvar makes the link, and every read or write of rect goes to the caller's
+      variable.
+
+  - id: m10-w07-q27
+    type: fill-blank
+    lesson: b
+    tags: [upvar]
+    review: false
+    prompt: 'The caller''s variable name is in the argument rectName. Fill the blank:     upvar 1 ___ rect'
+    answer: ['$rectName']
+    explanation: >
+      upvar needs the caller's variable NAME. That name is the value of rectName, so write $rectName.
+
+  - id: m10-w07-q28
+    type: mcq
+    lesson: b
+    tags: [global, scope]
+    review: false
+    prompt: "Why is it usually better to pass a value as an argument than to read it with global?"
+    choices:
+      - 'The proc is easier to test and to reuse with other values'
+      - 'Arguments are faster to type'
+      - 'global does not work inside procs'
+      - 'Arguments can be changed by the proc, globals cannot'
+    answer: 'The proc is easier to test and to reuse with other values'
+    explanation: >
+      A proc that gets everything through its arguments can be called with any values, for any chip.
+      Keep global for a few facts that the whole script shares.
+    distractor_feedback:
+      'Arguments are faster to type': 'Often they are longer to type. The gain is that the proc does not depend on hidden variables.'
+      'global does not work inside procs': 'It does: that is exactly where global is used.'
+      'Arguments can be changed by the proc, globals cannot': 'It is the other way round: a proc can change a global, but changing an argument only changes its own copy.'
+
+  - id: m10-w07-q29
+    type: find-the-bug
+    lesson: b
+    tags: [args]
+    review: false
+    prompt: "This should print 200, but it prints  200 140 120.  Which line has the bug?"
+    code: |
+      proc largest {args} {
+          set best [lindex $args 0]
+          foreach value $args {
+              if {$value > $best} {
+                  set best $value
+              }
+          }
+          return $best
+      }
+      puts [largest {200 140 120}]
+    answer: 10
+    explanation: >
+      The braces make the three numbers ONE word, so args holds one element: the whole list. Pass them
+      as separate words: largest 200 140 120.

@@ -295,7 +295,7 @@ All components must:
 | `<WorkedExample>` | Annotated code | `code`, `notes` (array keyed by line number). Hovering or focusing a note highlights its line |
 | `<FadedExample>` | Fill-in-the-blank code | `template` with `___1___` markers, `answers` (array of accepted strings or regex), `hint` per blank |
 | `<Trap>` | Common mistake | `wrong` code, `error` text, `fix` code, `why` text |
-| `<Quiz>` | Retrieval practice | `bank` (quiz file id), `mode` = `warmup` \| `exit` \| `weekly` \| `exam`, `count`, `mix` (current/earlier ratio). Question types in §8.2. Immediate feedback per question |
+| `<Quiz>` | Retrieval practice | `bank` (quiz file id), `mode` = `warmup` \| `exit` \| `weekly` \| `exam`, `count`, `mix` (current/earlier ratio), `require` (a tag: at least one question with it is always drawn). Question types in §8.2. Immediate feedback per question |
 | `<Flashcards>` | Spaced review | Leitner system: 5 boxes with intervals of 1, 3, 7, 14, 30 days. Cards come from quiz items with `review: true` and from questions answered wrongly |
 | `<ProgressTracker>` | Local progress | localStorage only, every access wrapped in try/catch, with a working no-storage fallback. Export/import progress as JSON (for moving between devices) |
 | `<VersionNote>` | Tcl 8.6 vs 9.0 differences | `since="9.0"`, short text + a code example for each version |

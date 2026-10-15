@@ -1,14 +1,22 @@
 ---
-title: "Week 6 Lesson A"
+title: "Slice, search, sort"
+description: "Week 6, Lesson A: taking part of a list with lrange, finding an element with lsearch, and sorting with lsort, by number, largest first, or by one field with -index."
 milestone: "m10"
 week: 6
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Take part of a list with lrange and find an element with lsearch
+  - Sort a list with lsort, using -integer for numbers and -decreasing for largest first
+  - Sort a list of pairs by one field with lsort -index
+prerequisites: ["m10-w05-a", "m10-w05-b"]
+glossary: [list, element, index, nested-list]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: More list commands, lsearch, lsort, lrange", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl16.html" }
+  - { title: "Tcl manual page: lrange", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lrange.htm" }
+  - { title: "Tcl manual page: lsearch", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lsearch.htm" }
+  - { title: "Tcl manual page: lsort", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lsort.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,218 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 6 (Lists II) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · lrange/lsearch concept + diagram + worked example 1 + playground 7 ·
+    predict 3 · lsort concept + playground 5 · pairs + -index concept + diagram + worked example 2 6 · faded 3 ·
+    traps 5 · exit quiz 4 · cheat card 1 = 40 min. -index is taught on a list of PAIRS only; nested lists in
+    full are Lesson B (decision log, P3 Weeks 6-7). Areas are the real block areas from lumen-1.json; the lab's
+    standard cells are not used here (style rule 21). */}
+
+<LessonMeta milestone="m10" week={6} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+The capstone report should list {chip.name}'s blocks from the largest to the smallest, so that a reader sees at once where the space goes. In Week 5, a list stayed in the order you typed it. This week you reorder lists. You cut out the part you need, look for one element, and sort the rest, by name or by size. Sorting by size works on numbers, so Tcl needs to be told that the elements are numbers.
+
+<ChipMap caption={`The ${chip.name} floorplan. Sorted by area, CORE comes first and the two smallest blocks, SENSOR and PADS, come last.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Take part of a list with lrange and find an element with lsearch', 'Sort a list with lsort, using -integer for numbers and -decreasing for largest first', 'Sort a list of pairs by one field with lsort -index']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 5. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w06" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05']} mode="warmup" />
+
+## lrange cuts, lsearch finds
+
+`lrange $layers 1 3` gives a new <GlossaryTerm term="list" />: the <GlossaryTerm term="element">elements</GlossaryTerm> from <GlossaryTerm term="index" /> 1 to index 3. **Both ends are included**, so you get three elements. As with lindex, counting starts at 0, and `end` means the last element.
+
+`lsearch $layers METAL1` works the other way round. You give it an element, and it tells you its index. If the element is not in the list, lsearch gives **−1**, a number that can never be an index. Capitals count: METAL1 and metal1 are different words.
+
+Both commands only read the list. The variable keeps its value.
+
+<Diagram name="w06-lrange-lsearch" alt="The seven layers ACTIVE, POLY, CONTACT, METAL1, VIA1, METAL2 and TEXT drawn as boxes numbered 0 to 6. A bracket over boxes 1 to 3 shows that lrange layers 1 3 gives POLY CONTACT METAL1: both ends are included. An arrow from the word METAL1 to box 3 shows that lsearch layers METAL1 gives 3. The word METAL3 has no box to point to, so lsearch gives minus 1." />
+
+<WorkedExample
+  code={`set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+puts [lrange $layers 0 2]
+puts [lrange $layers 3 end]
+puts [lsearch $layers METAL1]
+puts [lsearch $layers METAL3]`}
+  notes={{
+    1: 'The seven layers of Lumen-1, from the bottom of the chip to the top.',
+    2: 'Indexes 0, 1 and 2: both ends are included. Output: ACTIVE POLY CONTACT',
+    3: 'From index 3 to the last element. Output: METAL1 VIA1 METAL2 TEXT',
+    4: 'Where is METAL1? At index 3, the fourth element. Output: 3',
+    5: 'Lumen-1 has no METAL3, so lsearch gives -1. Output: -1'
+  }}
+/>
+
+Run it. Then try `lrange $layers 2 2`, and `lsearch $layers metal1` in small letters.
+
+<TclPlayground client:visible code={`set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+puts [lrange $layers 0 2]
+puts [lrange $layers 3 end]
+puts [lsearch $layers METAL1]
+puts [lsearch $layers METAL3]`} />
+
+## Predict → Run → Explain
+
+The five blocks of {chip.name}. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set blocks {CORE SRAM ADC SENSOR PADS}
+puts [lrange $blocks 1 2]
+puts [lsearch $blocks PADS]
+puts [lsearch $blocks pads]`}
+  expected={`SRAM ADC
+4
+-1`}
+  explanation="lrange includes both ends, so indexes 1 and 2 give SRAM and ADC. PADS is the fifth block, so its index is 4: counting starts at 0. The list has PADS in capitals, not pads, and for lsearch capitals count, so it gives -1: not found."
+/>
+
+## lsort puts a list in order
+
+`lsort $names` gives a new list in alphabetical order. Like lrange, it does **not** change the variable. To keep the sorted list, store it: `set names [lsort $names]`.
+
+Alphabetical order is right for names but wrong for numbers. As text, `32000` comes before `8000`, because the character 3 comes before the character 8. Add `-integer` and lsort compares whole numbers by their size. Add `-decreasing` to get the largest first.
+
+The playground below sorts the areas of {chip.name}'s five blocks, in µm², three ways. Look at where 8000 lands each time.
+
+<TclPlayground client:visible code={`set areas {32000 22400 9600 8000 8000}
+puts [lsort $areas]
+puts [lsort -integer $areas]
+puts [lsort -integer -decreasing $areas]
+puts [lsort {SRAM ADC CORE}]`} />
+
+## Sort pairs by one field
+
+To sort blocks by area and still know which block is which, keep each name with its area: `{CORE 32000}`. A list of such pairs is a list whose elements are lists: a <GlossaryTerm term="nested-list">nested list</GlossaryTerm>. Lesson B shows more of them. Here, each element in braces is simply one pair.
+
+`lsort -index 1` sorts the pairs by their element 1, the area. The name, at index 0, travels with its area. Add `-integer`, because the areas are numbers.
+
+When two pairs have the same area, like SENSOR and PADS, lsort keeps them in the order they were in.
+
+<Diagram name="w06-sort-index" alt="On the left, five pairs in floorplan order: CORE 32000, SRAM 22400, ADC 9600, SENSOR 8000, PADS 8000. The second element of each pair, the area at index 1, is highlighted. lsort -integer -index 1 compares only those areas. On the right, the sorted pairs: SENSOR 8000, PADS 8000, ADC 9600, SRAM 22400, CORE 32000. Each name moved with its area, and SENSOR stays before PADS because their areas are equal." />
+
+<WorkedExample
+  code={`set areas {{CORE 32000} {SRAM 22400} {ADC 9600} {SENSOR 8000} {PADS 8000}}
+puts [lindex $areas 2]
+set smallFirst [lsort -integer -index 1 $areas]
+puts $smallFirst
+puts "Smallest: [lindex $smallFirst 0]"
+puts [lsort -index 0 $areas]`}
+  notes={{
+    1: 'Five pairs, one per block: the name, then the area in µm². Each pair in braces is one element.',
+    2: 'Element 2 is a whole pair. Output: ADC 9600',
+    3: 'Sort by element 1 of each pair, the area, as whole numbers. Store the result: lsort never changes areas.',
+    4: 'Output: {SENSOR 8000} {PADS 8000} {ADC 9600} {SRAM 22400} {CORE 32000}. SENSOR and PADS tie, so they keep their order.',
+    5: 'The first pair of the sorted list. Output: Smallest: SENSOR 8000',
+    6: 'Sort by element 0, the name, in alphabetical order. Output: {ADC 9600} {CORE 32000} {PADS 8000} {SENSOR 8000} {SRAM 22400}'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that each line prints what its comment asks for.
+
+<FadedExample
+  client:visible
+  template={`set layers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+# Must print: METAL1 VIA1 METAL2
+puts [lrange $layers 3 ___1___]
+# Must print: 8000 9600 32000
+puts [lsort ___2___ {9600 32000 8000}]
+# Must print: {SENSOR 8000} {ADC 9600} {CORE 32000}
+puts [lsort -integer -index ___3___ {{ADC 9600} {CORE 32000} {SENSOR 8000}}]`}
+  answers={[['5'], ['-integer'], ['1']]}
+  hints={['METAL2 is the sixth layer. Counting from 0, what is its index? lrange includes both ends.', 'As text, 32000 would come before 8000. Which option makes lsort compare numbers?', 'In each pair, the name is element 0. Which element is the area?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set areas {32000 22400 9600 8000 8000}
+lsort -integer $areas
+puts "Smallest: [lindex $areas 0] um2"`}
+  output={`Smallest: 32000 um2`}
+  fix={`set areas {32000 22400 9600 8000 8000}
+set areas [lsort -integer $areas]
+puts "Smallest: [lindex $areas 0] um2"`}
+  why="lsort gives back a new, sorted list. It never changes the variable. On a line of its own, the sorted list is thrown away, and areas is still in its old order. Store the result with set."
+/>
+
+<Trap
+  wrong={`set pairs {{CORE 32000} {ADC 9600}}
+puts [lsort -index 1 $pairs]`}
+  output={`{CORE 32000} {ADC 9600}`}
+  fix={`set pairs {{CORE 32000} {ADC 9600}}
+puts [lsort -integer -index 1 $pairs]`}
+  why="-index chooses WHICH element to compare, but not HOW. Without -integer, lsort compares the areas as text, and the text 32000 comes before 9600 because 3 comes before 9. Use -index and -integer together for numbers."
+/>
+
+<Trap
+  wrong={`set layers {ACTIVE POLY CONTACT}
+if {[lsearch $layers METAL3]} {
+    puts "METAL3 found"
+}
+if {[lsearch $layers ACTIVE]} {
+    puts "ACTIVE found"
+}`}
+  output={`METAL3 found`}
+  fix={`set layers {ACTIVE POLY CONTACT}
+if {[lsearch $layers METAL3] != -1} {
+    puts "METAL3 found"
+}
+if {[lsearch $layers ACTIVE] != -1} {
+    puts "ACTIVE found"
+}`}
+  why="if treats 0 as false and every other number as true. lsearch gives an index, not a yes or no. METAL3 is missing, so lsearch gives -1, which is true: wrong. ACTIVE is found at index 0, which is false: wrong again. Compare with -1: the test != -1 is right in both cases."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w06" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="lrange, lsearch, lsort" lines={[
+  'lrange $list 1 3        elements 1 to 3: both ends included',
+  'lsearch $list METAL1    its index, or -1 if it is not there',
+  'if {[lsearch $list X] != -1} {…}    the right way to test "found"',
+  'lsort $names            alphabetical order (a NEW list)',
+  'lsort -integer $areas   by size; add -decreasing for largest first',
+  'lsort -integer -index 1 $pairs    sort {name area} pairs by area',
+  'Keep the result: set areas [lsort -integer $areas]',
+  'Equal elements keep their order',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: More list commands, lsearch, lsort, lrange', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl16.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: lrange', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/lrange.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: lsearch (options such as -exact and -all)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/lsearch.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: lsort, including -index and why equal elements keep their order', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/lsort.htm', kind: 'tcl-man' },
+]} />

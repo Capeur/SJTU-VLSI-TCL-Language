@@ -1,14 +1,19 @@
 ---
-title: "Week 6 Lab"
+title: "Lab: Sort cells by area"
+description: "Week 6 lab: rank a library of standard cells by area with lsort -index, name the largest with lrange and join, and find a cell's rank with lsearch."
 milestone: "m10"
 week: 6
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Turn a nested list of cells into {name area} pairs and sort them, largest first
+  - Use lmap, lrange, join and lsearch to report on the sorted list
+prerequisites: ["m10-w06-a", "m10-w06-b"]
+glossary: [standard-cell, nested-list, coordinate]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: lsort", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lsort.htm" }
+  - { title: "Tcl manual page: lmap", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/lmap.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,95 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Diagram from '../../../../components/Diagram.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-06/data/expected.txt?raw';
 
-Lab for week 6 (Lists II) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={6} lesson="lab" minutes={60} />
+
+## Goal
+
+**Rank a small library of standard cells from the largest to the smallest, and report on the ranking.**
+
+Why it matters for chips: the CORE block of {chip.name} is built from thousands of <GlossaryTerm term="standard-cell">standard cells</GlossaryTerm>, small ready-made pieces such as an inverter (INV) or a NAND gate. They all have the same height, so they line up in rows, like houses along a street. Their widths differ. A designer who wants a smaller chip first looks at the cells that take the most room. Your script makes that list.
+
+## What you'll practise
+
+- [Lesson A: Slice, search, sort](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-a/): `lsort -integer -decreasing -index 1`, `lrange`, `lsearch` and its −1.
+- [Lesson B: Lists inside lists](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-b/): reading a nested list, `lmap`, `join`.
+- [Week 5, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-05/lesson-b/): `foreach` and `lappend`.
+
+## Specification
+
+- **Inputs.** The starter gives you three lines. `set cells {…}` is a <GlossaryTerm term="nested-list">nested list</GlossaryTerm>: each cell is a pair `{name {x1 y1 x2 y2}}`, its name and then its rectangle, in µm. `set topCount 3` says how many of the largest cells to name. `set findCell NOR2` is the cell whose rank you look up. **Keep these three lines exactly as they are.** The checker changes their values twice and runs your script again.
+- **Output.** With these inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- **Line 1** counts the cells.
+- **Then one line per cell, largest area first**, numbered from 1. The area is (x2 − x1) × (y2 − y1). Two cells with the same area keep the order they were given in; lsort already does that for you.
+- **The Largest line** names the `topCount` largest cells, with `, ` between them.
+- **The last line** is the rank of `findCell`: `NOR2: rank 2`. If the cell is not in the list, print `NOR2: not found` (with its name).
+- Words, capitals and punctuation must match. Extra spaces are forgiven.
+
+The numbers are teaching numbers. Real standard cells are about a micrometre wide, a hundred times smaller.
+
+<Diagram name="w06-lab-cells" alt="The five starter cells drawn side by side to scale, all 10 micrometres tall: INV 3 wide, NAND2 5 wide, DFF 14 wide and clearly the largest, NOR2 6 wide, BUF 4 wide. Each cell is drawn from its own corner at 0, 0, and its area is its width times its height." />
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-06/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-06" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step, and compare your new lines with the specification.
+
+1. **Count.** Each cell is one element of `cells`, so llength counts the cells.
+2. **Pairs.** Start an empty list. For each cell, take its name with `lindex $cell 0` and its rectangle with `lindex $cell 1`, compute the area, and lappend `[list $name $area]`.
+3. **Sort and print.** Sort the pairs with `lsort -integer -decreasing -index 1` and store the result. Then print one numbered line per pair, with a counter.
+4. **Names.** Make the list of names in sorted order with lmap: the body is `lindex $pair 0`.
+5. **Largest.** Take the first `topCount` names with lrange, glue them with `join … ", "`, and print the line.
+6. **Rank.** Find `findCell` in the names with lsearch. If the index is not −1, the rank is the index + 1. Otherwise, print that it was not found.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Step 2 in three lines: set rect [lindex $cell 1], then set area [expr {([lindex $rect 2] - [lindex $rect 0]) * ([lindex $rect 3] - [lindex $rect 1])}], then lappend pairs [list [lindex $cell 0] $area].',
+  'Step 5: lrange counts from 0 and includes its end, so the end index is topCount - 1: lrange $names 0 [expr {$topCount - 1}]. Step 6: test the index with != -1, not with if {$index}: index 0 is a real cell.',
+  'If a test with new inputs fails, look for a number you typed instead of computing it: the height of the cells, the number of cells, or the end of lrange.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 9/9` when everything is right. The last two tests change the inputs: first a library with a tie and a cell that is not there, then six cells where the cell to find is the smallest. They pass only if every line comes from the inputs.
+
+## Stretch goal: cells from a line of text
+
+Cell libraries are often listed as text. Paste your finished lab script below, then add a line at the top: `set text "INV:3,NAND2:5,DFF:14"`. Use split twice, first at the commas and then at each colon, to build the same `cells` list as the starter (height 10, corner at 0, 0). This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+
+# Then build cells from this text instead:
+set text "INV:3,NAND2:5,DFF:14"
+`} />
