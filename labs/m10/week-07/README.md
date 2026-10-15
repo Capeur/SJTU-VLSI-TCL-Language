@@ -43,4 +43,7 @@ tclsh tests/test.tcl mine.tcl     # checks another file
 Each test gets a `PASS`, `FAIL` (with what was expected, what your script printed and a hint), `TODO` or
 `NOTE` line. The last line is `RESULT: PASS 15/15` when everything is right. The exit code is 0 only on a full pass.
 
+A loop that never ends does not freeze the checker: after a few seconds it stops your script and tells you.
+If the tests seem stuck for more than a few seconds, press Ctrl+C: your loop probably never ends.
+
 Solutions are not published. The checker works out every expected line and answer from the inputs itself.

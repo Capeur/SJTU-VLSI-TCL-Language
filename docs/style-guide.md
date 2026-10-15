@@ -33,7 +33,7 @@
 22. The lab page shows the target output from the lab's data file (`import x from '…/data/expected.txt?raw'`), never a hand-copied block.
 23. Values the checker swaps live in `data/*.txt` as `set name value` lines and appear unchanged in `starter.tcl`; the self-test checks both. Tell learners to keep those lines exactly as given.
 24. A lab self-test may build a passing program only for a small weekly lab. Capstone and exam graders are tested against the private solutions repository.
-25. **From Week 4, a lab checker guards against loops that never end:** `interp limit $child commands`, plus a cap on captured output (Wacl has a fixed 16 MB heap). A runaway script gets a FAIL that says so; the checker never hangs or crashes the browser interpreter. The self-test covers both a silent and a printing endless loop.
+25. **From Week 4, a lab checker guards against loops that never end:** `interp limit $child commands`, plus a cap on captured output (Wacl has a fixed 16 MB heap). In the terminal, `tests/test.tcl` also sets `labTimeLimit` (seconds per run, applied with `interp limit … time`), because a loop with an empty body (`while 1 {}`) runs no commands and only a time limit stops it. A runaway script gets a FAIL that says so; the checker never hangs or crashes the browser interpreter. The self-test covers a silent, a printing and an empty endless loop.
 
 28. **Every component that runs learner code in the browser goes through `src/lib/tclRuntime.ts`** (usually via `useTclRun`, showing `runProblem(result)`). That is what gives it the 5 s timeout, the output limit and the restart after an out-of-memory crash. The LayoutCanvas of P5 must do the same; `npm run test:browser` covers the guards.
 

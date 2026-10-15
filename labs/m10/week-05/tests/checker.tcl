@@ -13,6 +13,23 @@ set labCommandLimit 100000
 # whole browser interpreter. So the captured output is capped too; a correct report is under 1000 characters.
 set labOutputLimit 20000
 
+# The terminal checker (tests/test.tcl) also sets labTimeLimit, in seconds per run. A loop with an empty
+# body, like while 1 {}, runs no commands, so the command limit never stops it; a time limit does (tested
+# on Tcl 8.6, 9.0 and Wacl). In the browser it stays 0, off: the playground's 5 s timeout covers that case.
+if {![info exists labTimeLimit]} {
+    set labTimeLimit 0
+}
+
+# Set (or reset) the time limit of a child interpreter: labTimeLimit seconds from now.
+proc labStartClock {child} {
+    global labTimeLimit
+    if {$labTimeLimit > 0} {
+        interp limit $child time -seconds {}
+        set end [expr {[clock milliseconds] + 1000 * $labTimeLimit}]
+        interp limit $child time -seconds [expr {$end / 1000}] -milliseconds [expr {$end % 1000}]
+    }
+}
+
 # Stand-in for puts inside the learner's script: collect the text instead of printing it.
 proc labCapture {args} {
     global labOutput labOutputLimit
@@ -43,10 +60,11 @@ proc labRun {code} {
     set child [interp create -safe]
     interp alias $child puts {} labCapture
     interp limit $child commands -value $labCommandLimit
+    labStartClock $child
     set status ok
     if {[catch {$child eval $code} message]} {
         set status error
-        if {[string match "command count limit exceeded*" $message] || $message eq "output limit exceeded"} {
+        if {[string match "command count limit exceeded*" $message] || $message eq "time limit exceeded" || $message eq "output limit exceeded"} {
             set status toolong
         }
     }

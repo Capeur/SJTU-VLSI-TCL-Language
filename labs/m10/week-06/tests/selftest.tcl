@@ -143,4 +143,11 @@ set report [labCheck [string map [list "set topCount 3" "set topCount \[expr \{1
 expectIn changed "NOTE Follows the inputs: a tie, and a cell that is not there: I could not find the line   set topCount 3" $report
 expectNotIn changed "FAIL Follows" $report
 
+# Terminal time limit (tests/test.tcl sets labTimeLimit): a loop with an EMPTY body runs no commands, so
+# only the time limit can stop it. With the limit on, it is stopped and named like any endless loop.
+set labTimeLimit 1
+set report [labCheck "$labStarter\nwhile 1 {}\n"]
+expectIn emptyLoop "FAIL Your script ran too long" $report
+set labTimeLimit 0
+
 puts "SELFTEST PASS $checks checks"

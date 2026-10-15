@@ -155,4 +155,11 @@ set report [labCheck [string map [list "set shapes \{30 40" "set shapes \[list 3
 expectIn changed "NOTE Follows the inputs: four shapes, none too narrow: I could not find the line   set shapes {30 40 90 70" $report
 expectNotIn changed "FAIL Follows" $report
 
+# Terminal time limit (tests/test.tcl sets labTimeLimit): a loop with an EMPTY body runs no commands, so
+# only the time limit can stop it. With the limit on, it is stopped and named like any endless loop.
+set labTimeLimit 1
+set report [labCheck "$labStarter\nwhile 1 {}\n"]
+expectIn emptyLoop "FAIL Your script ran too long" $report
+set labTimeLimit 0
+
 puts "SELFTEST PASS $checks checks"

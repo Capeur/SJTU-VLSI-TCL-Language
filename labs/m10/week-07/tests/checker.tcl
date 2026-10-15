@@ -17,6 +17,23 @@ set labCallLimit 10000
 # whole browser interpreter. So the captured output is capped too; a correct report is under 1000 characters.
 set labOutputLimit 20000
 
+# The terminal checker (tests/test.tcl) also sets labTimeLimit, in seconds per run. A loop with an empty
+# body, like while 1 {}, runs no commands, so the command limit never stops it; a time limit does (tested
+# on Tcl 8.6, 9.0 and Wacl). In the browser it stays 0, off: the playground's 5 s timeout covers that case.
+if {![info exists labTimeLimit]} {
+    set labTimeLimit 0
+}
+
+# Set (or reset) the time limit of a child interpreter: labTimeLimit seconds from now.
+proc labStartClock {child} {
+    global labTimeLimit
+    if {$labTimeLimit > 0} {
+        interp limit $child time -seconds {}
+        set end [expr {[clock milliseconds] + 1000 * $labTimeLimit}]
+        interp limit $child time -seconds [expr {$end / 1000}] -milliseconds [expr {$end % 1000}]
+    }
+}
+
 # Stand-in for puts inside the learner's script: collect the text instead of printing it.
 proc labCapture {args} {
     global labOutput labOutputLimit
@@ -40,7 +57,7 @@ proc labCapture {args} {
 }
 
 proc labTooLong {message} {
-    return [expr {[string match "command count limit exceeded*" $message] || $message eq "output limit exceeded"}]
+    return [expr {[string match "command count limit exceeded*" $message] || $message eq "time limit exceeded" || $message eq "output limit exceeded"}]
 }
 
 # Run a script in a fresh safe interpreter, then make some calls in the same interpreter.
@@ -53,6 +70,7 @@ proc labRun {code {calls {}}} {
     set child [interp create -safe]
     interp alias $child puts {} labCapture
     interp limit $child commands -value $labCommandLimit
+    labStartClock $child
     set status ok
     if {[catch {$child eval $code} message]} {
         set status error
@@ -61,20 +79,30 @@ proc labRun {code {calls {}}} {
         }
     }
     set results {}
+    set outOfTime {}
     foreach call $calls {
         if {$status eq "toolong"} {
             lappend results [list skipped ""]
             continue
         }
+        # A proc that ran out of time once is not called again: each call would wait the full time limit.
+        if {[lindex $call 0] in $outOfTime} {
+            lappend results [list skipped ""]
+            continue
+        }
         # A fresh allowance for every call. A limit that was reached blocks the child until it is
-        # raised, so remove it before reading the command count.
+        # raised, so remove both limits before reading the command count.
         interp limit $child commands -value {}
+        labStartClock $child
         interp limit $child commands -value [expr {[$child eval {info cmdcount}] + $labCallLimit}]
         if {[$child eval [list info commands [lindex $call 0]]] eq ""} {
             lappend results [list missing ""]
         } elseif {[catch {$child eval $call} value]} {
             if {[labTooLong $value]} {
                 lappend results [list toolong $value]
+                if {$value eq "time limit exceeded"} {
+                    lappend outOfTime [lindex $call 0]
+                }
             } else {
                 lappend results [list error $value]
             }
@@ -222,6 +250,7 @@ proc labCallProblem {call result want} {
     lassign $result status value
     switch -- $status {
         toolong { return "     $call never ends. Look for a loop inside the proc." }
+        skipped { return "     $call was not run: an earlier call of [lindex $call 0] never ended." }
         error { return "     $call stops with an error. Tcl says: $value" }
     }
     if {[string is boolean -strict $value] && $value ne "0" && $value ne "1"} {

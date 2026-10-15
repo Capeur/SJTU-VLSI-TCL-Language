@@ -178,4 +178,15 @@ set report [labCheck [string map [list "set plan \{\{ALU" "set plan \[list \{ALU
 expectIn changed "NOTE Follows the input: blocks 1 um apart, no conflict: I could not find the line   set plan {{ALU" $report
 expectNotIn changed "FAIL Follows" $report
 
+# Terminal time limit (tests/test.tcl sets labTimeLimit): a loop with an EMPTY body runs no commands, so
+# only the time limit can stop it. With the limit on, it is stopped and named like any endless loop.
+set labTimeLimit 1
+set report [labCheck "$labStarter\nwhile 1 {}\n"]
+expectIn emptyLoop "FAIL Your script ran too long" $report
+set report [labCheck "[string map [list "proc rectArea \{rect\} \{\n" "proc rectArea \{rect\} \{\n    while 1 \{\}\n"] $procsOnly]"]
+expectIn emptyLoopProc "rectArea {0 0 30 20} never ends. Look for a loop inside the proc." $report
+expectIn emptyLoopProc "rectArea {10 10 50 30} was not run: an earlier call of rectArea never ended." $report
+expectIn emptyLoopProc "PASS rectOverlaps gives the same answer in both orders" $report
+set labTimeLimit 0
+
 puts "SELFTEST PASS $checks checks"

@@ -142,4 +142,11 @@ set report [labCheck [string map [list "set minSpace 2" "set minSpace 2.0"] $cor
 expectIn changed "NOTE Follows the inputs: a wire exactly at the minimum: I could not find the line   set minSpace 2" $report
 expectNotIn changed "FAIL Follows" $report
 
+# Terminal time limit (tests/test.tcl sets labTimeLimit): a loop with an EMPTY body runs no commands, so
+# only the time limit can stop it. With the limit on, it is stopped and named like any endless loop.
+set labTimeLimit 1
+set report [labCheck "$labStarter\nwhile 1 {}\n"]
+expectIn emptyLoop "FAIL Your script ran too long" $report
+set labTimeLimit 0
+
 puts "SELFTEST PASS $checks checks"
