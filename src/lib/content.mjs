@@ -89,3 +89,55 @@ export function loadGlossary() {
     }
     return map;
 }
+
+// Milestone exams (PRD §9.1; decision log, P3 Week 10): src/content/exams/<name>.yaml.
+// Every item is graded by RUNNING Tcl in the browser, so the public file holds NO answers and no
+// explanations (the reference answers live in the private solutions repository). The schema is strict:
+// an `answer` or `explanation` field is an error.
+//   predict-output  `code`; the learner types the output. `output_hash` = FNV-1a of the normalised real output,
+//                   used only by CI to check that tclsh 8.6, 9.0 and Wacl all print the same thing.
+//   complete-code   `code` with exactly one ___ and a `target` output; the learner's text fills the blank.
+//   choose-code     `choices`: short scripts; `target`: the output that exactly one of them prints.
+const examBase = {
+    id: z.string().regex(/^m\d0-exam-\d\d$/),
+    week: z.number().int().min(1).max(40),
+    tags: z.array(z.string()).default([]),
+    revisit: z.string().regex(/^m\d0-w\d\d-[ab]$/),   // the lesson to revisit, e.g. m10-w03-a
+    prompt: z.string().min(1),
+};
+export const examItemSchema = z.discriminatedUnion('type', [
+    z.object({ ...examBase, type: z.literal('predict-output'), code: z.string(), output_hash: z.string().regex(/^[0-9a-f]{8}$/) }).strict(),
+    z.object({ ...examBase, type: z.literal('complete-code'), code: z.string(), target: z.string() }).strict()
+        .refine((q) => q.code.split('___').length === 2, { message: 'complete-code needs exactly one ___ in code' }),
+    z.object({ ...examBase, type: z.literal('choose-code'), choices: z.array(z.string()).min(3), target: z.string() }).strict(),
+]);
+export const examSchema = z.object({
+    ai_assisted: z.boolean(),
+    reviewed_by: z.string(),
+    review_date: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/),
+    title: z.string(),
+    items: z.array(examItemSchema).min(1),
+}).strict();
+
+export function loadExams() {
+    return readYamlDir('exams').map(({ name, data, file }) => ({ name, file, ...examSchema.parse(data) }));
+}
+
+/** FNV-1a (32 bits) of the UTF-8 bytes of a text, as 8 hex digits. Same as labFnv in the Tcl graders. */
+export function fnv1a(text) {
+    let hash = 0x811c9dc5;
+    for (const byte of new TextEncoder().encode(text)) {
+        hash = Math.imul(hash ^ byte, 0x01000193) >>> 0;
+    }
+    return hash.toString(16).padStart(8, '0');
+}
+
+/** Output in a fair form, exactly as the playground compares it (src/lib/tclRuntime.ts normaliseOutput). */
+export function normaliseOutput(text) {
+    return text.replace(/\r/g, '').split('\n').map((line) => line.replace(/\s+$/, '')).join('\n').replace(/\s+$/, '');
+}
+
+/** The hash stored for a predict-output exam item. */
+export function examOutputHash(output) {
+    return fnv1a(`exam:${normaliseOutput(output)}`);
+}

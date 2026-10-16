@@ -1,10 +1,14 @@
 ---
 title: "Week 10: When things go wrong"
+description: "Week 10 overview: raising and catching errors with error, catch, errorInfo and try … on error … finally, defensive procs, then the M10 capstone (Mini Floorplan Checker) and the M10 exam. A longer week of about 5 hours."
 milestone: "m10"
 week: 10
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 300
+goals:
+  - Raise, catch and trace errors with error, catch and errorInfo
+  - Handle errors with try … on error … finally, and write defensive procs
+  - Build the Mini Floorplan Checker, then take the M10 exam
+prerequisites: ["m10-w04-a", "m10-w07-a", "m10-w07-b"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,33 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+Every script meets bad input sooner or later. This week yours learn to expect it: to refuse a bad value with a clear message, to catch the error, report it and carry on. Then you put all of M10 together in the capstone, a checker for the floorplan of {chip.name}, and finish with the M10 exam.
+
+## This week you will
+
+<Goals items={['Raise, catch and trace errors with error, catch and errorInfo', 'Handle errors with try … on error … finally, and write defensive procs', 'Build the Mini Floorplan Checker, then take the M10 exam']} />
+
+## Time plan (about 5 hours)
+
+This week is longer than the others. If you need to, spread it over two weeks: the lessons and the quiz in the first, the capstone and the exam in the second.
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: error, catch and errorInfo](/SJTU-VLSI-TCL-Language/m10/week-10/lesson-a/) | 40 min | Your own error messages, catching errors, reading the stack trace |
+| [Lesson B: try, finally and defensive procs](/SJTU-VLSI-TCL-Language/m10/week-10/lesson-b/) | 40 min | try … on error, finally, guard clauses |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-10/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+| [Capstone: Mini Floorplan Checker](/SJTU-VLSI-TCL-Language/m10/capstone/) | 2 to 3 h | The M10 project; see the [capstone week page](/SJTU-VLSI-TCL-Language/m10/week-10/lab/) |
+| [M10 exam](/SJTU-VLSI-TCL-Language/m10/exam/) | 45 min | 30 items, mostly "what does this print?" |
+
+Do the quiz before the capstone: it shows which ideas need another look while there is still time.
+
+## Review these first
+
+This week builds on three earlier lessons. If any of these feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 4, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-04/lesson-a/): `if` and `else`. `if {[catch …]}` is an if like any other.
+- [Week 7, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-a/): `proc` and `return`. An error leaves a proc the way `return` does, but as a problem.
+- [Week 7, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-b/): `global`. A proc reads `errorInfo` with `global errorInfo`.

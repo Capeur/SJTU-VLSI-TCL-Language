@@ -1,0 +1,20 @@
+Mini Floorplan Checker: Lumen-1, 400 x 300 um
+Skipped FUSE: needs 5 values, got 4
+Skipped LOGO: w is not a number: ten
+Skipped SPARE: w must be positive, got -5
+Skipped: 3
+CORE      32000 um2
+SRAM      22400 um2
+ADC        9600 um2
+SENSOR     8000 um2
+PADS       8000 um2
+TIMER       800 um2
+LDO        1080 um2
+BIAS       1600 um2
+TEST       1200 um2
+Total     83480 um2 (69.6% of the chip)
+Outside: TEST
+Conflict: CORE and TIMER
+Conflict: CORE and BIAS
+Conflict: SRAM and TIMER
+Problems: 4

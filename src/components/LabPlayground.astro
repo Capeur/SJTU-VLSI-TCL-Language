@@ -4,10 +4,11 @@
 // as `tclsh tests/test.tcl` in the Terminal tab. Files are read at build time.
 import RunWhere from './RunWhere';
 import { labStarter, labCheckScript } from '../lib/labs.mjs';
-interface Props { lab: string; }   // e.g. "m10/week-03"
+interface Props { lab: string; }   // e.g. "m10/week-03" or "m10/capstone"
 const { lab } = Astro.props;
 const [ms, week] = lab.split('/');
-const checkId = `${ms}-w${week.replace('week-', '')}-lab`;
+// Progress id: m10-w03-lab for a weekly lab, m10-capstone for labs/m10/capstone.
+const checkId = week.startsWith('week-') ? `${ms}-w${week.replace('week-', '')}-lab` : `${ms}-${week}`;
 ---
 <RunWhere client:visible code={labStarter(lab)} filename="starter.tcl" check={labCheckScript(lab)} checkId={checkId} terminalCommand="tclsh tests/test.tcl" />
 <noscript><p>The Check button needs JavaScript. You can also run <code>tclsh tests/test.tcl</code> in the lab folder.</p></noscript>

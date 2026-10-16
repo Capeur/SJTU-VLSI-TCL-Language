@@ -3,6 +3,8 @@
 #   <n>.only     "8.6" or "9.0": run only on that Tcl version (used by <VersionNote>)
 #   <n>.drvlite  preload drvlite/drvlite.tcl (arrives in P5)
 #   <n>.error    the script must FAIL, and its error output must contain this text (used by <Trap>)
+#   <n>.hash     exam item: the output must match this FNV-1a hash; NOTHING of the output is printed,
+#                because the output is the answer and CI logs are public
 #   <n>.maxdecimals  N: a successful run must not print a decimal number with more than N places
 #                (M10 snippets; learners cannot round numbers before Week 8)
 # Usage: tclsh scripts/run-snippets.tcl ?snippetsDir? ?timeoutMs?
@@ -19,6 +21,16 @@ proc trimLines {text} {
         lappend lines [string trimright $line]
     }
     return [string trimright [join $lines \n]]
+}
+
+# FNV-1a (32 bits) of the UTF-8 bytes, as 8 hex digits (same as fnv1a in src/lib/content.mjs).
+proc fnv1a {text} {
+    set hash 2166136261
+    binary scan [encoding convertto utf-8 $text] cu* bytes
+    foreach byte $bytes {
+        set hash [expr {(($hash ^ $byte) * 16777619) & 0xFFFFFFFF}]
+    }
+    return [format %08x $hash]
 }
 
 proc readFile {path} {
@@ -74,6 +86,17 @@ foreach file $files {
     lassign [runWithTimeout $tclsh $args $timeoutMs] status output
     if {$status eq "timeout"} {
         incr fail; puts "FAIL $name: timed out after ${timeoutMs} ms"; continue
+    }
+    if {[file exists $base.hash]} {
+        if {$status ne "ok"} {
+            incr fail; puts "FAIL $name: exam item raised an error (output not shown)"; continue
+        }
+        if {[fnv1a "exam:[trimLines $output]"] ne [string trim [readFile $base.hash]]} {
+            incr fail; puts "FAIL $name: exam item output does not match its hash (output not shown)"; continue
+        }
+        incr pass
+        puts "ok   $name"
+        continue
     }
     if {[file exists $base.error]} {
         set want [string trim [readFile $base.error]]

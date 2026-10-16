@@ -7,6 +7,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer-core';
+import { examOutputHash } from '../src/lib/content.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const snipDir = path.join(root, 'snippets');
@@ -27,7 +28,7 @@ for (const page of fs.readdirSync(snipDir, { withFileTypes: true }).filter((d) =
         if (read('.runs_in')?.trim() !== 'playground') continue;
         if (read('.only') !== undefined && read('.only').trim() !== '8.6') continue;   // Wacl is Tcl 8.6.6
         if (fs.existsSync(base + '.drvlite')) continue;                                // DRV-Lite arrives in P5
-        jobs.push({ name: `${page.name}/${file}`, code: read('.tcl'), expected: read('.expected'), error: read('.error') });
+        jobs.push({ name: `${page.name}/${file}`, code: read('.tcl'), expected: read('.expected'), error: read('.error'), hash: read('.hash') });
     }
 }
 console.log(`Running ${jobs.length} playground snippet(s) in Wacl (headless Chrome)`);
@@ -72,6 +73,11 @@ for (const job of jobs) {
     else if (reply.outputLimit) problem = 'printed more than the playground output limit';
     else if (job.error !== undefined) {
         if (reply.ok || !reply.error.includes(job.error.trim())) problem = `expected an error containing ${JSON.stringify(job.error.trim())} but Wacl gave ${reply.ok ? 'no error' : JSON.stringify(reply.error.split('\n')[0])}`;
+    }
+    // Exam items: compare a hash and print NOTHING of the output (it is the answer; CI logs are public).
+    else if (job.hash !== undefined) {
+        if (!reply.ok) problem = 'exam item raised an error in Wacl (output not shown)';
+        else if (examOutputHash(reply.stdout) !== job.hash.trim()) problem = 'exam item output does not match its hash in Wacl (output not shown)';
     }
     else if (!reply.ok) problem = `Tcl error in Wacl: ${reply.error}`;
     else if (job.expected !== undefined && norm(reply.stdout) !== norm(job.expected)) {

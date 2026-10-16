@@ -1,0 +1,25 @@
+---
+// A milestone exam paper (PRD §9.1). Loads src/content/exams/<exam>.yaml at build time and hands the items
+// to the ExamPaper island, which grades them by running Tcl in the browser. The YAML has no answers, and
+// output_hash (a CI check only) is not sent to the page.
+import ExamPaper from './ExamPaper';
+import { loadExams } from '../lib/content.mjs';
+interface Props { exam: string; }   // e.g. "m10"
+const { exam } = Astro.props;
+const paper = loadExams().find((e) => e.name === exam);
+if (!paper) throw new Error(`<Exam>: exam "${exam}" not found in src/content/exams/`);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const items = paper.items.map((item) => {
+    const [, ms, week, lesson] = /^(m\d0)-w(\d\d)-([ab])$/.exec(item.revisit)!;
+    return {
+        id: item.id, type: item.type, week: item.week, prompt: item.prompt,
+        code: 'code' in item ? item.code : undefined,
+        target: 'target' in item ? item.target : undefined,
+        choices: 'choices' in item ? item.choices : undefined,
+        revisitUrl: `${base}/${ms}/week-${week}/lesson-${lesson}/`,
+        revisitLabel: `Week ${Number(week)}, Lesson ${lesson.toUpperCase()}`,
+    };
+});
+---
+<ExamPaper client:load examId={`${exam}-exam`} items={items} />
+<noscript><p>The exam needs JavaScript: each answer is checked by running Tcl in your browser. Nothing is sent anywhere.</p></noscript>

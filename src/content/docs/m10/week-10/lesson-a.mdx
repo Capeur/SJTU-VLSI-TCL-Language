@@ -1,14 +1,21 @@
 ---
-title: "Week 10 Lesson A"
+title: "error, catch and errorInfo"
+description: "Week 10, Lesson A: raising your own error with a clear message, catching errors with catch so that one bad block does not stop a report, and finding where an error came from with errorInfo."
 milestone: "m10"
 week: 10
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Stop a proc with your own clear message, using error
+  - Catch an error with catch, and read its code (0 or 1) and its message
+  - Find where an error came from with errorInfo
+prerequisites: ["m10-w07-a", "m10-w07-b", "m10-w04-a"]
+glossary: [error-message, stack-trace, capstone, procedure]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: error", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/error.htm" }
+  - { title: "Tcl manual page: catch", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/catch.htm" }
+  - { title: "Tcl manual page: tclvars (errorInfo)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/tclvars.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,232 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 10 (When things go wrong) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · error concept + worked example 1 + failing playground 6 ·
+    catch concept + diagram + worked example 2 6 · predict 3 · errorInfo concept + playground 3 · faded 3 ·
+    traps 4 · exit quiz 4 · cheat card 1 = 36 min. The exit quiz always draws a "catch-code" item (0 = fine,
+    1 = error). errorInfo is shown in a playground WITHOUT expected output: its exact text is not compared
+    (Wacl runs the learner's code inside its own wrapper). No snippet quotes an expr error about non-numeric
+    text: its wording differs between Tcl 8.6 and 9.0. The capstone's own messages are not used here. */}
+
+<LessonMeta milestone="m10" week={10} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+This week ends M10 with its <GlossaryTerm term="capstone" />: a checker for the floorplan of {chip.name}. Its input is typed by people, so some entries will be wrong: a width of `ten`, a missing number. Until now, one bad value stopped your whole script, and a checker that stops at the first bad entry reports nothing at all. Errors are normal and useful: this week your scripts expect them, report them clearly, and carry on.
+
+<ChipMap caption={`The ${chip.name} floorplan. A checker reads every block; one badly typed block must not stop it from checking the others.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Stop a proc with your own clear message, using error', 'Catch an error with catch, and read its code (0 or 1) and its message', 'Find where an error came from with errorInfo']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 9. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w10" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07', 'm10-w08', 'm10-w09']} mode="warmup" />
+
+## error: stop with a clear message
+
+You have seen many <GlossaryTerm term="error-message">error messages</GlossaryTerm> from Tcl itself. Your own procs can raise errors too. `error "message"` stops the proc at once, and the script with it, and shows your message.
+
+Use it when a proc gets a value it cannot work with. A width of −5 µm makes no sense, so returning a "result" would hide the problem. A good message says what is wrong and shows the value: `width must be positive, got -5`.
+
+<WorkedExample
+  code={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+puts [blockArea 120 80]`}
+  notes={{
+    1: 'A proc with two arguments, the width and the height of a block.',
+    2: 'Check the input first: is the width impossible?',
+    3: 'If it is, stop here with a clear message. Nothing after this line runs.',
+    4: 'The end of the check.',
+    5: 'Only good input reaches this line.',
+    6: 'The end of the proc.',
+    7: 'A good block. Output: 9600'
+  }}
+/>
+
+Now run the same proc with a bad width. The script stops, and your message is the error message.
+
+<TclPlayground client:visible fails={`width must be positive, got -5`} code={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+puts [blockArea -5 10]
+puts "this line never runs"`} />
+
+## catch: a safety net
+
+`catch {script} message` runs the script and catches any error in it, so your own script goes on. It gives back a code: **0** if all went well, **1** if there was an error. The variable you name, here `message`, receives the result, or the error message.
+
+That fits an `if`: `if {[catch {…} message]} {…}` runs its body only when something went wrong. Brace the script, just like a loop body: `catch` must receive the code, not its result.
+
+<Diagram name="w10-error-stops" alt="Two rows of three blocks. Top row, without catch: the block 120 by 80 gives 9600, the block minus 5 by 10 gives an error, and the block 100 by 80 never runs, because the script stops at the bad block. Bottom row, with catch: area 9600, then skipped minus 5 by 10, then area 8000: the bad block is reported and the script goes on. A note says catch gives 1 and the message on an error, 0 and the result when all goes well." />
+
+<WorkedExample
+  code={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+foreach size {{120 80} {-5 10} {100 80}} {
+    set w [lindex $size 0]
+    set h [lindex $size 1]
+    if {[catch {blockArea $w $h} result]} {
+        puts "skipped $w by $h: $result"
+    } else {
+        puts "area $result um2"
+    }
+}`}
+  notes={{
+    1: 'The same proc as above.',
+    7: 'Three blocks, one of them bad.',
+    8: 'The width of this block.',
+    9: 'The height.',
+    10: 'Run the call inside catch. 1 means an error: result then holds the error message.',
+    11: 'Output for the bad block: skipped -5 by 10: width must be positive, got -5',
+    12: '0 means all went well: result holds the area.',
+    13: 'Output: area 9600 um2 for the first block, area 8000 um2 for the last one.',
+    15: 'The loop reaches every block. The bad one did not stop it.'
+  }}
+/>
+
+## Predict → Run → Explain
+
+catch gives back a code and fills a variable. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set ok [catch {expr {1 / 0}} msg]
+puts "$ok: $msg"
+set ok [catch {expr {6 / 2}} msg]
+puts "$ok: $msg"`}
+  expected={`1: divide by zero
+0: 3`}
+  explanation="Dividing by zero is an error, so catch gives 1 and msg holds the error message, divide by zero. The second division works: catch gives 0, and msg holds the result, 3. The script itself never stops."
+/>
+
+## errorInfo: where did it break?
+
+The message says WHAT went wrong. To see WHERE, read the <GlossaryTerm term="stack-trace">stack trace</GlossaryTerm>. After an error, Tcl keeps it in the variable `errorInfo`: first the message, then "while executing" and the command that failed, then one "invoked from within" line for each level further out.
+
+Here the error starts in `blockArea`, which was called by `reportBlock`. Run it and read the trace from the top. Inside a proc, you would write `global errorInfo` first (Week 7).
+
+<TclPlayground client:visible code={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+proc reportBlock {name w h} {
+    return "$name: [blockArea $w $h] um2"
+}
+if {[catch {reportBlock SPARE -5 10} message]} {
+    puts "Message: $message"
+    puts "Trace:"
+    puts $errorInfo
+}`} />
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`proc blockHeight {h} {
+    if {$h <= 0} {
+        ___1___ "height must be positive, got $h"
+    }
+    return $h
+}
+# Must print: problem: height must be positive, got 0
+if {[___2___ {blockHeight 0} ___3___]} {
+    puts "problem: $why"
+}`}
+  answers={[['error'], ['catch'], ['why']]}
+  hints={['Which command stops a proc with your own message?', 'Which command runs a script and catches its error?', 'The body prints $why. Which variable must catch fill with the message?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`catch [expr {1 / 0}] message
+puts "still running"`}
+  error={`divide by zero`}
+  fix={`catch {expr {1 / 0}} message
+puts "still running"`}
+  why="With brackets, Tcl runs expr BEFORE catch even starts (Week 2), so the error happens outside the safety net and stops the script. Braces hand the code itself to catch, which runs it inside the net."
+/>
+
+<Trap
+  wrong={`if {[catch {expr {6 / 2}} result]} {
+    puts "fine: $result"
+} else {
+    puts "error: $result"
+}`}
+  output={`error: 3`}
+  fix={`if {[catch {expr {6 / 2}} result]} {
+    puts "error: $result"
+} else {
+    puts "fine: $result"
+}`}
+  why="catch gives 1 when there WAS an error, and 0 when all went well. So the body of the if is the error branch. Read it as: if catching found an error…"
+/>
+
+<Trap
+  wrong={`error width must be positive`}
+  error={`wrong # args: should be "error message ?errorInfo? ?errorCode?"`}
+  fix={`catch {error "width must be positive"} message
+puts $message`}
+  why="error takes ONE word for its message. Without quotes, the message is four words, so error gets too many arguments. Put the message in quotes, like the text of puts."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w10" lesson="a" mode="exit" count={4} require="catch-code" />
+
+## Cheat card
+
+<CheatCard title="error, catch, errorInfo" lines={[
+  'error "width must be positive, got $w"   stop with a clear message',
+  'catch {script} message   1 = error (message), 0 = fine (result)',
+  'if {[catch {…} message]} {…}   the body runs on an ERROR',
+  'Brace the script: catch {…}, never catch […]',
+  'puts $errorInfo        the stack trace: message, then where',
+  'Inside a proc: global errorInfo first',
+  'A good message says what is wrong AND shows the value',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl manual page: error', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/error.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: catch (the options variable comes later)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/catch.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: tclvars, including errorInfo', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/tclvars.htm', kind: 'tcl-man' },
+]} />

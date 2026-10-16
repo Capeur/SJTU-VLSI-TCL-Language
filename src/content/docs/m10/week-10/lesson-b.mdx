@@ -1,14 +1,21 @@
 ---
-title: "Week 10 Lesson B"
+title: "try, finally and defensive procs"
+description: "Week 10, Lesson B: handling errors with try … on error, running clean-up code every time with finally, and writing defensive procs whose guard clauses refuse bad input with clear messages."
 milestone: "m10"
 week: 10
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Handle an error with try … on error {message} {…}
+  - Run clean-up code every time with finally
+  - Write a defensive proc that checks its input first and refuses bad values with clear messages
+prerequisites: ["m10-w10-a", "m10-w05-b", "m10-w08-b"]
+glossary: [guard-clause, error-message, procedure, capstone]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: try", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/try.htm" }
+  - { title: "Tcl manual page: string (string is)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm" }
+  - { title: "Tcl manual page: error", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/error.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,287 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 10 (When things go wrong) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · try / on error concept + diagram + worked example 1 7 ·
+    finally concept + playground 3 · predict 3 · defensive procs concept + worked example 2 7 · faded 3 ·
+    traps 4 · exit quiz 4 · cheat card 1 = 38 min. Trap 3 is "swallowing errors" (user decision, P3 Week 10 outline).
+    The worked examples check RECTANGLES {x1 y1 x2 y2} with their own messages; the capstone's checkBlock checks
+    {name x y w h} with other, specified messages, so nothing here gives the capstone away. string is double -strict
+    is new: one line in the concept, then the worked example and a trap. */}
+
+<LessonMeta milestone="m10" week={10} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+`catch` works, but every call needs an `if` and you must remember that 1 means "error". Tcl has a clearer way to say "try this; if it goes wrong, do that": `try`. With it, the capstone checker can test each block of {chip.name}'s floorplan, report the bad ones and keep going. And the best place to catch a bad block is at the door: a proc that checks its own input first, before it trusts it.
+
+<ChipMap caption={`The ${chip.name} floorplan. Each block is checked at the door: is it complete, are its values numbers, are its sizes positive?`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Handle an error with try … on error {message} {…}', 'Run clean-up code every time with finally', 'Write a defensive proc that checks its input first and refuses bad values with clear messages']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 9, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w10" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07', 'm10-w08', 'm10-w09']} mode="warmup" count={3} mix={1 / 3} />
+
+## try … on error
+
+`try {body} on error {message} {handler}` runs the body. If all goes well, the handler is skipped. If a command in the body raises an error, the body stops at once, the error message goes into `message`, and the handler runs. Either way, the script carries on after the `try`.
+
+It does the same job as `if {[catch …]}`, but it reads like a sentence, and you cannot mix up 0 and 1.
+
+<Diagram name="w10-try-paths" alt="A flow diagram. try with its body runs the risky commands. With no error, the rest of the body runs and the on error part is skipped. With an error, the body stops at once and on error with the variable message and its handler runs; message holds the error message. Both paths then meet at finally with its clean-up code, which runs at the end after an error or after a normal run." />
+
+<WorkedExample
+  code={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+foreach size {{120 80} {0 10} {100 80}} {
+    try {
+        set area [blockArea [lindex $size 0] [lindex $size 1]]
+        puts "area $area um2"
+    } on error {message} {
+        puts "skipped: $message"
+    }
+}
+puts "report done"`}
+  notes={{
+    1: 'Lesson A’s proc: it raises an error for a width that is not positive.',
+    7: 'Three blocks; the second has a width of 0.',
+    8: 'The risky part goes in the body of try.',
+    9: 'For the bad block, blockArea raises an error here, so the next line is skipped.',
+    10: 'Output: area 9600 um2, then area 8000 um2 for the last block.',
+    11: 'On an error, the message goes into the variable message.',
+    12: 'Output for the bad block: skipped: width must be positive, got 0',
+    15: 'The loop finished every block. Output: report done'
+  }}
+/>
+
+## finally: always runs
+
+Add `finally {…}` at the end of a `try`, and its code runs every time: after a normal run, and after an error too. Use it for work that must happen whatever the result, like counting how many blocks you have checked, or, from Week 12, closing a file.
+
+<TclPlayground client:visible code={`foreach w {5 0} {
+    try {
+        if {$w <= 0} {
+            error "bad width $w"
+        }
+        puts "width $w ok"
+    } on error {message} {
+        puts "skipped: $message"
+    } finally {
+        puts "done with $w"
+    }
+}`} />
+
+## Predict → Run → Explain
+
+Which lines run, and in which order? Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`try {
+    puts a
+    error b
+    puts c
+} on error {message} {
+    puts "caught $message"
+} finally {
+    puts end
+}`}
+  expected={`a
+caught b
+end`}
+  explanation="The body prints a, then error stops it at once, so puts c never runs. The handler gets the message b. finally runs last, as always."
+/>
+
+## Defensive procs
+
+A defensive proc checks its input at the door. Its first lines are <GlossaryTerm term="guard-clause">guard clauses</GlossaryTerm>: is the number of values right, is each value a number, does it make sense? Each failed check raises an error that says what is wrong and shows the value. After the guards, the rest of the proc can trust its input.
+
+To test "is this text a number?", use `string is double -strict $value`: 1 for `12`, `-5` or `2.5`, and 0 for `ten`. Without `-strict`, an empty text counts as a number too (see the traps).
+
+<WorkedExample
+  code={`proc checkRect {rect} {
+    if {[llength $rect] != 4} {
+        error "a rectangle has 4 numbers, this one has [llength $rect]"
+    }
+    foreach value $rect {
+        if {![string is double -strict $value]} {
+            error "not a number: $value"
+        }
+    }
+    if {[lindex $rect 2] <= [lindex $rect 0]} {
+        error "x2 must be larger than x1"
+    }
+    return ""
+}
+foreach rect {{20 20 220 180} {20 20 220} {20 20 two 180} {220 20 20 180}} {
+    try {
+        checkRect $rect
+        puts "ok: $rect"
+    } on error {message} {
+        puts "bad: $message"
+    }
+}`}
+  notes={{
+    1: 'A proc that only checks: it returns nothing for a good rectangle.',
+    2: 'Guard 1: the number of values (Week 5).',
+    3: 'Say what is wrong, and show what you got.',
+    5: 'Guard 2: every value must be a number.',
+    6: '! turns 1 into 0 and 0 into 1: "if it is NOT a number".',
+    7: 'Show the bad value in the message.',
+    10: 'Guard 3: the rectangle must make sense.',
+    13: 'All guards passed.',
+    15: 'Four rectangles: one good, then three different mistakes.',
+    17: 'If checkRect raises an error, the next line is skipped.',
+    18: 'Output: ok: 20 20 220 180',
+    20: 'Output: bad: a rectangle has 4 numbers, this one has 3, then bad: not a number: two, then bad: x2 must be larger than x1'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`proc checkWidth {w} {
+    if {![string is double ___1___ $w]} {
+        error "not a number: $w"
+    }
+    return ok
+}
+# Must print: ok, checked 4, skipped: not a number: wide, checked wide
+foreach w {4 wide} {
+    try {
+        puts [checkWidth $w]
+    } ___2___ {message} {
+        puts "skipped: $message"
+    } ___3___ {
+        puts "checked $w"
+    }
+}`}
+  answers={[['-strict'], ['on error'], ['finally']]}
+  hints={['Which option makes string is double refuse an empty text?', 'Which two words start the part that runs on an error?', 'Which part of try runs every time, at the end?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set w ""
+if {[string is double $w]} {
+    puts "a number"
+} else {
+    puts "not a number"
+}`}
+  output={`a number`}
+  fix={`set w ""
+if {[string is double -strict $w]} {
+    puts "a number"
+} else {
+    puts "not a number"
+}`}
+  why="Without -strict, string is says 1 for an empty text, so a forgotten value slips through your guard. Always write -strict in a guard clause."
+/>
+
+<Trap
+  wrong={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+foreach w {120 0 100} {
+    puts "area [blockArea $w 80] um2"
+}`}
+  error={`width must be positive, got 0`}
+  fix={`proc blockArea {w h} {
+    if {$w <= 0} {
+        error "width must be positive, got $w"
+    }
+    return [expr {$w * $h}]
+}
+foreach w {120 0 100} {
+    try {
+        puts "area [blockArea $w 80] um2"
+    } on error {message} {
+        puts "skipped: $message"
+    }
+}`}
+  why="The proc refuses the bad width, which is right. But nobody catches the error, so it stops the whole loop: the first block is reported, the last one never is. Put the call inside try … on error."
+/>
+
+<Trap
+  wrong={`proc checkBlock {block} {
+    if {[llength $block] != 5} {
+        error "wrong number of values"
+    }
+}
+foreach b {{CORE 20 20 200 160} {FUSE 10 10 20}} {
+    catch {checkBlock $b}
+    puts "[lindex $b 0]: fine"
+}`}
+  output={`CORE: fine
+FUSE: fine`}
+  fix={`proc checkBlock {block} {
+    if {[llength $block] != 5} {
+        error "wrong number of values"
+    }
+}
+foreach b {{CORE 20 20 200 160} {FUSE 10 10 20}} {
+    if {[catch {checkBlock $b} message]} {
+        puts "[lindex $b 0]: $message"
+    } else {
+        puts "[lindex $b 0]: fine"
+    }
+}`}
+  why="This is called swallowing an error. catch stops the error, but the script ignores what catch gives back, so every block looks fine, even FUSE with its missing value. A hidden error is worse than a crash: nobody knows to fix it. Always look at catch's result, or use try … on error."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w10" lesson="b" mode="exit" count={4} require="try" />
+
+## Cheat card
+
+<CheatCard title="try, finally, defensive procs" lines={[
+  'try {body} on error {message} {handler}',
+  '  an error stops the body; the handler gets the message',
+  'finally {…}   runs at the end, after an error or not',
+  'Guard clauses first: count, numbers, sense; then trust the input',
+  'string is double -strict $v   1 for 12, -5, 2.5; 0 for ten and ""',
+  'error "not a number: $v"   say what is wrong, show the value',
+  'Never swallow an error: always use what catch gives back',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl manual page: try (on error, finally, and more handlers)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/try.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: string (see string is and its classes)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: error', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/error.htm', kind: 'tcl-man' },
+]} />

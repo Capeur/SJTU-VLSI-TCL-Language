@@ -1,14 +1,18 @@
 ---
 title: "M10 Exam"
+description: "The M10 milestone exam: 30 items on Weeks 1 to 10, two thirds of them 'what does this print?', a third on quotes and substitution. Each answer is checked by running Tcl in your browser; no answers are stored on the page."
 milestone: "m10"
 week: 10
 lesson: "exam"
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 45
+goals:
+  - Show what you can do after M10, without notes
+  - Find the lessons to revisit before M20
+prerequisites: ["m10-w10-a", "m10-w10-b"]
 glossary: []
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Dunlosky et al. (2013): which study strategies make the grade", url: "https://www.psychologicalscience.org/news/releases/which-study-strategies-make-the-grade.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +20,18 @@ review_date: ""
 sidebar: {"label":"Exam","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../components/LessonMeta.astro';
+import Exam from '../../../components/Exam.astro';
 
-Milestone exam — content arrives in a later phase.
+<LessonMeta milestone="m10" week={10} lesson="exam" minutes={45} />
+
+The M10 exam has **30 items** on Weeks 1 to 10. Twenty of them ask "what does this print?". Ten are about Week 3, quotes and substitution, because every later milestone depends on it. Plan about 45 minutes.
+
+- **No notes, no playground.** The exam shows you what you can do on your own, so that you know what to revisit before M20.
+- **Three kinds of item:** type the exact output; type what goes in a blank `___`; or choose the script that prints a target.
+- **Checking:** press **Check my exam** at the end. The page runs each item's code in your browser and compares the result with your answer. It stores no answer key, and nothing is sent anywhere. Your score stays in this browser.
+- **After checking**, you see your score, the real output of every prediction you missed, and the lesson to revisit for each missed item. You can change your answers and check again, but the first attempt is the honest one.
+
+Around 60 % or more means you are ready for M20. Below that, spend a few days on the lessons of the items you missed, then take the exam again.
+
+<Exam exam="m10" />

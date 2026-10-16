@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230">
+  <defs><marker id="w10-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-bold" x="20" y="24">Without catch: the first error stops everything</text>
+  <rect class="d-box-ok" x="20" y="40" width="130" height="40" rx="6"/>
+  <text class="d-txt d-mono d-small" x="85" y="65" text-anchor="middle">120 80 → 9600</text>
+  <line class="d-arrow" x1="152" y1="60" x2="178" y2="60" marker-end="url(#w10-arrow1)"/>
+  <rect class="d-box-bad" x="182" y="40" width="130" height="40" rx="6"/>
+  <text class="d-txt d-mono d-small" x="247" y="65" text-anchor="middle">-5 10 → error!</text>
+  <line class="d-arrow" x1="314" y1="60" x2="340" y2="60" marker-end="url(#w10-arrow1)"/>
+  <rect class="d-box-code" x="344" y="40" width="130" height="40" rx="6"/>
+  <text class="d-txt d-mono d-small d-muted" x="409" y="65" text-anchor="middle">100 80 never runs</text>
+  <text class="d-txt d-small d-fg-bad" x="20" y="104">The script stops at the bad block. The error message names the problem: width must be positive, got -5</text>
+
+  <text class="d-txt d-bold" x="20" y="146">With catch: the bad block is reported, and the script goes on</text>
+  <rect class="d-box-ok" x="20" y="162" width="130" height="40" rx="6"/>
+  <text class="d-txt d-mono d-small" x="85" y="187" text-anchor="middle">area 9600 um2</text>
+  <line class="d-arrow" x1="152" y1="182" x2="178" y2="182" marker-end="url(#w10-arrow1)"/>
+  <rect class="d-box-warn" x="182" y="162" width="130" height="40" rx="6"/>
+  <text class="d-txt d-mono d-small" x="247" y="187" text-anchor="middle">skipped -5 x 10</text>
+  <line class="d-arrow" x1="314" y1="182" x2="340" y2="182" marker-end="url(#w10-arrow1)"/>
+  <rect class="d-box-ok" x="344" y="162" width="130" height="40" rx="6"/>
+  <text class="d-txt d-mono d-small" x="409" y="187" text-anchor="middle">area 8000 um2</text>
+  <text class="d-txt d-small d-muted" x="20" y="224">catch {script} message gives 1 and the message on an error, 0 and the result when all goes well.</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240">
+  <defs><marker id="w10-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <rect class="d-box-code" x="20" y="20" width="220" height="56" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="44">try {body}</text>
+  <text class="d-txt d-small d-muted" x="34" y="64">runs the risky commands</text>
+  <line class="d-arrow" x1="240" y1="40" x2="356" y2="40" marker-end="url(#w10-arrow2)"/>
+  <text class="d-txt d-small d-fg-ok" x="252" y="32">no error</text>
+  <rect class="d-box-ok" x="360" y="20" width="260" height="40" rx="6"/>
+  <text class="d-txt d-small" x="374" y="45">the rest of the body runs; skip on error</text>
+  <line class="d-arrow" x1="130" y1="78" x2="130" y2="104" marker-end="url(#w10-arrow2)"/>
+  <text class="d-txt d-small d-fg-bad" x="140" y="96">an error: the body stops at once</text>
+  <rect class="d-box-warn" x="20" y="108" width="340" height="56" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="132">on error {message} {handler}</text>
+  <text class="d-txt d-small d-muted" x="34" y="152">message holds the error message</text>
+  <line class="d-arrow" x1="190" y1="166" x2="190" y2="186" marker-end="url(#w10-arrow2)"/>
+  <line class="d-arrow" x1="490" y1="62" x2="400" y2="186" marker-end="url(#w10-arrow2)"/>
+  <rect class="d-box-info" x="20" y="190" width="600" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="34" y="215">finally {clean-up}</text>
+  <text class="d-txt d-small" x="250" y="215">runs at the end, after an error OR after a normal run</text>
+</svg>

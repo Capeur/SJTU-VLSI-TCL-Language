@@ -1,11 +1,62 @@
 ---
 title: "M10 — Tcl Syntax Core"
-description: "Overview of M10 — Tcl Syntax Core"
+description: "Overview of M10, Tcl Syntax Core (Weeks 1 to 10): what you will be able to do, the ten weeks, the Mini Floorplan Checker capstone, where the code runs, how the lessons work, and how you are assessed."
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import GlossaryTerm from '../../../components/GlossaryTerm.astro';
+import chip from '../../../data/lumen-1.json';
 
-Milestone overview — content arrives in a later phase.
+M10 takes you from your first `puts` to a 100-line script that stores, checks and reports data about the rectangles of a chip. Everything runs in your browser.
 
-Capstone: **Mini Floorplan Checker**.
+## By the end of M10 you will be able to
+
+1. Predict exactly what Tcl does with quotes, braces, brackets, `$` and backslashes.
+2. Compute with `expr`, and make decisions and loops with `if`, `while`, `for` and `foreach`.
+3. Store and search data in lists, dicts and arrays, and clean and format text.
+4. Write your own commands with `proc`, with arguments, defaults and the right scope.
+5. Refuse bad input with clear errors, catch them with `try`, and keep going.
+
+## The ten weeks
+
+| Week | Theme | In one line |
+|---|---|---|
+| [1](/SJTU-VLSI-TCL-Language/m10/week-01/) | Hello, chip | What a chip and a script are; `puts`, words, `set` and `$` |
+| [2](/SJTU-VLSI-TCL-Language/m10/week-02/) | Tcl as a calculator | `expr`, the integer-division trap, and `[ ]` |
+| [3](/SJTU-VLSI-TCL-Language/m10/week-03/) | The quoting week | `"…"` substitutes, `{…}` freezes, `\` escapes; always brace `expr` |
+| [4](/SJTU-VLSI-TCL-Language/m10/week-04/) | Decisions and loops | `if`, comparisons, `while`, `for`, `incr` |
+| [5](/SJTU-VLSI-TCL-Language/m10/week-05/) | Lists I | `list`, `llength`, `lindex`, `lappend`, `foreach`; a rectangle as `{x1 y1 x2 y2}` |
+| [6](/SJTU-VLSI-TCL-Language/m10/week-06/) | Lists II | `lrange`, `lsearch`, `lsort`, `split`, `join`, `lmap`, nested lists |
+| [7](/SJTU-VLSI-TCL-Language/m10/week-07/) | Your own commands | `proc`, `return`, the touching rule, scope, `global`, `upvar`, `args` |
+| [8](/SJTU-VLSI-TCL-Language/m10/week-08/) | Text handling | `string` commands, glob patterns, `string map`, `format` |
+| [9](/SJTU-VLSI-TCL-Language/m10/week-09/) | Tables of data | `dict` in insertion order, arrays, choosing between them |
+| [10](/SJTU-VLSI-TCL-Language/m10/week-10/) | When things go wrong | `error`, `catch`, `errorInfo`, `try … on error … finally`; capstone and exam |
+
+## The capstone: Mini Floorplan Checker
+
+In [the M10 capstone](/SJTU-VLSI-TCL-Language/m10/capstone/), your script checks a floorplan of {chip.name} with proposed new blocks and badly typed entries. It refuses the bad entries with `try`, computes the areas, finds the blocks that stick out of the chip and every pair of blocks that clash, and prints a formatted report.
+
+It is the first of four <GlossaryTerm term="capstone">capstones</GlossaryTerm> that build on each other. In M20, its rectangles and its procs `rectArea` and `rectOverlaps` become TinyLayout, a small layout database of your own. In Week 23 you will draw these rectangles for real, as polygons in a layout, and open them in KLayout.
+
+## Where the code runs
+
+All of M10 runs in the **browser playground**: nothing to install. Every lesson has playgrounds, and every lab and the capstone have a **Check my work** button. If you like, you can also install `tclsh` early (see [Setup](/SJTU-VLSI-TCL-Language/setup/)) and run the labs' `tests/test.tcl` in a terminal. From Week 11 on, `tclsh` on your own computer is required.
+
+## How the lessons work in M10
+
+M10 gives you the most help of the whole course, because everything is new:
+
+- Each lesson shows **two worked examples**, explained line by line, then a **faded example** with blanks to fill.
+- **Predict → Run → Explain** is the main exercise: you write down what you think the code prints before you run it.
+- Labs go **step by step**, with a checker that tells you what to fix and which lesson to revisit.
+
+From M20 on, you will get one worked example, then a broken script to fix: you will be ready for less help.
+
+## Assessment
+
+- **Weekly quizzes:** 10 questions, about 70 % on the week and 30 % from earlier weeks. Missed questions come back in your spaced review.
+- **[M10 exam](/SJTU-VLSI-TCL-Language/m10/exam/):** 30 items; at least 60 % are "what does this print?", and a third are on Week 3. Each answer is checked by running Tcl in your browser.
+- **Capstone:** correctness 50 %, error handling 25 % (both checked automatically), readability 25 % (you score it with a short list).

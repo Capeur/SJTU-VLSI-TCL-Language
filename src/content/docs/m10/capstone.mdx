@@ -1,14 +1,20 @@
 ---
 title: "M10 Capstone: Mini Floorplan Checker"
+description: "The M10 capstone: check a floorplan of Lumen-1 with proposed new blocks and badly typed entries. Refuse bad entries with try, compute areas, find blocks outside the chip and blocks that clash, and print a formatted report. Graded for correctness, error handling and readability."
 milestone: "m10"
 week: 10
 lesson: "capstone"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 180
+goals:
+  - Validate typed input with try and defensive procs, and keep going after bad entries
+  - Check a floorplan with the touching rule and the boundary rule, and report every problem once
+  - Print a clear, formatted report from any chip and any list of blocks
+prerequisites: ["m10-w07-a", "m10-w07-b", "m10-w08-b", "m10-w10-b"]
+glossary: [capstone, floorplan, block, guard-clause, abut]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: try", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/try.htm" }
+  - { title: "Tcl manual page: format", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/format.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +22,126 @@ review_date: ""
 sidebar: {"label":"Capstone","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../components/LessonMeta.astro';
+import LabPlayground from '../../../components/LabPlayground.astro';
+import Hints from '../../../components/Hints.tsx';
+import Diagram from '../../../components/Diagram.astro';
+import GlossaryTerm from '../../../components/GlossaryTerm.astro';
+import chip from '../../../data/lumen-1.json';
+import expected from '../../../../labs/m10/capstone/data/expected.txt?raw';
 
-Capstone — content arrives in a later phase.
+<LessonMeta milestone="m10" week={10} lesson="capstone" minutes={180} />
+
+## Goal
+
+**Write a checker that reads a floorplan, refuses the badly typed entries, and reports every block that sticks out of the chip and every pair of blocks that clash.**
+
+Why it matters for chips: the team wants to add four small blocks to {chip.name}: TIMER, a clock; LDO, a voltage regulator; BIAS, which feeds steady currents to the sensor; and TEST, a strip of test pads. Somebody typed the list, and three entries came out wrong. Before anyone draws a single shape, your checker says which proposals fit. This is the first of four <GlossaryTerm term="capstone">capstones</GlossaryTerm>: in M20, your checker grows into TinyLayout, and in Week 23 you will draw these rectangles for real.
+
+<Diagram name="m10-capstone-plan" alt="The Lumen-1 chip, 400 by 300 micrometres, drawn to scale with its five blocks in blue: CORE, SRAM, ADC, SENSOR and PADS. Four proposed blocks are added, numbered 1 to 4 with a key on the right. TIMER, in red, fills the 20 micrometre channel between CORE and SRAM exactly, so it touches both. BIAS, in red, overlaps the top right corner of CORE. LDO, in green, touches the right edge of the chip and is 2 micrometres from SRAM: it is fine. TEST, in red, sticks out of the chip on the right. The three badly typed entries, FUSE, LOGO and SPARE, are not drawn." />
+
+## What you'll practise
+
+- [Week 7, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-a/): procs, the touching rule, every pair once.
+- [Week 7, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-b/): checking a block against the chip.
+- [Week 8, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-08/lesson-b/): `format`, for the columns and the rounded share.
+- [Week 10, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-10/lesson-b/): `try … on error`, guard clauses, `string is double -strict`.
+
+## Specification
+
+### Inputs
+
+The starter gives you four lines. **Keep them exactly as they are:** the checker changes them three times, to hidden floorplans, and runs your script again.
+
+- `chipName`, `chipWidth`, `chipHeight`: the chip is the rectangle from (0, 0) to (`chipWidth`, `chipHeight`), in µm.
+- `blocks`: a list of entries `{name x y w h}`: a <GlossaryTerm term="block" />'s name, its bottom-left corner, then its width and height. Some entries are bad.
+
+### The procs
+
+The checker calls these procs with its own test cases, so use exactly these names and arguments.
+
+| Proc | Returns |
+|---|---|
+| `rectArea rect` | the area of `{x1 y1 x2 y2}` |
+| `rectOverlaps a b` | `1` if the two rectangles overlap **or touch**, `0` if there is space between them (Week 7's rule) |
+| `blockRect block` | the corners `{x y x+w y+h}` of a block `{name x y w h}` |
+| `rectInside rect boundary` | `1` if the rectangle is inside the boundary rectangle, **touching its edge included**; `0` if not |
+| `checkBlock block` | nothing for a good block; for a bad one, it raises an error with one of the messages below |
+
+`checkBlock`'s <GlossaryTerm term="guard-clause">guard clauses</GlossaryTerm>, in this order, with exactly these messages:
+
+1. The entry must have 5 values: `needs 5 values, got 4`.
+2. `x`, `y`, `w` and `h`, in this order, must be numbers (`string is double -strict`): `w is not a number: ten`.
+3. `w`, then `h`, must be positive: `w must be positive, got -5`. Zero is not positive.
+
+### The two rules
+
+- **Blocks must not touch each other.** Touching counts as a conflict, along an edge or at a corner, exactly as in Week 7: two touching blocks leave no room between them for wires.
+- **Blocks may touch the edge of the chip.** The boundary is a limit, not a neighbour. A block that reaches the chip's edge has nothing on the other side that needs room: it is still inside the chip. So `rectInside` uses `>=` on the left and bottom, and `<=` on the right and top.
+
+These are design decisions for floorplan blocks, not laws of nature: real layouts often <GlossaryTerm term="abut" /> small cells on purpose.
+
+### The report
+
+With the starter's inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+Line by line:
+
+- **First line:** the chip's name and size, from the inputs.
+- **One `Skipped` line per bad entry**, in input order: `Skipped NAME: ` and the message of `checkBlock`. The name is the first value of the entry.
+- **`Skipped: N`**: the number of bad entries. Print it even when N is 0.
+- **One area line per good block**, in input order. Blocks outside the chip get an area line too.
+- **`Total`**: the sum of the areas of the good blocks that are **inside** the chip only, and their share of the chip's area, rounded to 1 decimal: `Total 83480 um2 (69.6% of the chip)`. TEST is outside, so its 1200 µm² is not counted.
+- **One `Outside` line** per good block that is not inside the chip, in input order.
+- **One `Conflict` line per clashing pair** of good blocks, each pair once, in the pair loop's order (i from 0, j from i + 1). Blocks outside the chip are checked for conflicts too.
+- **`Problems`**: the number of Outside lines plus the number of Conflict lines. Skipped entries are **not** problems: they are reported, but they are not part of the floorplan.
+
+Words, capitals and punctuation must match. Extra spaces are forgiven, so you can line up the columns with `format` as you like.
+
+## Where to run this
+
+Type your code under each step comment in the Playground tab. Press **Run** to see your report, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/capstone/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/capstone" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe between sessions.
+
+## Hints
+
+The capstone gives less help than the weekly labs: it is your M10 project. Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Start with the procs: the checker tests each one on its own. rectArea and rectOverlaps are your Week 7 procs. checkBlock is like checkRect in Week 10, Lesson B, with the capstone’s messages: first llength, then foreach field {x y w h} value [lrange $block 1 4] {…} with string is double -strict, then w and h > 0.',
+  'For the report, keep the good blocks in a list first: foreach block $blocks {try {checkBlock $block; lappend valid $block} on error {message} {…}}. Then every later step loops over valid, and the pair loop uses lindex $valid $i.',
+  'If a hidden floorplan fails, look for a number you typed instead of computing it: the chip size (use chipWidth and chipHeight, also for the share), or a count. And check the two rules: <= between blocks, and touching the edge is inside.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test, with its points:
+
+- **Correctness, 50 points:** each proc on its own test cases (20), the report for the starter's inputs (10), and three hidden floorplans (20). For a hidden floorplan, the checker shows your line and says what kind of line was expected; it never shows the expected text.
+- **Error handling, 25 points:** `checkBlock`'s three kinds of error (10), the Skipped lines and a report that goes on to the end (10), and the use of `try` (5).
+
+The last lines are `RESULT: PASS 17/17` when every automatic test passes, then your score, for example `SCORE: 75/75 automatic`.
+
+## Readability: score yourself (25 points)
+
+A checker cannot judge whether your code is easy to read, so you do. Give yourself 5 points for each line that is true, or ask a classmate to score it.
+
+1. Every proc has a clear name, and does one job.
+2. Every `expr`, `if` and `while` condition is in braces.
+3. The code is indented by 4 spaces inside every body.
+4. No result is typed in by hand: every number in the report comes from the inputs.
+5. A comment before each step says what it does.
+
+Your capstone mark: the checker's score out of 75, plus your readability score out of 25.
+
+## Stretch goal: suggest a fix
+
+For each Conflict line, also print by how many micrometres the second block would have to move right to clear the first one by 1 µm. This part is not graded. The extra lines would make the checker fail, so try it on a copy of your finished script.

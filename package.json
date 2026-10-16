@@ -9,7 +9,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "gen:skeleton": "node scripts/gen-skeleton.mjs",
-    "validate": "node scripts/validate-quizzes.mjs && node scripts/check-chip.mjs && node scripts/check-lessons.mjs",
+    "validate": "node scripts/validate-quizzes.mjs && node scripts/check-exam.mjs && node scripts/check-chip.mjs && node scripts/check-lessons.mjs",
     "snippets:extract": "node scripts/extract-snippets.mjs",
     "snippets:test": "npm run snippets:extract && tclsh scripts/run-snippets.tcl",
     "test": "npm run validate && npm run snippets:test",

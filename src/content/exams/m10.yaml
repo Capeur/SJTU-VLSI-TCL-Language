@@ -1,0 +1,491 @@
+# M10 milestone exam (PRD §9.1): 30 items, a fixed paper.
+# Blueprint: predict-output 20/30 (>= 60 %), Week 3 10/30 (>= 1/3). Weeks: 1:1 2:2 3:10 4:3 5:2 6:3 7:3 8:2 9:2 10:2.
+# NO ANSWERS HERE (user decision, P3 Week 10): every item is graded by running its code in the browser.
+# The reference answers and explanations are in the private repository Capeur/SJTU-VLSI-TCL-Language-solutions
+# (m10/exam/answers.yaml). Items are new: none repeats a public quiz-bank item, whose answer would be public.
+# output_hash is written by `node scripts/check-exam.mjs --write-hashes` from real tclsh output; CI checks it on
+# Tcl 8.6, 9.0 and Wacl. Avoid array order, long decimals and error texts that differ between Tcl versions.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+title: "M10 exam: Tcl Syntax Core"
+items:
+  # ---------- Week 1 ----------
+  - id: m10-exam-01
+    type: predict-output
+    week: 1
+    tags: [set, dollar]
+    revisit: m10-w01-b
+    prompt: "What does this print?"
+    code: |
+      set chip Lumen-1
+      set chip SRAM
+      puts $chip
+      puts chip
+    output_hash: "1ad526e5"
+
+  # ---------- Week 2 ----------
+  - id: m10-exam-02
+    type: predict-output
+    week: 2
+    tags: [expr, integer-division]
+    revisit: m10-w02-a
+    prompt: "What does this print?"
+    code: |
+      puts [expr {7 / 2}]
+      puts [expr {7 / 2.0}]
+      puts [expr {7 % 2}]
+    output_hash: "11f843f2"
+
+  - id: m10-exam-03
+    type: complete-code
+    week: 2
+    tags: [brackets, expr]
+    revisit: m10-w02-b
+    prompt: "Type the ONE word that goes in the blank, so that the script prints the target."
+    code: |
+      set w 120
+      set h 80
+      puts "Area: [___ {$w * $h}] um2"
+    target: "Area: 9600 um2"
+
+  # ---------- Week 3 ----------
+  - id: m10-exam-04
+    type: predict-output
+    week: 3
+    tags: [quotes, braces, brackets]
+    revisit: m10-w03-a
+    prompt: "Quotes, braces and brackets. What does this print?"
+    code: |
+      set w 20
+      puts "{$w}"
+      puts {[expr {$w * 2}]}
+      puts "[expr {$w * 2}]"
+    output_hash: "c3c8764a"
+
+  - id: m10-exam-05
+    type: predict-output
+    week: 3
+    tags: [backslash, quotes]
+    revisit: m10-w03-b
+    prompt: "What does this print?"
+    code: |
+      set name SRAM
+      set w 140
+      puts "$name: \$w is \"$w\" um"
+    output_hash: "7ed76b11"
+
+  - id: m10-exam-06
+    type: predict-output
+    week: 3
+    tags: [quotes, braces]
+    revisit: m10-w03-a
+    prompt: "Three ways to write the same words. What does this print?"
+    code: |
+      set x 5
+      puts "x = $x"
+      puts {x = $x}
+      puts x=$x
+    output_hash: "abd1681f"
+
+  - id: m10-exam-07
+    type: predict-output
+    week: 3
+    tags: [brackets, braces, quotes]
+    revisit: m10-w03-a
+    prompt: "Brackets start a new command, even inside quotes. What does this print?"
+    code: |
+      set w 200
+      set h 160
+      puts "[expr {$w * $h}] um2, {$w}"
+    output_hash: "a573c885"
+
+  - id: m10-exam-08
+    type: predict-output
+    week: 3
+    tags: [backslash, braces]
+    revisit: m10-w03-b
+    prompt: "What does this print?"
+    code: |
+      puts "a\\b"
+      puts {a\\b}
+    output_hash: "213e426a"
+
+  - id: m10-exam-09
+    type: predict-output
+    week: 3
+    tags: [one-pass, substitution]
+    revisit: m10-w03-b
+    prompt: "Tcl substitutes in one pass. What does this print?"
+    code: |
+      set price 5
+      set text {$price}
+      puts $text
+      puts "$text"
+    output_hash: "dd5c3e88"
+
+  - id: m10-exam-10
+    type: predict-output
+    week: 3
+    tags: [words, grouping, llength]
+    revisit: m10-w03-a
+    prompt: "How many words? What does this print?"
+    code: |
+      set blocks "CORE SRAM"
+      puts [llength $blocks]
+      puts [llength {$blocks}]
+      puts [llength "$blocks ADC"]
+    output_hash: "3dbefabc"
+
+  - id: m10-exam-11
+    type: predict-output
+    week: 3
+    tags: [quotes, braces, backslash]
+    revisit: m10-w03-a
+    prompt: "Quotes inside braces, braces inside quotes. What does this print?"
+    code: |
+      set name ADC
+      puts {"$name"}
+      puts "{$name}"
+      puts "\{$name\}"
+    output_hash: "654dcc95"
+
+  - id: m10-exam-12
+    type: complete-code
+    week: 3
+    tags: [backslash, dollar]
+    revisit: m10-w03-b
+    prompt: "Type what goes in the blank (no spaces), so that the script prints the target with a real dollar sign."
+    code: |
+      puts "Cost: ___5 per chip"
+    target: "Cost: $5 per chip"
+
+  - id: m10-exam-13
+    type: choose-code
+    week: 3
+    tags: [quotes, braces, list]
+    revisit: m10-w03-a
+    prompt: "Which script prints exactly the target?"
+    choices:
+      - |
+        set w 200
+        puts "{CORE} $w"
+      - |
+        set w 200
+        puts {{CORE} $w}
+      - |
+        set w 200
+        puts [list CORE $w]
+      - |
+        set w 200
+        puts "{CORE} \$w"
+    target: "{CORE} 200"
+
+  # ---------- Week 4 ----------
+  - id: m10-exam-14
+    type: predict-output
+    week: 4
+    tags: [if, elseif]
+    revisit: m10-w04-a
+    prompt: "What does this print?"
+    code: |
+      set width 3
+      if {$width >= 4} {
+          puts wide
+      } elseif {$width == 3} {
+          puts "just under"
+      } else {
+          puts narrow
+      }
+    output_hash: "8a7c83ec"
+
+  - id: m10-exam-15
+    type: predict-output
+    week: 4
+    tags: [for, incr]
+    revisit: m10-w04-b
+    prompt: "What does this print? Look at the last line closely."
+    code: |
+      set total 0
+      for {set i 1} {$i <= 4} {incr i} {
+          incr total $i
+      }
+      puts $total
+      puts $i
+    output_hash: "0d2608ac"
+
+  - id: m10-exam-16
+    type: complete-code
+    week: 4
+    tags: [while, incr]
+    revisit: m10-w04-b
+    prompt: "Type what goes in the blank, so that the loop prints the target."
+    code: |
+      set i 0
+      while {$i < 6} {
+          puts $i
+          incr i ___
+      }
+    target: |-
+      0
+      2
+      4
+
+  # ---------- Week 5 ----------
+  - id: m10-exam-17
+    type: predict-output
+    week: 5
+    tags: [lindex, llength]
+    revisit: m10-w05-a
+    prompt: "A rectangle as a list. What does this print?"
+    code: |
+      set rect {20 200 140 280}
+      puts [lindex $rect 2]
+      puts [llength $rect]
+      puts [lindex $rect end]
+    output_hash: "985f3db1"
+
+  - id: m10-exam-18
+    type: choose-code
+    week: 5
+    tags: [foreach]
+    revisit: m10-w05-b
+    prompt: "Which script prints exactly the target?"
+    choices:
+      - |
+        foreach {a b} {CORE SRAM ADC SENSOR} {
+            puts "$a-$b"
+        }
+      - |
+        foreach a {CORE SRAM ADC SENSOR} {
+            puts "$a-$a"
+        }
+      - |
+        foreach {a b} {CORE SRAM ADC SENSOR} {
+            puts {$a-$b}
+        }
+      - |
+        foreach a {CORE ADC} b {SRAM SENSOR} {
+            puts "$a $b"
+        }
+    target: |-
+      CORE-SRAM
+      ADC-SENSOR
+
+  # ---------- Week 6 ----------
+  - id: m10-exam-19
+    type: predict-output
+    week: 6
+    tags: [lsort]
+    revisit: m10-w06-a
+    prompt: "What does this print?"
+    code: |
+      set areas {9600 32000 8000}
+      puts [lsort $areas]
+      puts [lsort -integer $areas]
+    output_hash: "8e832566"
+
+  - id: m10-exam-20
+    type: predict-output
+    week: 6
+    tags: [split, join]
+    revisit: m10-w06-b
+    prompt: "What does this print?"
+    code: |
+      set text "POLY,METAL1,VIA1"
+      set layers [split $text ,]
+      puts [llength $layers]
+      puts [join $layers " + "]
+    output_hash: "c684b660"
+
+  - id: m10-exam-21
+    type: complete-code
+    week: 6
+    tags: [lsearch]
+    revisit: m10-w06-a
+    prompt: "Type the ONE command name that goes in the blank, so that the script prints the target."
+    code: |
+      set blocks {CORE SRAM ADC SENSOR PADS}
+      puts [___ $blocks ADC]
+    target: "2"
+
+  # ---------- Week 7 ----------
+  - id: m10-exam-22
+    type: predict-output
+    week: 7
+    tags: [scope, global]
+    revisit: m10-w07-b
+    prompt: "A proc and a variable called total. What does this print?"
+    code: |
+      set total 0
+      proc addBlock {area} {
+          incr total $area
+          return $total
+      }
+      puts [addBlock 800]
+      puts $total
+    output_hash: "215fe46a"
+
+  - id: m10-exam-23
+    type: predict-output
+    week: 7
+    tags: [proc, default-value, return]
+    revisit: m10-w07-a
+    prompt: "What does this print?"
+    code: |
+      proc margin {width {extra 2}} {
+          if {$width < 0} {
+              return "bad"
+          }
+          return [expr {$width + 2 * $extra}]
+      }
+      puts [margin 6]
+      puts [margin 6 1]
+      puts [margin -1]
+    output_hash: "86887766"
+
+  - id: m10-exam-24
+    type: choose-code
+    week: 7
+    tags: [touching, proc]
+    revisit: m10-w07-a
+    prompt: "In this course, touching counts as a clash. Which proc follows that rule? Each script tests two spans that touch (0 to 10 and 10 to 20), then two with a 1 µm gap."
+    choices:
+      - |
+        proc clash {a1 a2 b1 b2} {
+            return [expr {$a1 <= $b2 && $b1 <= $a2}]
+        }
+        puts [clash 0 10 10 20]
+        puts [clash 0 10 11 20]
+      - |
+        proc clash {a1 a2 b1 b2} {
+            return [expr {$a1 < $b2 && $b1 < $a2}]
+        }
+        puts [clash 0 10 10 20]
+        puts [clash 0 10 11 20]
+      - |
+        proc clash {a1 a2 b1 b2} {
+            return [expr {$a1 <= $b2 || $b1 <= $a2}]
+        }
+        puts [clash 0 10 10 20]
+        puts [clash 0 10 11 20]
+      - |
+        proc clash {a1 a2 b1 b2} {
+            return [expr {$a1 <= $b1}]
+        }
+        puts [clash 0 10 10 20]
+        puts [clash 0 10 11 20]
+    target: |-
+      1
+      0
+
+  # ---------- Week 8 ----------
+  - id: m10-exam-25
+    type: predict-output
+    week: 8
+    tags: [string-trim, toupper, string-match]
+    revisit: m10-w08-a
+    prompt: "Cleaning a typed name. What does this print?"
+    code: |
+      set raw "  via1_Pin "
+      set name [string toupper [string trim $raw]]
+      puts "|$name|"
+      puts [string length $name]
+      puts [string match {VIA?_*} $name]
+    output_hash: "6b92b426"
+
+  - id: m10-exam-26
+    type: complete-code
+    week: 8
+    tags: [format]
+    revisit: m10-w08-b
+    prompt: "Type the format specifier that goes in the blank, so that the script prints the target (the | signs show the column edges)."
+    code: |
+      puts [format "%-5s|___|" ADC 9600]
+    target: "ADC  |  9600|"
+
+  # ---------- Week 9 ----------
+  - id: m10-exam-27
+    type: predict-output
+    week: 9
+    tags: [dict, order]
+    revisit: m10-w09-a
+    prompt: "What does this print?"
+    code: |
+      set gds [dict create POLY 2.0 VIA1 5.0]
+      dict set gds ACTIVE 1.0
+      dict set gds POLY 2.0
+      puts [dict keys $gds]
+      puts [dict get $gds VIA1]
+    output_hash: "2ebcadde"
+
+  - id: m10-exam-28
+    type: choose-code
+    week: 9
+    tags: [array, lsort, dict]
+    revisit: m10-w09-b
+    prompt: "Which script prints exactly the target, every time, on any Tcl version?"
+    choices:
+      - |
+        foreach layer {POLY METAL2 METAL2} {
+            incr count($layer)
+        }
+        foreach layer [lsort [array names count]] {
+            puts "$layer: $count($layer)"
+        }
+      - |
+        foreach layer {POLY METAL2 METAL2} {
+            incr count($layer)
+        }
+        puts "METAL2: $count(METAL2)"
+        puts "POLY: $count(METAL2)"
+      - |
+        set count [dict create POLY 1 METAL2 2]
+        dict for {layer n} $count {
+            puts "$layer: $n"
+        }
+      - |
+        set count [dict create METAL2 2 POLY 1]
+        dict for {layer} $count {
+            puts $layer
+        }
+    target: |-
+      METAL2: 2
+      POLY: 1
+
+  # ---------- Week 10 ----------
+  - id: m10-exam-29
+    type: predict-output
+    week: 10
+    tags: [try, finally, error]
+    revisit: m10-w10-b
+    prompt: "try, on error and finally in a loop. What does this print?"
+    code: |
+      proc checkWidth {w} {
+          if {$w <= 0} {
+              error "width must be positive, got $w"
+          }
+          return ok
+      }
+      foreach w {5 0 3} {
+          try {
+              puts [checkWidth $w]
+          } on error {message} {
+              puts "skipped: $message"
+          } finally {
+              puts "checked $w"
+          }
+      }
+    output_hash: "6d8550c2"
+
+  - id: m10-exam-30
+    type: complete-code
+    week: 10
+    tags: [catch]
+    revisit: m10-w10-a
+    prompt: "Type the ONE word that goes in the blank, so that the script prints the target."
+    code: |
+      if {[catch {puts $w} ___]} {
+          puts "caught: $problem"
+      }
+    target: "caught: can't read \"w\": no such variable"

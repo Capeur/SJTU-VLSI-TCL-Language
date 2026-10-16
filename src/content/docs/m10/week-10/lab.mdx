@@ -1,21 +1,49 @@
 ---
-title: "Week 10 Lab"
+title: "Capstone week"
+description: "Week 10 has no separate lab: its lab time goes to the M10 capstone, the Mini Floorplan Checker, followed by the M10 exam. How to plan the work, and how both are checked."
 milestone: "m10"
 week: 10
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 225
+goals:
+  - Plan the capstone in small steps, checking each one
+  - Know how the capstone and the exam are checked
+prerequisites: ["m10-w10-a", "m10-w10-b"]
+glossary: [capstone]
 tcl_min: "8.6"
 sources: []
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
 review_date: ""
-sidebar: {"label":"Lab","order":3}
+sidebar: {"label":"Capstone week","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lab for week 10 (When things go wrong) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={10} lesson="lab" minutes={225} />
+
+Week 10 has no separate lab. Its lab time goes to the M10 <GlossaryTerm term="capstone" />, then to the exam. Both use everything from Weeks 1 to 10.
+
+## 1. The capstone: Mini Floorplan Checker (2 to 3 hours)
+
+**[Open the capstone](/SJTU-VLSI-TCL-Language/m10/capstone/).** You check a floorplan of {chip.name} with four proposed new blocks and three badly typed entries, and print a report. It reuses `rectArea` and `rectOverlaps` from Week 7, `format` from Week 8, and `try` from this week.
+
+A plan that works:
+
+1. **Session 1 (about 1 hour): the procs.** Write `rectArea`, `rectOverlaps`, `blockRect`, `rectInside` and `checkBlock`. Press **Check my work** after each one: the checker tests every proc on its own, so you see your progress before the report even exists.
+2. **Session 2 (about 1 hour): the report.** Print the lines one kind at a time, from the first line down to `Problems`. Check after each kind.
+3. **Session 3 (30 minutes or more): polish.** Make the hidden floorplans pass, then score your readability with the list on the capstone page.
+
+You do not have to finish in one sitting. Copy your script somewhere safe between sessions: the playground does not save it.
+
+## 2. The M10 exam (45 minutes)
+
+**[Open the exam](/SJTU-VLSI-TCL-Language/m10/exam/)** when the capstone is done, ideally on another day. It has 30 items; two thirds of them ask "what does this print?", and a third are about Week 3, quotes and substitution. Answer without your notes and without the playground.
+
+## How they are checked
+
+- **The capstone** is checked like the weekly labs, by **Check my work** or `tclsh tests/test.tcl`, with points: correctness 50, error handling 25. Readability, the last 25 points, you score yourself.
+- **The exam** is checked by running each item's code in your browser. The page stores no answers, and nothing is sent anywhere.

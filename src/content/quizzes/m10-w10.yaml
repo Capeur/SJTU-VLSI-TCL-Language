@@ -1,0 +1,557 @@
+# Week 10 — When things go wrong. Lesson A: error "message" (one word, quoted), catch {script} var (1 = error,
+# 0 = fine; brace the script), errorInfo (the stack trace; global errorInfo in a proc). Lesson B: try … on error
+# {message} {…} … finally {…}, guard clauses, string is double -strict, never swallow an error.
+# Tags used by the exit quizzes: "catch-code" (Lesson A, require="catch-code"), "try" (Lesson B, require="try").
+# No item quotes an expr error about non-numeric text (its wording differs between Tcl 8.6 and 9.0), and no item
+# uses the capstone's checkBlock messages or repeats an exam item (scripts/check-exam.mjs checks the codes).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w10-q01
+    type: predict-output
+    lesson: a
+    tags: [catch-code, catch]
+    review: true
+    prompt: "catch gives back a code and fills a variable. What does this print?"
+    code: |
+      set code [catch {expr {10 / 0}} message]
+      puts "$code $message"
+      set code [catch {expr {10 / 4}} message]
+      puts "$code $message"
+    answer: |-
+      1 divide by zero
+      0 2
+    explanation: >
+      Dividing by zero is an error: catch gives 1 and message holds the error message. 10 / 4 works (whole
+      numbers, so 2): catch gives 0 and message holds the result.
+
+  - id: m10-w10-q02
+    type: mcq
+    lesson: a
+    tags: [catch-code, catch]
+    review: true
+    prompt: "In  if {[catch {blockArea $w $h} result]} {…},  when does the body of the if run?"
+    choices:
+      - 'When blockArea raises an error'
+      - 'When blockArea works'
+      - 'Every time'
+      - 'Never: catch hides the result'
+    answer: 'When blockArea raises an error'
+    explanation: >
+      catch gives 1 when there was an error and 0 when all went well. if runs its body for 1, so the body
+      is the error branch; result then holds the error message.
+    distractor_feedback:
+      'When blockArea works': 'Then catch gives 0, and the if skips its body. The else branch is where the good case goes.'
+      'Every time': 'if runs its body only when the condition is true, here when catch gives 1.'
+      'Never: catch hides the result': 'catch puts the result (or the message) into result. Nothing is hidden.'
+
+  - id: m10-w10-q03
+    type: find-the-bug
+    lesson: a
+    tags: [catch, brackets]
+    review: true
+    prompt: 'This should print "carry on", but it stops with  divide by zero.  Which line has the bug?'
+    code: |
+      set total 100
+      catch [expr {$total / 0}] message
+      puts "carry on"
+    answer: 2
+    explanation: >
+      The brackets make Tcl run expr BEFORE catch starts, so the error happens outside the safety net.
+      Brace the script: catch {expr {$total / 0}} message.
+
+  - id: m10-w10-q04
+    type: predict-output
+    lesson: a
+    tags: [error, proc]
+    review: true
+    prompt: "A proc that refuses bad input, called inside catch. What does this print?"
+    code: |
+      proc halfWidth {w} {
+          if {$w < 0} {
+              error "negative width: $w"
+          }
+          return [expr {$w / 2}]
+      }
+      catch {halfWidth 40} result
+      puts $result
+      catch {halfWidth -8} result
+      puts $result
+    answer: |-
+      20
+      negative width: -8
+    explanation: >
+      With 40, the proc returns 20 and catch puts it in result. With -8, error stops the proc, and catch
+      puts the error message in result instead.
+
+  - id: m10-w10-q05
+    type: mcq
+    lesson: a
+    tags: [error, error-message]
+    review: true
+    prompt: "Which message is the most useful for a proc that gets a width of -5?"
+    choices:
+      - 'width must be positive, got -5'
+      - 'error'
+      - 'bad input'
+      - 'width must be positive'
+    answer: 'width must be positive, got -5'
+    explanation: >
+      A good message says what is wrong AND shows the value, so the reader can find the bad entry at once.
+    distractor_feedback:
+      'error': 'It says that something went wrong, but not what, nor where.'
+      'bad input': 'Which input, and what was wrong with it? The reader has to search.'
+      'width must be positive': 'It says what is wrong, but not which value was given. Add the value: got -5.'
+
+  - id: m10-w10-q06
+    type: mcq
+    lesson: a
+    tags: [error, quotes]
+    review: false
+    prompt: 'error width must be positive  stops with  wrong # args: should be "error message ?errorInfo? ?errorCode?".  Why?'
+    choices:
+      - 'The message is four words; error wants one word, so put it in quotes'
+      - 'error must be inside a proc'
+      - 'error cannot be used with text'
+      - 'width is not a variable'
+    answer: 'The message is four words; error wants one word, so put it in quotes'
+    explanation: >
+      Without quotes, each word is a separate argument. error "width must be positive" passes one word.
+    distractor_feedback:
+      'error must be inside a proc': 'error works anywhere, in a proc or in the main script.'
+      'error cannot be used with text': 'Text is exactly what error takes: one word with the message.'
+      'width is not a variable': 'There is no $, so Tcl does not look for a variable. The problem is the number of words.'
+
+  - id: m10-w10-q07
+    type: predict-output
+    lesson: a
+    tags: [catch, foreach]
+    review: true
+    prompt: "A loop that keeps going after an error. What does this print?"
+    code: |
+      set good 0
+      foreach divisor {4 0 2} {
+          if {[catch {expr {8 / $divisor}} result]} {
+              puts "skipped: $result"
+          } else {
+              incr good
+          }
+      }
+      puts "good: $good"
+    answer: |-
+      skipped: divide by zero
+      good: 2
+    explanation: >
+      8 / 4 and 8 / 2 work, so good becomes 2. 8 / 0 is caught: catch gives 1, and the loop goes on.
+
+  - id: m10-w10-q08
+    type: mcq
+    lesson: a
+    tags: [errorInfo, stack-trace]
+    review: true
+    prompt: "What does the variable errorInfo hold after an error?"
+    choices:
+      - 'The message, then the commands and procs the error passed through: the stack trace'
+      - 'Only the error message'
+      - 'The value that caused the error'
+      - '1 if there was an error, 0 if not'
+    answer: 'The message, then the commands and procs the error passed through: the stack trace'
+    explanation: >
+      errorInfo starts with the message, then "while executing" and the command that failed, then one
+      "invoked from within" line for each level further out. It shows WHERE the error came from.
+    distractor_feedback:
+      'Only the error message': 'The message comes first, but errorInfo adds where it happened. catch gives you the message alone.'
+      'The value that caused the error': 'The value may appear in your message, but errorInfo is the whole trace.'
+      '1 if there was an error, 0 if not': 'That is the code that catch gives back.'
+
+  - id: m10-w10-q09
+    type: fill-blank
+    lesson: a
+    tags: [catch-code, catch]
+    review: true
+    prompt: 'catch gives this code when the script raised an error. Fill the blank with a number:     catch {…} message  →  ___'
+    answer: ['1']
+    explanation: >
+      1 means an error happened; 0 means all went well.
+
+  - id: m10-w10-q10
+    type: predict-output
+    lesson: a
+    tags: [catch-code, catch]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set result [catch {set area 32000} value]
+      puts $result
+      puts $value
+    answer: |-
+      0
+      32000
+    explanation: >
+      set works, so catch gives 0, and value holds the result of the script: the value that set gave back.
+
+  - id: m10-w10-q11
+    type: find-the-bug
+    lesson: a
+    tags: [catch-code, if]
+    review: true
+    prompt: "This prints  OK: divide by zero.  Which line should be swapped with line 4?"
+    code: |
+      if {[catch {expr {1 / 0}} msg]} {
+          puts "OK: $msg"
+      } else {
+          puts "Error: $msg"
+      }
+    answer: 2
+    explanation: >
+      catch gives 1 for an error, so the body of the if is the error branch. Lines 2 and 4 are the wrong way
+      round.
+
+  - id: m10-w10-q12
+    type: mcq
+    lesson: a
+    tags: [errorInfo, global]
+    review: false
+    prompt: "A proc wants to print errorInfo after it caught an error. What must it write first?"
+    choices: ['global errorInfo', 'upvar errorInfo', 'set errorInfo ""', 'Nothing: procs see every variable']
+    answer: 'global errorInfo'
+    explanation: >
+      errorInfo is a variable of the main script. A proc sees only its own variables, so it names the global
+      one with global errorInfo (Week 7).
+    distractor_feedback:
+      'upvar errorInfo': 'upvar links to the CALLER, which may be another proc. errorInfo always lives in the main script: use global.'
+      'set errorInfo ""': 'That makes a new local variable and loses the trace.'
+      'Nothing: procs see every variable': 'Each proc has its own variables (Week 7). Outside variables are invisible without global or upvar.'
+
+  - id: m10-w10-q13
+    type: order-steps
+    lesson: a
+    tags: [catch, error]
+    review: false
+    prompt: 'Put in order what happens in:   catch {halfWidth -8} result   when halfWidth raises an error for negative widths.'
+    steps:
+      - "catch starts running the braced script"
+      - "halfWidth checks its input and runs error with a message"
+      - "The error stops halfWidth, and catch catches it"
+      - "catch puts the message in result and gives back 1"
+      - "The script goes on with the next command"
+    explanation: >
+      The error travels out of the proc until it reaches catch, which stops it there and reports it with 1.
+
+  - id: m10-w10-q14
+    type: predict-output
+    lesson: a
+    tags: [error, proc, catch]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      proc label {name} {
+          if {$name eq ""} {
+              error "empty name"
+          }
+          return "block $name"
+      }
+      foreach name {CORE "" ADC} {
+          if {[catch {label $name} text]} {
+              puts "problem: $text"
+          } else {
+              puts $text
+          }
+      }
+    answer: |-
+      block CORE
+      problem: empty name
+      block ADC
+    explanation: >
+      The middle element is an empty string. label refuses it with an error, catch reports it, and the loop
+      goes on to ADC.
+
+  # ---------- Lesson B ----------
+  - id: m10-w10-q15
+    type: predict-output
+    lesson: b
+    tags: [try, finally]
+    review: true
+    prompt: "Which lines run, and in which order? What does this print?"
+    code: |
+      try {
+          puts one
+          error two
+          puts three
+      } on error {message} {
+          puts "handled $message"
+      } finally {
+          puts four
+      }
+      puts five
+    answer: |-
+      one
+      handled two
+      four
+      five
+    explanation: >
+      error stops the body, so three is never printed. The handler gets the message two, finally runs next,
+      and the script goes on with five.
+
+  - id: m10-w10-q16
+    type: predict-output
+    lesson: b
+    tags: [try, finally]
+    review: true
+    prompt: "No error this time. What does this print?"
+    code: |
+      try {
+          puts "width ok"
+      } on error {message} {
+          puts "problem: $message"
+      } finally {
+          puts "checked"
+      }
+    answer: |-
+      width ok
+      checked
+    explanation: >
+      With no error, the on error handler is skipped. finally still runs: it runs every time.
+
+  - id: m10-w10-q17
+    type: mcq
+    lesson: b
+    tags: [try, finally]
+    review: true
+    prompt: "When does the finally part of a try run?"
+    choices:
+      - 'At the end, every time: after a normal run and after an error'
+      - 'Only after an error'
+      - 'Only when there was no error'
+      - 'Before the body'
+    answer: 'At the end, every time: after a normal run and after an error'
+    explanation: >
+      finally is for work that must happen whatever the result, such as counting checked blocks or closing
+      a file.
+    distractor_feedback:
+      'Only after an error': 'That is the on error handler. finally runs in both cases.'
+      'Only when there was no error': 'The rest of the body is what runs only without an error. finally runs always.'
+      'Before the body': 'finally comes last, as its name says.'
+
+  - id: m10-w10-q18
+    type: predict-output
+    lesson: b
+    tags: [string-is, guard-clause]
+    review: true
+    prompt: "string is double -strict. What does this print?"
+    code: |
+      puts [string is double -strict 12]
+      puts [string is double -strict 2.5]
+      puts [string is double -strict ten]
+      puts [string is double -strict ""]
+      puts [string is double ""]
+    answer: |-
+      1
+      1
+      0
+      0
+      1
+    explanation: >
+      12 and 2.5 are numbers; ten is not. With -strict, an empty text is not a number; without -strict, it
+      counts as one, which is why guard clauses always use -strict.
+
+  - id: m10-w10-q19
+    type: mcq
+    lesson: b
+    tags: [swallow, catch]
+    review: true
+    prompt: "A script runs  catch {checkRect $r}  and never looks at what catch gives back. What is the danger?"
+    choices:
+      - 'A bad rectangle is silently treated as good'
+      - 'The script stops at the first bad rectangle'
+      - 'catch prints the error twice'
+      - 'There is no danger: catch handles the error'
+    answer: 'A bad rectangle is silently treated as good'
+    explanation: >
+      This is swallowing an error. catch stops it, but nobody reports it, so a bad entry looks fine. Always
+      use catch's code, or use try … on error.
+    distractor_feedback:
+      'The script stops at the first bad rectangle': 'No: catch stops the error, so the script goes on. That is the problem: it goes on as if all were fine.'
+      'catch prints the error twice': 'catch prints nothing at all. The error simply disappears.'
+      'There is no danger: catch handles the error': 'catch stops the error, but handling it means DOING something: reporting it or skipping the entry.'
+
+  - id: m10-w10-q20
+    type: predict-output
+    lesson: b
+    tags: [try, guard-clause]
+    review: true
+    prompt: "A defensive proc with two guards. What does this print?"
+    code: |
+      proc checkSize {value} {
+          if {![string is double -strict $value]} {
+              error "not a number: $value"
+          }
+          if {$value <= 0} {
+              error "too small: $value"
+          }
+          return ok
+      }
+      foreach value {8 big -2} {
+          try {
+              puts [checkSize $value]
+          } on error {message} {
+              puts $message
+          }
+      }
+    answer: |-
+      ok
+      not a number: big
+      too small: -2
+    explanation: >
+      8 passes both guards. big fails the first one. -2 is a number, so it passes the first guard but fails
+      the second.
+
+  - id: m10-w10-q21
+    type: fill-blank
+    lesson: b
+    tags: [try]
+    review: true
+    prompt: 'Fill the blank (two words) so that the handler runs on an error:     try {checkRect $r} ___ {message} {puts $message}'
+    answer: ['on error']
+    explanation: >
+      try … on error {message} {handler}: the handler gets the error message in message.
+
+  - id: m10-w10-q22
+    type: mcq
+    lesson: b
+    tags: [guard-clause]
+    review: true
+    prompt: "Where do the guard clauses of a defensive proc go?"
+    choices:
+      - 'At the very top of the proc, before the input is used'
+      - 'At the end, after the result is computed'
+      - 'In the main script, before each call'
+      - 'In the finally part of a try'
+    answer: 'At the very top of the proc, before the input is used'
+    explanation: >
+      Check at the door: once the guards have passed, the rest of the proc can trust its arguments, and
+      every caller is protected.
+    distractor_feedback:
+      'At the end, after the result is computed': 'By then the bad input has already been used, and may have caused a strange error of its own.'
+      'In the main script, before each call': 'Then every caller must repeat the checks, and one forgotten check lets bad input in.'
+      'In the finally part of a try': 'finally is for clean-up. Checking input belongs in the proc itself.'
+
+  - id: m10-w10-q23
+    type: predict-output
+    lesson: b
+    tags: [try, foreach, finally]
+    review: false
+    prompt: "Counting with finally. What does this print?"
+    code: |
+      set checked 0
+      foreach w {3 x 7} {
+          try {
+              if {![string is double -strict $w]} {
+                  error "skip $w"
+              }
+          } on error {message} {
+              puts $message
+          } finally {
+              incr checked
+          }
+      }
+      puts "checked: $checked"
+    answer: |-
+      skip x
+      checked: 3
+    explanation: >
+      Only x fails the check. finally runs for all three values, error or not, so checked is 3.
+
+  - id: m10-w10-q24
+    type: mcq
+    lesson: b
+    tags: [try, catch]
+    review: false
+    prompt: "Why do many scripts prefer  try … on error  to  if {[catch …]} ?"
+    choices:
+      - 'It reads like a sentence, and you cannot mix up 0 and 1'
+      - 'catch does not work inside a loop'
+      - 'try is faster than catch'
+      - 'catch cannot give the error message'
+    answer: 'It reads like a sentence, and you cannot mix up 0 and 1'
+    explanation: >
+      Both catch the error. try names the error branch with on error, so its meaning is clear, and it adds
+      finally.
+    distractor_feedback:
+      'catch does not work inside a loop': 'catch works anywhere. Lesson A used it in a loop.'
+      'try is faster than catch': 'Speed is not the reason. Clarity is.'
+      'catch cannot give the error message': 'It can: the second word of catch names the variable that gets it.'
+
+  - id: m10-w10-q25
+    type: find-the-bug
+    lesson: b
+    tags: [swallow, catch]
+    review: true
+    prompt: 'This prints  fine  for every block, even for X, which has too few values. Which line swallows the error?'
+    code: |
+      foreach block {{ADC 20 200 120 80} {X 1 2}} {
+          catch {checkRect [lrange $block 1 end]}
+          puts "[lindex $block 0]: fine"
+      }
+    answer: 2
+    explanation: >
+      catch stops the error, but its result is thrown away, so line 3 always says fine. Use
+      if {[catch {…} message]} {…} else {…}, or try … on error.
+
+  - id: m10-w10-q26
+    type: predict-output
+    lesson: b
+    tags: [try, error]
+    review: false
+    prompt: "An error inside a proc, caught by try outside it. What does this print?"
+    code: |
+      proc needFive {values} {
+          if {[llength $values] != 5} {
+              error "needs 5, got [llength $values]"
+          }
+          return "five"
+      }
+      try {
+          puts [needFive {a b c}]
+      } on error {message} {
+          puts "caught: $message"
+      }
+    answer: "caught: needs 5, got 3"
+    explanation: >
+      The error starts inside needFive and travels out to the try around the call, where on error catches
+      it. puts never runs.
+
+  - id: m10-w10-q27
+    type: multi-select
+    lesson: b
+    tags: [guard-clause, string-is]
+    review: false
+    prompt: "A guard must refuse every width that is not a positive number. Which values must it refuse? Pick all that apply."
+    choices: ['0', '-3', 'wide', '""  (an empty text)', '2.5', '40']
+    answer: ['0', '-3', 'wide', '""  (an empty text)']
+    explanation: >
+      0 and -3 are numbers but not positive; wide and the empty text are not numbers (with -strict). 2.5 and
+      40 are positive numbers.
+
+  - id: m10-w10-q28
+    type: mcq
+    lesson: b
+    tags: [try, error]
+    review: false
+    prompt: "Inside  try {…} on error {message} {…},  a command in the body raises an error. What happens to the rest of the body?"
+    choices:
+      - 'It is skipped: the body stops at once and the handler runs'
+      - 'It runs after the handler'
+      - 'It runs before the handler'
+      - 'The whole script stops'
+    answer: 'It is skipped: the body stops at once and the handler runs'
+    explanation: >
+      An error ends the body where it happens. Then on error runs, then finally if there is one, then the
+      script goes on after the try.
+    distractor_feedback:
+      'It runs after the handler': 'try never goes back into the body. Code that must always run goes in finally.'
+      'It runs before the handler': 'The error stops the body at once, so the commands after it never run.'
+      'The whole script stops': 'That is what happens WITHOUT try. With try, on error catches the error.'

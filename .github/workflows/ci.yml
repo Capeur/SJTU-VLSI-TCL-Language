@@ -67,8 +67,7 @@ jobs:
           if ls drvlite/tests/*.test >/dev/null 2>&1; then
             for t in drvlite/tests/*.test; do $TCLSH "$t"; done
           else echo "::notice::DRV-Lite tests not yet added (P5)"; fi
-      - name: Lab tests against private reference solutions
-        run: echo "::warning::private solutions repository not available; lab tests skipped"
+      # Lab, capstone and exam tests against the private reference solutions run in the job "solutions" below.
 
   wacl:
     # Runs every snippet marked runs_in=playground in the real browser engine (Wacl, Tcl 8.6.6),
@@ -89,3 +88,80 @@ jobs:
         run: |
           export CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
           npm run test:browser
+
+  solutions:
+    # Tests the M10 capstone grader and exam against the PRIVATE reference solutions
+    # (Capeur/SJTU-VLSI-TCL-Language-solutions; decision log, P3 Week 10). Needs the repository secret
+    # SOLUTIONS_DEPLOY_KEY: the private half of a READ-ONLY deploy key of that repository. Without it (before
+    # setup, or on a pull request from a fork, which never gets secrets) every step is skipped with a warning
+    # and the job still succeeds.
+    # CI logs of this public repository are public, so the tools print only check names and ok/FAIL, and
+    # every step also filters its output to those lines: no solution, answer or expected line can reach the log.
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tcl: ['8.6', '9.0']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Is the solutions key set?
+        id: key
+        env:
+          SOLUTIONS_DEPLOY_KEY: ${{ secrets.SOLUTIONS_DEPLOY_KEY }}
+        run: |
+          if [ -z "$SOLUTIONS_DEPLOY_KEY" ]; then
+            echo "::warning title=Private solutions not checked::SOLUTIONS_DEPLOY_KEY is not set (or this is a pull request from a fork), so the capstone grader and the exam were NOT tested against the private reference solutions."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check out the private solutions
+        if: steps.key.outputs.available == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Capeur/SJTU-VLSI-TCL-Language-solutions
+          ssh-key: ${{ secrets.SOLUTIONS_DEPLOY_KEY }}
+          path: solutions
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        if: steps.key.outputs.available == 'true'
+        with: { node-version: 22, cache: npm }
+      - name: Install dependencies
+        if: steps.key.outputs.available == 'true'
+        run: npm ci
+      - name: Install Tcl ${{ matrix.tcl }}
+        if: steps.key.outputs.available == 'true'
+        run: |
+          if [ "${{ matrix.tcl }}" = "8.6" ]; then
+            sudo apt-get update && sudo apt-get install -y tcl8.6
+            echo "TCLSH=tclsh8.6" >> "$GITHUB_ENV"
+          else
+            sudo apt-get update && sudo apt-get install -y tcl9.0 || {
+              echo "tcl9.0 not available from apt; building from source"
+              curl -fsSL https://prdownloads.sourceforge.net/tcl/tcl9.0.1-src.tar.gz | tar xz
+              (cd tcl9.0.1/unix && ./configure --prefix=/usr/local && make -j"$(nproc)" && sudo make install)
+              echo "TCLSH=/usr/local/bin/tclsh9.0" >> "$GITHUB_ENV"
+            }
+            [ -n "$TCLSH" ] || echo "TCLSH=tclsh9.0" >> "$GITHUB_ENV"
+          fi
+      - name: Capstone data files match the reference solution
+        if: steps.key.outputs.available == 'true'
+        run: |
+          set -o pipefail
+          $TCLSH solutions/tools/make-capstone-data.tcl . check 2>&1 | grep -E '^(ok  |FAIL) '
+      - name: Capstone grader against the reference solution and mutants
+        if: steps.key.outputs.available == 'true'
+        run: |
+          set -o pipefail
+          $TCLSH solutions/tools/check-capstone.tcl . 2>&1 | grep -E '^(ok  |FAIL|check-capstone:) '
+      - name: Exam reference answers
+        if: steps.key.outputs.available == 'true'
+        run: |
+          set -o pipefail
+          TCLSH=$TCLSH node solutions/tools/check-exam-answers.mjs 2>&1 | grep -E '^(ok  |FAIL|check-exam-answers:) '
+      - name: Exam and capstone in the browser (Wacl, headless Chrome)
+        if: steps.key.outputs.available == 'true' && matrix.tcl == '8.6'
+        run: |
+          set -o pipefail
+          npm run build > /dev/null
+          export CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
+          node solutions/tools/check-browser.mjs 2>&1 | grep -E '^(ok  |FAIL|check-browser:) '

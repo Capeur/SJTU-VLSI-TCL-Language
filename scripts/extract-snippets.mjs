@@ -1,7 +1,9 @@
 // Collects every runnable Tcl snippet into snippets/<page-id>/<n>.tcl (+ .expected, .only, .drvlite).
 // Sources (PRD §15.2): ```tcl run blocks, <PredictOutput>, <VersionNote> samples, <Trap> wrong/fix code,
 // <WorkedExample> and <TclPlayground> code (must run without error, or fail with `fails="…"`),
-// predict-output quiz items, and lab checker self-tests (labs/**/tests/selftest.tcl).
+// predict-output quiz items, lab checker self-tests (labs/**/tests/selftest.tcl), and the predict-output
+// items of the milestone exams (src/content/exams/), which have NO expected output in this repo: they get a
+// <n>.hash file instead (FNV-1a of the normalised output), and the runners print no output for them.
 // M10 snippets get a <n>.maxdecimals file (4): run-snippets fails if they print a decimal with more
 // places, unless the snippet is marked intentional (```tcl run longdecimal, longDecimal prop, or
 // long_decimal: true on a quiz item). Rounding is taught only in Week 8 (format).
@@ -10,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 import { walk, fencedBlocks, componentTags } from './lib/mdx-scan.mjs';
-import { loadQuizBanks } from '../src/lib/content.mjs';
+import { loadQuizBanks, loadExams } from '../src/lib/content.mjs';
 import { isGradable, labSelftestScript } from '../src/lib/labs.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,14 +34,15 @@ function pageRunsIn(text) {
     return front.milestone === 'm10' ? 'playground' : 'terminal';
 }
 const MAX_DECIMALS = 4;
-const isM10 = (pageId) => /^(m10__|quiz__m10-|lab__m10__)/.test(pageId);
-function emit(pageId, n, { code, expected, error, only, drvlite, runsIn, longDecimal }) {
+const isM10 = (pageId) => /^(m10__|quiz__m10-|lab__m10__|exam__m10)/.test(pageId);
+function emit(pageId, n, { code, expected, error, only, drvlite, runsIn, longDecimal, hash }) {
     const dir = path.join(outDir, pageId);
     fs.mkdirSync(dir, { recursive: true });
     const base = path.join(dir, String(n).padStart(2, '0'));
     fs.writeFileSync(`${base}.tcl`, code.endsWith('\n') ? code : `${code}\n`);
     if (expected !== undefined) fs.writeFileSync(`${base}.expected`, expected);
     if (error !== undefined) fs.writeFileSync(`${base}.error`, error);   // must fail with this message
+    if (hash !== undefined) fs.writeFileSync(`${base}.hash`, hash);      // exam item: output must match this hash
     if (only) fs.writeFileSync(`${base}.only`, only);
     if (drvlite) fs.writeFileSync(`${base}.drvlite`, '');
     fs.writeFileSync(`${base}.runs_in`, runsIn);
@@ -78,6 +81,14 @@ for (const bank of loadQuizBanks()) {
     let n = 0;
     for (const q of bank.questions) {
         if (q.type === 'predict-output') emit(`quiz__${bank.name}`, ++n, { code: q.code, expected: q.answer, runsIn: 'terminal', longDecimal: q.long_decimal });
+    }
+}
+// Exam predict-output items: the output is checked against its hash on every Tcl version and in Wacl (the exam runs in the browser).
+// choose-code choices may fail on purpose, so scripts/check-exam.mjs checks them (tclsh 8.6 and 9.0) instead.
+for (const exam of loadExams()) {
+    let n = 0;
+    for (const item of exam.items) {
+        if (item.type === 'predict-output') emit(`exam__${exam.name}`, ++n, { code: item.code, hash: item.output_hash, runsIn: 'playground' });
     }
 }
 // Lab checkers test themselves on every Tcl version and in Wacl (the browser "Check" button uses them).
