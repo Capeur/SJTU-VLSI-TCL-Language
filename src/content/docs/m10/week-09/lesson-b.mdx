@@ -1,14 +1,21 @@
 ---
-title: "Week 9 Lesson B"
+title: "array, and choosing dict or array"
+description: "Week 9, Lesson B: arrays as families of variables, counting with incr count($layer), the order trap (array names promises no order, so sort it with lsort), and how to choose between a dict and an array."
 milestone: "m10"
 week: 9
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Store, change and read values in an array with set count(METAL1), incr and $count(METAL1)
+  - List an array's names in a fixed order with lsort [array names …]
+  - Choose a dict or an array for a task
+prerequisites: ["m10-w09-a", "m10-w07-b"]
+glossary: [array, key, dictionary, insertion-order]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Associative arrays", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl22.html" }
+  - { title: "Tcl tutorial: More on arrays, iterating and use in procedures", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl23.html" }
+  - { title: "Tcl manual page: array", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/array.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,250 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import LayerStack from '../../../../components/LayerStack.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 9 (Tables of data) — content arrives in a later phase.
+{/* Time plan (≈40 min, user request at the P3 Weeks 8-9 outline review):
+    | Section                                                          | min |
+    | Chip story + goals                                               |  3  |
+    | Warm-up                                                          |  3  |
+    | An array: concept + worked example 1 + playground                |  6  |
+    | array names, no promised order: concept + diagram + playground   |  5  |
+    | Predict → Run → Explain                                          |  3  |
+    | dict or array: table + worked example 2 (dict AND upvar versions) |  7  |
+    | Faded example                                                    |  3  |
+    | Common traps (2)                                                 |  3  |
+    | Exit quiz                                                        |  4  |
+    | Cheat card                                                       |  1  |
+    | Total                                                            | 38  |
+    38 ≤ 40, so worked example 2 keeps both halves (user rule: keep only the dict half if over 40).
+    THE ORDER RULE (user decision): no snippet, quiz answer or lab test may depend on the order of array names, and
+    the prose must not say which order 8.6 or 9.0 happens to print. The order trap is therefore a playground without
+    expected output plus prose, not a Trap component (CI runs a Trap's wrong code and needs a fixed output).
+    Every printed array listing goes through lsort. parray is not used (not in the safe child interpreter). */}
+
+<LessonMeta milestone="m10" week={9} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+How many shapes does each layer of {chip.name} hold? A script that reads the layout meets the shapes one by one, in no useful order: a METAL1 wire, a POLY gate, another METAL1 wire. For each one it adds 1 to the counter of its layer, like a row of tally counters, one per layer. Tcl has a tool made for this: the array, a family of variables with one name. It is fast and simple, with one trap that this lesson takes seriously: an array does not keep any order.
+
+<LayerStack caption={`The layers of ${chip.name}. Counting shapes per layer needs one counter per layer: count(METAL1), count(POLY), and so on.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Store, change and read values in an array with set count(METAL1), incr and $count(METAL1)', 'List an array’s names in a fixed order with lsort [array names …]', 'Choose a dict or an array for a task']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 8, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w09" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07', 'm10-w08']} mode="warmup" count={3} mix={1 / 3} />
+
+## An array: a family of variables
+
+An <GlossaryTerm term="array" /> is a group of variables that share one name. Each one, an element, is picked by a key in parentheses: `count(METAL1)`, `count(POLY)`. You use an element like any variable: `set count(POLY) 0`, `$count(POLY)`, `incr count(POLY)`. The key can come from a variable: `$count($layer)`.
+
+`incr` on an element that does not exist yet starts it at 0, so counting needs no setup. `array size count` gives the number of elements, and `array names count` the list of their keys.
+
+<WorkedExample
+  code={`set shapeLayers {VIA1 POLY METAL2 VIA1 POLY VIA1}
+foreach layer $shapeLayers {
+    incr count($layer)
+}
+puts "VIA1: $count(VIA1)"
+puts [array size count]
+foreach layer [lsort [array names count]] {
+    puts "$layer: $count($layer)"
+}`}
+  notes={{
+    1: 'The layer of each shape, in the order the script met them.',
+    2: 'One pass over the shapes.',
+    3: 'Add 1 to the counter of this shape’s layer. A new element starts at 0.',
+    4: 'The end of the loop.',
+    5: 'Read one element. Output: VIA1: 3',
+    6: 'Three layers were seen, so three elements. Output: 3',
+    7: 'The keys, SORTED with lsort. The next section shows why.',
+    8: 'Output: METAL2: 1, then POLY: 2, then VIA1: 3'
+  }}
+/>
+
+<TclPlayground client:visible code={`set gds(POLY) 2.0
+set gds(METAL1) 4.0
+set name METAL1
+puts "$name is GDS $gds($name)"
+incr width(METAL2) 4
+puts "METAL2 width: $width(METAL2)"
+puts [array size gds]`} />
+
+## array names: no promised order
+
+A dict keeps its keys in insertion order. An array does not. `array names` gives every key, but **in an order that Tcl does not promise**. It is not the order you added them, and not sorted either. It may differ between Tcl versions, and it may change as the array grows.
+
+So never let your output depend on it. When the order matters, sort the names with `lsort [array names count]`, or walk a dict that holds the order you want, as the lab does.
+
+<Diagram name="w09-dict-vs-array" alt="Top: a dict drawn as a row of numbered boxes in order, 1 ACTIVE 1.0, 2 POLY 2.0, 3 METAL1 4.0, then more: dict keys and dict for follow the order the keys were added. Bottom: an array drawn as separate boxes scattered in a bag, gds(METAL1), gds(ACTIVE), gds(POLY): array names gives every name, but in an order that is not promised. lsort of array names gives a fixed, sorted order." />
+
+Run this and compare the first line with the order of the list in the loop. Then compare the other two lines.
+
+<TclPlayground client:visible code={`foreach {name number} {ACTIVE 1.0 POLY 2.0 CONTACT 3.0 METAL1 4.0 VIA1 5.0 METAL2 6.0 TEXT 63.0} {
+    set gds($name) $number
+}
+puts "array names: [array names gds]"
+puts "sorted:      [lsort [array names gds]]"
+set table [dict create ACTIVE 1.0 POLY 2.0 CONTACT 3.0]
+dict set table METAL1 4.0
+puts "dict keys:   [dict keys $table]"`} />
+
+## Predict → Run → Explain
+
+The names are sorted, so the order is fixed. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`foreach layer {METAL2 POLY METAL2 ACTIVE METAL2} {
+    incr count($layer)
+}
+foreach layer [lsort [array names count]] {
+    puts "$layer: $count($layer)"
+}
+puts [array size count]`}
+  expected={`ACTIVE: 1
+METAL2: 3
+POLY: 1
+3`}
+  explanation="incr adds 1 to each layer’s counter: METAL2 three times, POLY and ACTIVE once. lsort puts the keys in alphabetical order, ACTIVE, METAL2, POLY, whatever order array names gave them in. Three different layers were seen, so the array has 3 elements."
+/>
+
+## dict or array?
+
+Both map keys to values. The difference is what they are.
+
+| | dict | array |
+|---|---|---|
+| What it is | one **value**, like a list | a family of **variables** |
+| Order | insertion order | no promised order: sort it |
+| Pass to a proc, return it | yes, like any value | no: pass its name and use `upvar` |
+| A record inside it | yes: nested dicts | no: one level only |
+| Change one element | `dict set d key value` | `set a(key) value`, `incr a(key)` |
+
+A good rule: use a **dict** for a table you pass around, nest, or print in order; use an **array** for a few counters that you change in place.
+
+<WorkedExample
+  code={`proc addLayer {table name number} {
+    dict set table $name $number
+    return $table
+}
+set gdsNumbers [dict create POLY 2.0]
+set gdsNumbers [addLayer $gdsNumbers VIA1 5.0]
+puts $gdsNumbers
+proc addCount {arrayName layer} {
+    upvar 1 $arrayName counts
+    incr counts($layer)
+}
+addCount shapes METAL1
+addCount shapes METAL1
+puts "METAL1: $shapes(METAL1)"`}
+  notes={{
+    1: 'A dict goes in as a VALUE, like a list.',
+    2: 'This changes the proc’s own copy, table.',
+    3: 'Send the new dict back.',
+    4: 'The end of the dict version.',
+    5: 'A table with one layer.',
+    6: 'Store what the proc returns. Output of the next line: POLY 2.0 VIA1 5.0',
+    7: 'Print the new table.',
+    8: 'An array cannot travel as a value. The proc gets its NAME instead.',
+    9: 'Week 7’s upvar: counts now means the caller’s array.',
+    10: 'This changes the caller’s array directly. Nothing to return.',
+    11: 'The end of the array version.',
+    12: 'Pass the name shapes, without $.',
+    13: 'The second call adds 1 again.',
+    14: 'Output: METAL1: 2'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`foreach layer {POLY VIA1 POLY} {
+    ___1___ count($layer)
+}
+# Must print POLY: 2, then VIA1: 1, in this order every time
+foreach layer [___2___ [array names count]] {
+    puts "$layer: $count($layer)"
+}
+proc countOf {arrayName layer} {
+    ___3___ 1 $arrayName counts
+    return $counts($layer)
+}
+# Must print: 2
+puts [countOf count POLY]`}
+  answers={[['incr'], ['lsort'], ['upvar']]}
+  hints={['Which command adds 1 to a variable, and starts it at 0 if it is new?', 'array names promises no order. Which command puts a list in a fixed order?', 'The proc gets the NAME of the caller’s array. Which command links a local name to it (Week 7)?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`foreach layer {POLY VIA1 POLY} {
+    incr count($layer)
+}
+puts $count`}
+  error={`can't read "count": variable is array`}
+  fix={`foreach layer {POLY VIA1 POLY} {
+    incr count($layer)
+}
+puts "POLY: $count(POLY)"`}
+  why="An array is a family of variables, not one value, so $count alone means nothing to Tcl. Read one element with $count(POLY). To see them all, loop over lsort [array names count]."
+/>
+
+<Trap
+  wrong={`set count(METAL1) 12
+puts $count(metal1)`}
+  error={`can't read "count(metal1)": no such element in array`}
+  fix={`set count(METAL1) 12
+puts $count(METAL1)`}
+  why="Keys are exact, and capitals count: metal1 and METAL1 are two different elements. Clean a typed name first with string toupper (Week 8)."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w09" lesson="b" mode="exit" count={4} require="array-order" />
+
+## Cheat card
+
+<CheatCard title="array, and dict or array" lines={[
+  'set count(POLY) 0   $count(POLY)   $count($layer)',
+  'incr count($layer)   add 1 (a new element starts at 0)',
+  'array size count / array names count   how many / the keys',
+  'array names: NO promised order. Use lsort [array names count]',
+  '$count alone: error "variable is array"',
+  'dict: a value, keeps order, can nest, pass it and return it',
+  'array: variables, counters in place; pass the NAME + upvar',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Associative arrays', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl22.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: More on arrays, iterating and use in procedures', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl23.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: array', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/array.htm', kind: 'tcl-man' },
+]} />

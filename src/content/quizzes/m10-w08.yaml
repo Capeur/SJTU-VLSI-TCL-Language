@@ -1,0 +1,512 @@
+# Week 8 — Text handling. Lesson A: string length / index / range (counting from 0, end, both ends included),
+# string first (-1 when absent), string trim / toupper / tolower (a NEW string, the variable is unchanged),
+# ${name}_ to end a variable name, layer and purpose (teaching purposes drawing and pin).
+# Lesson B: string match with glob patterns (*, ?, [ ]; pattern first; brace the pattern; NOT regular
+# expressions, which are Week 15), string map, format (%s %d %.1f widths %%).
+# Tag used by the Lesson B exit quiz: "glob" (require="glob").
+# ASCII only in string length / index items (user decision, P3 Weeks 8-9). No exact halves in format items.
+# The lab's raw names and percentages are not used here (style rule 21).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w08-q01
+    type: predict-output
+    lesson: a
+    tags: [string-length, string-index, string-range]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set name "METAL2_pin"
+      puts [string length $name]
+      puts [string index $name 0]
+      puts [string index $name end]
+      puts [string range $name 0 5]
+    answer: |-
+      10
+      M
+      n
+      METAL2
+    explanation: >
+      METAL2_pin has 10 characters, the underscore included. Index 0 is the first one, M, and end is the
+      last one, n. string range 0 5 takes characters 0 to 5, both included: METAL2.
+
+  - id: m10-w08-q02
+    type: mcq
+    lesson: a
+    tags: [toupper, new-string]
+    review: true
+    prompt: "name holds via1_drawing. After the line  string toupper $name  on its own, what does  puts $name  print?"
+    choices: ['via1_drawing', 'VIA1_DRAWING', 'VIA1_drawing', 'An error']
+    answer: 'via1_drawing'
+    explanation: >
+      string toupper gives back a NEW string, but nothing keeps it, so it is thrown away. The variable
+      never changes. Write  set name [string toupper $name]  to keep the result.
+    distractor_feedback:
+      'VIA1_DRAWING': 'That is what string toupper gives back, but the line does not store it anywhere. name still holds the old text.'
+      'VIA1_drawing': 'string toupper changes every letter, not only the layer part, and here its result is not even kept.'
+      'An error': 'A command whose result is not used is not an error. Tcl simply drops the result.'
+
+  - id: m10-w08-q03
+    type: predict-output
+    lesson: a
+    tags: [string-first, string-range]
+    review: true
+    prompt: "Cutting a name at its underscore. What does this print?"
+    code: |
+      set name ACTIVE_pin
+      set cut [string first _ $name]
+      puts $cut
+      puts [string range $name 0 [expr {$cut - 1}]]
+      puts [string range $name [expr {$cut + 1}] end]
+    answer: |-
+      6
+      ACTIVE
+      pin
+    explanation: >
+      A C T I V E are indexes 0 to 5, so the underscore is at 6. The layer is 0 to cut - 1, the purpose is
+      cut + 1 to the end.
+
+  - id: m10-w08-q04
+    type: mcq
+    lesson: a
+    tags: [string-first]
+    review: true
+    prompt: "What does  string first _ METAL2  give?"
+    choices: ['-1', '0', '6', 'An empty string']
+    answer: '-1'
+    explanation: >
+      METAL2 has no underscore. Like lsearch, string first gives -1 when it finds nothing, because 0 is a
+      real position: the first character.
+    distractor_feedback:
+      '0': '0 would mean "the _ is the first character". Not found is -1.'
+      '6': 'METAL2 has 6 characters, at indexes 0 to 5. There is no _ at all.'
+      'An empty string': 'string first always gives a number. For "not found" that number is -1.'
+
+  - id: m10-w08-q05
+    type: predict-output
+    lesson: a
+    tags: [string-length, llength]
+    review: true
+    prompt: "Words or characters? What does this print?"
+    code: |
+      set text "METAL2 drawing"
+      puts [llength $text]
+      puts [string length $text]
+    answer: |-
+      2
+      14
+    explanation: >
+      As a list, the text has two words. As a string, it has 14 characters: 6 + 1 space + 7.
+
+  - id: m10-w08-q06
+    type: find-the-bug
+    lesson: a
+    tags: [variable-name, braces]
+    review: true
+    prompt: 'This stops with  can''t read "layer_": no such variable.  Which line has the bug?'
+    code: |
+      set layer POLY
+      set purpose drawing
+      puts "$layer_$purpose"
+    answer: 3
+    explanation: >
+      A variable name may contain _, so Tcl reads $layer_ as the variable layer_. Write ${layer}_$purpose:
+      the braces show where the name ends.
+
+  - id: m10-w08-q07
+    type: predict-output
+    lesson: a
+    tags: [string-trim]
+    review: true
+    prompt: "string trim removes spaces at the ends only. What does this print?"
+    code: |
+      set typed "  POLY drawing  "
+      set clean [string trim $typed]
+      puts "|$clean|"
+      puts [string length $clean]
+    answer: |-
+      |POLY drawing|
+      12
+    explanation: >
+      The two spaces at each end are gone, but the space inside stays: string trim never touches the
+      middle. POLY drawing has 4 + 1 + 7 = 12 characters.
+
+  - id: m10-w08-q08
+    type: predict-output
+    lesson: a
+    tags: [string-range, end]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set name METAL2_drawing
+      puts [string range $name end-6 end]
+      puts [string index $name 5]
+    answer: |-
+      drawing
+      2
+    explanation: >
+      end-6 is six places before the last character, so the range is the last 7 characters: drawing.
+      Index 5 is the sixth character, the digit 2.
+
+  - id: m10-w08-q09
+    type: mcq
+    lesson: a
+    tags: [string-range]
+    review: true
+    prompt: "cut holds the index of the _ in POLY_pin (4). What does  string range POLY_pin 0 $cut  give?"
+    choices: ['POLY_', 'POLY', 'POL', 'pin']
+    answer: 'POLY_'
+    explanation: >
+      string range includes both ends, like lrange. Index 4 is the underscore itself, so it is kept. Stop
+      at $cut - 1 to get POLY.
+    distractor_feedback:
+      'POLY': 'That needs the range to stop one place before the underscore: 0 to $cut - 1.'
+      'POL': 'Indexes 0 to 4 are five characters: P O L Y _.'
+      'pin': 'The range starts at 0, so it takes the beginning of the name.'
+
+  - id: m10-w08-q10
+    type: multi-select
+    lesson: a
+    tags: [clean-up, eq]
+    review: true
+    prompt: 'Which expressions give 1 for the text "  metal2_drawing " (with the spaces)? Pick all that apply.'
+    choices:
+      - '[string toupper [string trim $t]] eq "METAL2_DRAWING"'
+      - '[string trim $t] eq "metal2_drawing"'
+      - '$t eq "metal2_drawing"'
+      - '[string toupper $t] eq "METAL2_DRAWING"'
+    answer:
+      - '[string toupper [string trim $t]] eq "METAL2_DRAWING"'
+      - '[string trim $t] eq "metal2_drawing"'
+    explanation: >
+      eq compares every character, spaces and capitals included. Trimming removes the outer spaces, and
+      toupper the difference in capitals. Without trim, the spaces are still there, so eq gives 0.
+
+  - id: m10-w08-q11
+    type: fill-blank
+    lesson: a
+    tags: [string-index]
+    review: false
+    prompt: 'Fill the blank so that it prints the LAST character of the name:     puts [string index $name ___]'
+    answer: ['end']
+    explanation: >
+      end always means the last position, whatever the length of the string.
+
+  - id: m10-w08-q12
+    type: mcq
+    lesson: a
+    tags: [layer-purpose]
+    review: false
+    prompt: "In the layer name METAL2_pin, what does the part pin say?"
+    choices:
+      - 'What the shapes are for: places where a wire may connect'
+      - 'The number of the layer in the GDS file'
+      - 'That the layer is the second metal'
+      - 'Nothing: it is a comment'
+    answer: 'What the shapes are for: places where a wire may connect'
+    explanation: >
+      A name like this has two parts: the layer, METAL2, then the purpose. This course uses two teaching
+      purposes: drawing (shapes that become the mask) and pin (where a wire may connect).
+    distractor_feedback:
+      'The number of the layer in the GDS file': 'The GDS number is stored separately (Week 9). pin is the purpose.'
+      'That the layer is the second metal': 'That is what METAL2 says, the first part.'
+      'Nothing: it is a comment': 'It is part of the name, and it means something: what the shapes are for.'
+
+  - id: m10-w08-q13
+    type: predict-output
+    lesson: a
+    tags: [string-index, string-length]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set name VIA1
+      puts [string length [string index $name 10]]
+      puts [string index $name 3]
+    answer: |-
+      0
+      1
+    explanation: >
+      VIA1 has only 4 characters, indexes 0 to 3. Asking for index 10 gives an empty string, not an error,
+      and an empty string has length 0. Index 3 is the digit 1.
+
+  - id: m10-w08-q14
+    type: order-steps
+    lesson: a
+    tags: [string-first, string-range]
+    review: false
+    prompt: 'Put in order the steps that turn " poly_PIN " into POLY_pin.'
+    steps:
+      - "Trim the spaces at both ends with string trim"
+      - "Find the first _ with string first"
+      - "Cut out the layer and the purpose with string range"
+      - "Put the layer in capitals and the purpose in lower case"
+      - "Glue them back with \"${layer}_$purpose\""
+    explanation: >
+      Clean first, so that the spaces do not shift the positions. Then find the cut, take the two parts,
+      change their case and join them again.
+
+  # ---------- Lesson B ----------
+  - id: m10-w08-q15
+    type: predict-output
+    lesson: b
+    tags: [glob, string-match]
+    review: true
+    prompt: "Glob patterns. What does this print?"
+    code: |
+      puts [string match {METAL?_*} METAL2_drawing]
+      puts [string match {METAL?_*} METAL10_drawing]
+      puts [string match {*_pin} VIA1_pin]
+      puts [string match {[A-Z]*} poly_drawing]
+    answer: |-
+      1
+      0
+      1
+      0
+    explanation: >
+      ? takes exactly one character: 2 fits, but in METAL10 the 0 meets the _ of the pattern. *_pin fits any
+      name that ends in _pin. [A-Z] needs a capital letter first, and p is not one.
+
+  - id: m10-w08-q16
+    type: mcq
+    lesson: b
+    tags: [glob, regex]
+    review: true
+    prompt: "In  string match {*_drawing} $name,  what does the * mean?"
+    choices:
+      - 'Any run of characters, even none'
+      - 'The character before it, repeated any number of times'
+      - 'Exactly one character'
+      - 'A real star character'
+    answer: 'Any run of characters, even none'
+    explanation: >
+      string match uses glob patterns: * is any characters, ? is exactly one, [A-Z] is one from a set.
+    distractor_feedback:
+      'The character before it, repeated any number of times': 'That is what * means in a regular expression, a different, bigger pattern language that you meet in Week 15. string match uses glob patterns.'
+      'Exactly one character': 'That is the job of ?. The star takes any number of characters.'
+      'A real star character': 'In a glob pattern, * is special. It matches any characters, including a star.'
+
+  - id: m10-w08-q17
+    type: predict-output
+    lesson: b
+    tags: [format]
+    review: true
+    prompt: "What does this print? The | signs show where each column starts and ends."
+    code: |
+      puts [format "%-6s|%5.1f|" CORE 26.66]
+    answer: "CORE  | 26.7|"
+    explanation: >
+      %-6s pads CORE on the right to 6 characters. %5.1f rounds 26.66 to 26.7 and pads it on the left to
+      5 characters, so one space comes first.
+
+  - id: m10-w08-q18
+    type: find-the-bug
+    lesson: b
+    tags: [glob, brackets]
+    review: true
+    prompt: 'This stops with  invalid command name "A-Z".  Which line has the bug?'
+    code: |
+      set name METAL2_drawing
+      if {[string match [A-Z]* $name]} {
+          puts "starts with a capital"
+      }
+    answer: 2
+    explanation: >
+      Without braces, the brackets in the pattern are command substitution (Week 3), so Tcl tries to run a
+      command called A-Z. Write the pattern in braces: {[A-Z]*}.
+
+  - id: m10-w08-q19
+    type: mcq
+    lesson: b
+    tags: [glob, string-match]
+    review: true
+    prompt: "string match $name {*_pin}  gives 0 for the name VIA1_pin. Why?"
+    choices:
+      - 'The pattern must come first; here VIA1_pin is used as the pattern'
+      - 'Patterns cannot start with *'
+      - 'string match ignores the underscore'
+      - '_pin is not a glob pattern'
+    answer: 'The pattern must come first; here VIA1_pin is used as the pattern'
+    explanation: >
+      string match pattern text. With the words swapped, Tcl tests whether the text *_pin fits the pattern
+      VIA1_pin. It does not, and there is no error to warn you.
+    distractor_feedback:
+      'Patterns cannot start with *': '{*_pin} is a fine pattern. It is just in the wrong place.'
+      'string match ignores the underscore': 'An _ in a pattern matches an _ in the text, like any normal character.'
+      '_pin is not a glob pattern': 'Any text is a glob pattern; only *, ? and [ ] are special in it.'
+
+  - id: m10-w08-q20
+    type: predict-output
+    lesson: b
+    tags: [string-map]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      puts [string map {- _} METAL2-pin]
+      puts [string map {_drawing ""} VIA1_drawing]
+      puts [string map {A a} ADC]
+    answer: |-
+      METAL2_pin
+      VIA1
+      aDC
+    explanation: >
+      string map replaces every from with its to. A to of "" deletes the piece. Capitals count, so only the
+      capital A changes.
+
+  - id: m10-w08-q21
+    type: predict-output
+    lesson: b
+    tags: [format]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set share [expr {100.0 * 9600 / 120000}]
+      puts $share
+      puts [format "ADC: %.1f%%" $share]
+      puts [format "%d blocks" 5]
+    answer: |-
+      8.0
+      ADC: 8.0%
+      5 blocks
+    explanation: >
+      9600 out of 120000 is exactly 8 percent; a decimal division prints it as 8.0. %.1f keeps one decimal
+      place, and %% prints a real percent sign. %d prints a whole number.
+
+  - id: m10-w08-q22
+    type: mcq
+    lesson: b
+    tags: [format, error]
+    review: true
+    prompt: 'puts [format "%s is %d um wide" CORE]  stops with an error. Which one?'
+    choices:
+      - 'not enough arguments for all format specifiers'
+      - 'expected integer but got "CORE"'
+      - 'wrong # args'
+      - 'invalid command name "%s"'
+    answer: 'not enough arguments for all format specifiers'
+    explanation: >
+      Each % code takes the next value. %s takes CORE, and %d finds nothing left. Give one value per % code:
+      format "%s is %d um wide" CORE 200.
+    distractor_feedback:
+      'expected integer but got "CORE"': 'CORE goes to %s, which takes text. The trouble is the missing value for %d.'
+      'wrong # args': 'format accepts any number of values; it is the specifiers that need one each.'
+      'invalid command name "%s"': 'The pattern is in quotes, so %s is plain text for Tcl. Only format reads it.'
+
+  - id: m10-w08-q23
+    type: fill-blank
+    lesson: b
+    tags: [glob, string-match]
+    review: true
+    prompt: 'Fill the blank with ONE glob sign so that the test gives 1 for METAL1 and METAL2 but 0 for METAL:     string match {METAL___} $name'
+    answer: ['?']
+    explanation: >
+      ? matches exactly one character, so METAL1 and METAL2 fit and METAL (nothing after it) does not.
+      With *, METAL would fit too, because * also matches nothing.
+
+  - id: m10-w08-q24
+    type: multi-select
+    lesson: b
+    tags: [glob, string-match]
+    review: true
+    prompt: "Which names fit the pattern  {*_drawing} ? Pick all that apply."
+    choices: ['POLY_drawing', 'METAL2_drawing', '_drawing', 'POLY_drawings', 'POLY-drawing']
+    answer: ['POLY_drawing', 'METAL2_drawing', '_drawing']
+    explanation: >
+      * matches any characters, even none, so _drawing fits too. The text must END with _drawing exactly:
+      an extra s, or a dash instead of _, does not fit.
+
+  - id: m10-w08-q25
+    type: predict-output
+    lesson: b
+    tags: [format, widths]
+    review: false
+    prompt: "Columns with format. What does this print?"
+    code: |
+      foreach {name area} {SENSOR 8000 CORE 32000} {
+          puts [format "%-7s|%6d|" $name $area]
+      }
+    answer: |-
+      SENSOR |  8000|
+      CORE   | 32000|
+    explanation: >
+      %-7s pads each name on the right to 7 characters; %6d pads each number on the left to 6. The columns
+      line up, whatever the length of the name.
+
+  - id: m10-w08-q26
+    type: mcq
+    lesson: b
+    tags: [string-map, list]
+    review: false
+    prompt: 'You want  string map  to replace NAME with the value of $block. Which line works?'
+    choices:
+      - 'string map [list NAME $block] $text'
+      - 'string map {NAME $block} $text'
+      - 'string map NAME $block $text'
+      - 'string map $text {NAME $block}'
+    answer: 'string map [list NAME $block] $text'
+    explanation: >
+      The first word is a list of from/to pairs. In braces, $block would stay as the six characters $block.
+      list builds the pair with the real value.
+    distractor_feedback:
+      'string map {NAME $block} $text': 'Braces stop substitution (Week 3), so NAME would be replaced with the text $block itself.'
+      'string map NAME $block $text': 'string map takes ONE word of pairs, then the text. Here it gets too many words.'
+      'string map $text {NAME $block}': 'The pairs come first and the text second.'
+
+  - id: m10-w08-q27
+    type: mcq
+    lesson: b
+    tags: [format, rounding]
+    review: true
+    prompt: "Why use  format %.1f  in a report instead of printing  [expr {100.0 * $a / $b}]  directly?"
+    choices:
+      - 'It rounds the number to 1 decimal place, so the report shows 26.7 instead of 26.666666666666668'
+      - 'expr cannot divide decimal numbers'
+      - 'format makes the number more exact'
+      - 'puts cannot print decimals'
+    answer: 'It rounds the number to 1 decimal place, so the report shows 26.7 instead of 26.666666666666668'
+    explanation: >
+      expr keeps every digit it has. format chooses how many to show and rounds the last one.
+    distractor_feedback:
+      'expr cannot divide decimal numbers': 'It can: with 100.0 the division gives a decimal. It just shows all its digits.'
+      'format makes the number more exact': 'It makes it shorter, not more exact: it rounds.'
+      'puts cannot print decimals': 'puts prints any text, decimals included. The point is how many digits you want to see.'
+
+  - id: m10-w08-q28
+    type: predict-output
+    lesson: b
+    tags: [glob, string-match, foreach]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set count 0
+      foreach name {METAL1_pin POLY_drawing METAL2_drawing VIA1_pin} {
+          if {[string match {METAL*} $name]} {
+              incr count
+          }
+      }
+      puts "metal names: $count"
+    answer: "metal names: 2"
+    explanation: >
+      METAL* fits every name that starts with METAL: METAL1_pin and METAL2_drawing.
+
+  - id: m10-w08-q29
+    type: mcq
+    lesson: b
+    tags: [glob, braces]
+    review: false
+    prompt: "Why should you write a pattern like  {[A-Z]*}  in braces?"
+    choices:
+      - 'Without braces, Tcl runs [A-Z] as a command before string match sees it'
+      - 'string match only accepts braced words'
+      - 'Braces make the pattern ignore capitals'
+      - 'Braces turn the glob pattern into a regular expression'
+    answer: 'Without braces, Tcl runs [A-Z] as a command before string match sees it'
+    explanation: >
+      Brackets mean command substitution (Week 3). Braces stop all substitution, so string match receives
+      the pattern exactly as typed.
+    distractor_feedback:
+      'string match only accepts braced words': 'A pattern without special signs, like METAL2, works without braces. Brackets are the problem.'
+      'Braces make the pattern ignore capitals': 'Braces only stop substitution. Capitals still count.'
+      'Braces turn the glob pattern into a regular expression': 'string match always uses glob patterns. Regular expressions need other commands (Week 15).'

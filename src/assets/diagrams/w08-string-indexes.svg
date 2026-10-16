@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 250">
+  <text class="d-txt d-mono" x="20" y="24">set name METAL2_drawing</text>
+  <text class="d-txt d-small d-muted" x="20" y="46">A string is a row of characters. Each character has a position, counting from 0.</text>
+  <rect class="d-box-info" x="20" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="39" y="90" text-anchor="middle">M</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="39" y="122" text-anchor="middle">0</text>
+  <rect class="d-box-info" x="62" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="81" y="90" text-anchor="middle">E</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="81" y="122" text-anchor="middle">1</text>
+  <rect class="d-box-info" x="104" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="123" y="90" text-anchor="middle">T</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="123" y="122" text-anchor="middle">2</text>
+  <rect class="d-box-info" x="146" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="165" y="90" text-anchor="middle">A</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="165" y="122" text-anchor="middle">3</text>
+  <rect class="d-box-info" x="188" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="207" y="90" text-anchor="middle">L</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="207" y="122" text-anchor="middle">4</text>
+  <rect class="d-box-info" x="230" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="249" y="90" text-anchor="middle">2</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="249" y="122" text-anchor="middle">5</text>
+  <rect class="d-box-warn" x="272" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="291" y="90" text-anchor="middle">_</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="291" y="122" text-anchor="middle">6</text>
+  <rect class="d-box-info" x="314" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="333" y="90" text-anchor="middle">d</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="333" y="122" text-anchor="middle">7</text>
+  <rect class="d-box-info" x="356" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="375" y="90" text-anchor="middle">r</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="375" y="122" text-anchor="middle">8</text>
+  <rect class="d-box-info" x="398" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="417" y="90" text-anchor="middle">a</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="417" y="122" text-anchor="middle">9</text>
+  <rect class="d-box-info" x="440" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="459" y="90" text-anchor="middle">w</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="459" y="122" text-anchor="middle">10</text>
+  <rect class="d-box-info" x="482" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="501" y="90" text-anchor="middle">i</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="501" y="122" text-anchor="middle">11</text>
+  <rect class="d-box-info" x="524" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="543" y="90" text-anchor="middle">n</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="543" y="122" text-anchor="middle">12</text>
+  <rect class="d-box-info" x="566" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="585" y="90" text-anchor="middle">g</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="585" y="122" text-anchor="middle">13</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="585" y="138" text-anchor="middle">end</text>
+  <path class="d-arrow" d="M20 150 L20 158 L268 158 L268 150" fill="none"/>
+  <text class="d-txt d-mono d-small" x="20" y="178">string range $name 0 5 → METAL2</text>
+  <text class="d-txt d-mono" x="20" y="212">string length $name   → 14</text>
+  <text class="d-txt d-mono" x="20" y="236">string index $name 0  → M</text>
+  <text class="d-txt d-mono" x="340" y="212">string index $name 6    → _</text>
+  <text class="d-txt d-mono" x="340" y="236">string index $name end  → g</text>
+</svg>

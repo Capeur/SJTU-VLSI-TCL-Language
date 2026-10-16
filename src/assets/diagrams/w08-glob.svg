@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 250">
+  <text class="d-txt d-small d-muted" x="20" y="22">string match PATTERN text: the pattern comes first. 1 = it fits, 0 = it does not.</text>
+  <text class="d-txt d-small d-bold" x="20" y="50">*  any characters, even none</text>
+  <text class="d-txt d-small d-bold" x="230" y="50">?  exactly one character</text>
+  <text class="d-txt d-small d-bold" x="430" y="50">[A-Z]  one character from a set</text>
+
+  <rect class="d-box-code" x="20" y="66" width="600" height="40" rx="4"/>
+  <text class="d-txt d-mono" x="34" y="92">METAL<tspan class="d-bold d-fg-warn">?</tspan>_<tspan class="d-bold d-fg-warn">*</tspan>   on  METAL<tspan class="d-bold d-fg-warn">2</tspan>_<tspan class="d-bold d-fg-warn">drawing</tspan></text>
+  <text class="d-txt d-mono d-bold d-fg-ok" x="560" y="92">1</text>
+
+  <rect class="d-box-code" x="20" y="116" width="600" height="40" rx="4"/>
+  <text class="d-txt d-mono" x="34" y="142">METAL<tspan class="d-bold d-fg-warn">?</tspan>_<tspan class="d-bold d-fg-warn">*</tspan>   on  METAL<tspan class="d-bold d-fg-bad">10</tspan>_drawing</text>
+  <text class="d-txt d-mono d-bold d-fg-bad" x="560" y="142">0</text>
+  <text class="d-txt d-small d-muted" x="34" y="172">? takes ONE character, so 1 fits but then 0 meets the _ of the pattern: no match.</text>
+
+  <rect class="d-box-code" x="20" y="186" width="600" height="40" rx="4"/>
+  <text class="d-txt d-mono" x="34" y="212"><tspan class="d-bold d-fg-warn">{[A-Z]*}</tspan>   on  <tspan class="d-bold d-fg-bad">p</tspan>oly_drawing</text>
+  <text class="d-txt d-mono d-bold d-fg-bad" x="560" y="212">0</text>
+  <text class="d-txt d-small d-muted" x="20" y="244">Glob patterns are not regular expressions (Week 15). Put [ ] patterns in braces.</text>
+</svg>

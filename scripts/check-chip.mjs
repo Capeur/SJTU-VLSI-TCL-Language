@@ -9,6 +9,10 @@
 //   - "Blocks: …" and "Layers: …" lists must match the JSON (all names, same order)
 //   - the channel between CORE and SRAM (Week 4 lab): `set channelWidth <n>` and "<n> µm channel/gap
 //     between (the) CORE and SRAM" must equal the gap computed from the blocks' x and w
+//   - teaching layer numbers (Weeks 8+), read from src/styles/layers.ts, the ONE source (PRD §13.3):
+//     "METAL1 4.0", "METAL1 is 4.0", "METAL1: number 4, datatype 0", "METAL1 number 4", "METAL1 {number 4 datatype 0"
+//     must use the layer's GDS number; `set layerNumbers {…}` must list every layer with its number, in order;
+//     `set knownLayers {…}` must list every layer, in order; lumen-1.json's layers must be the layers in layers.ts
 // Usage: node scripts/check-chip.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,9 +33,18 @@ const blocks = Object.fromEntries(chip.blocks.map((b) => [b.name, b]));
 const sizes = new Set([`${chip.width_um} x ${chip.height_um}`, ...chip.blocks.map((b) => `${b.w} x ${b.h}`)]);
 const blockList = chip.blocks.map((b) => b.name).join(' ');
 const layerList = chip.layers.join(' ');
+// GDS numbers of the teaching layers, from the palette file (DERIVED is not a chip layer).
+const layersTs = fs.readFileSync(path.join(root, 'src/styles/layers.ts'), 'utf8');
+const gds = Object.fromEntries([...layersTs.matchAll(/name: '([A-Z0-9]+)', gds: '(\d+\.\d+)'/g)].map((m) => [m[1], m[2]]));
+delete gds.DERIVED;
+const layerNames = chip.layers.join('|');
+const layerNumbersList = chip.layers.map((l) => `${l} ${gds[l]}`).join(' ');
 // The empty strip between CORE (left) and SRAM (right): SRAM's left edge minus CORE's right edge.
 const coreSramGap = blocks.SRAM.x - (blocks.CORE.x + blocks.CORE.w);
 const errors = [];
+if (Object.keys(gds).join(' ') !== layerList) {
+    errors.push(`src/styles/layers.ts: layers ${Object.keys(gds).join(' ')} differ from lumen-1.json's layers ${layerList}`);
+}
 for (const file of files) {
     const rel = path.relative(root, file);
     fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
@@ -70,6 +83,25 @@ for (const file of files) {
         }
         for (const m of line.matchAll(/\b(\d+) (?:µm|um) (?:wide )?(?:channel|gap) between (?:the )?CORE and SRAM\b/g)) {
             if (Number(m[1]) !== coreSramGap) errors.push(`${where}: "${m[0]}" — the gap between CORE and SRAM is ${coreSramGap} µm`);
+        }
+        // Teaching layer numbers: "METAL1 4.0", "METAL1 is 4.0", "METAL1 (GDS 4.0)".
+        for (const m of line.matchAll(new RegExp(`\\b(${layerNames})\\s+(?:is\\s+|\\(?GDS\\s+)?(\\d+\\.\\d+)\\b`, 'g'))) {
+            if (m[2] !== gds[m[1]]) errors.push(`${where}: "${m[0]}" — ${m[1]} is GDS ${gds[m[1]]} (src/styles/layers.ts)`);
+        }
+        // "METAL1: number 4, datatype 0", "dict set layers METAL1 number 4", "METAL1 {number 4 datatype 0".
+        for (const m of line.matchAll(new RegExp(`\\b(${layerNames}):?\\s+\\{?number\\s+(\\d+)(?:,?\\s+datatype\\s+(\\d+))?`, 'g'))) {
+            const [layer, datatype] = gds[m[1]].split('.');
+            if (m[2] !== layer || (m[3] !== undefined && m[3] !== datatype)) {
+                errors.push(`${where}: "${m[0]}" — ${m[1]} is GDS ${gds[m[1]]}: number ${layer}, datatype ${datatype}`);
+            }
+        }
+        for (const m of line.matchAll(/\bset\s+layerNumbers\s+\{([^}]*)\}/g)) {
+            if (m[1].trim() === '…') continue;   // prose placeholder: set layerNumbers {…}
+            if (m[1].trim().split(/\s+/).join(' ') !== layerNumbersList) errors.push(`${where}: layerNumbers should be {${layerNumbersList}}`);
+        }
+        for (const m of line.matchAll(/\bset\s+knownLayers\s+\{([^}]*)\}/g)) {
+            if (m[1].trim() === '…') continue;   // prose placeholder: set knownLayers {…}
+            if (m[1].trim().split(/\s+/).join(' ') !== layerList) errors.push(`${where}: knownLayers should be {${layerList}}`);
         }
         // "Blocks: CORE SRAM …" and "Layers: ACTIVE POLY …" lists must be complete and in the JSON's order.
         for (const [label, want] of [['Blocks', blockList], ['Layers', layerList]]) {

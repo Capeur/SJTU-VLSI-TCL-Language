@@ -1,14 +1,22 @@
 ---
-title: "Week 8 Lesson B"
+title: "Patterns, swaps and tidy numbers"
+description: "Week 8, Lesson B: testing names against glob patterns with string match (*, ? and [ ], not regular expressions), swapping pieces of text with string map, and printing aligned, rounded columns with format."
 milestone: "m10"
 week: 8
 lesson: "b"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Test a name against a glob pattern with string match, using *, ? and [ ]
+  - Swap pieces of text with string map
+  - Print aligned columns and rounded numbers with format
+prerequisites: ["m10-w08-a", "m10-w02-a", "m10-w03-a"]
+glossary: [glob-pattern, regular-expression, format-specifier, string]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: String comparisons, match", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl18.html" }
+  - { title: "Tcl tutorial: Modifying strings, format", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl19.html" }
+  - { title: "Tcl manual page: string (match and map)", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm" }
+  - { title: "Tcl manual page: format", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/format.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +24,193 @@ review_date: ""
 sidebar: {"label":"Lesson B","order":2}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import ChipMap from '../../../../components/ChipMap.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson B for week 8 (Text handling) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · glob concept + diagram + worked example 1 6 · predict 3 ·
+    string map concept + playground 4 · format concept + diagram + worked example 2 7 · faded 3 · traps 4 ·
+    exit quiz 4 · cheat card 1 = 38 min. The exit quiz always draws a glob item (require="glob"), so the
+    "glob, not regex" point is tested. format is where M10 finally rounds (decision log, P3 Weeks 1-2).
+    Quiz items avoid exact halves (0.125 → 0.12): binary decimals make them round unexpectedly. */}
+
+<LessonMeta milestone="m10" week={8} lesson="b" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+The capstone report should say how much of {chip.name} each block takes. CORE is 32000 µm² of a 120000 µm² chip. Back in Week 2, a division like that printed a long tail of digits: 26.666666666666668. A report needs 26.7, in a neat column. This lesson gives you three tools for text: a pattern test for names, a find-and-replace for pieces of text, and `format`, which lines up columns and rounds numbers.
+
+<ChipMap caption={`The ${chip.name} floorplan. Each block's share of the chip is its area divided by ${chip.width_um} × ${chip.height_um} µm², times 100.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Test a name against a glob pattern with string match, using *, ? and [ ]', 'Swap pieces of text with string map', 'Print aligned columns and rounded numbers with format']} />
+
+## Warm-up
+
+Two questions from Weeks 1 to 7, and one from Lesson A. Answer from memory first.
+
+<Quiz bank="m10-w08" lesson="a" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07']} mode="warmup" count={3} mix={1 / 3} />
+
+## Glob patterns: string match
+
+`string match pattern text` gives 1 if the text fits the pattern and 0 if not. The pattern comes first. It is a <GlossaryTerm term="glob-pattern">glob pattern</GlossaryTerm>, with three special signs: `*` means any characters, even none; `?` means exactly one character; `[A-Z]` means one character from a set, here any capital letter.
+
+These are glob patterns, the same small language a terminal uses for file names, and not <GlossaryTerm term="regular-expression">regular expressions</GlossaryTerm>, a bigger pattern language you meet in Week 15, where `*` means something else.
+
+Always put a pattern in braces. A pattern with `[ ]` must be braced, or Tcl runs the brackets as a command (Week 3).
+
+<Diagram name="w08-glob" alt="Three pattern tests. METAL?_* on METAL2_drawing gives 1: the question mark takes the single character 2 and the star takes drawing. METAL?_* on METAL10_drawing gives 0: the question mark takes only the 1, then the 0 does not match the underscore of the pattern. The braced pattern [A-Z]* on poly_drawing gives 0, because the first character p is not a capital letter. A note says glob patterns are not regular expressions, and patterns with brackets go in braces." />
+
+<WorkedExample
+  code={`puts [string match {METAL?_*} METAL2_drawing]
+puts [string match {METAL?_*} METAL10_drawing]
+puts [string match {*_pin} VIA1_pin]
+puts [string match {[A-Z]*} poly_drawing]
+puts [string match {*_*} ACTIVE]`}
+  notes={{
+    1: '? takes the 2, the _ matches, and * takes drawing. Output: 1',
+    2: '? takes only ONE character, the 1. Then the 0 meets the _ of the pattern. Output: 0',
+    3: '* takes VIA1, then _pin matches the end exactly. Output: 1',
+    4: 'One capital letter, then anything. p is not a capital. Output: 0',
+    5: 'Is there a _ anywhere? ACTIVE has none. Output: 0'
+  }}
+/>
+
+## Predict → Run → Explain
+
+A loop that keeps only the pin names. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set names {POLY_pin METAL2_drawing VIA1_pin ACTIVE_drawing}
+foreach name $names {
+    if {[string match {*_pin} $name]} {
+        puts "pin: $name"
+    }
+}
+puts [string match {METAL?} METAL]`}
+  expected={`pin: POLY_pin
+pin: VIA1_pin
+0`}
+  explanation="Only the names that end in _pin fit *_pin, so the loop prints two lines. In the last line, ? needs exactly one character after METAL, and there is none, so the answer is 0. With * instead of ?, it would be 1, because * also matches nothing."
+/>
+
+## string map: swap pieces of text
+
+`string map {from to} text` gives back a new string where every `from` is replaced with `to`. The first word is a list of pairs, so you can swap several things at once: `{from1 to1 from2 to2}`. A `to` can be empty, `""`, to delete a piece.
+
+When the values come from variables, build the pairs with `list`, as in the last line below.
+
+<TclPlayground client:visible code={`set typed METAL2-pin
+puts [string map {- _} $typed]
+puts [string map {_drawing ""} POLY_drawing]
+set name CORE
+set width 200
+puts [string map [list NAME $name WIDTH $width] "NAME is WIDTH um wide"]`} />
+
+## format: neat columns and rounded numbers
+
+`format` builds a line of text from a pattern and some values. Each <GlossaryTerm term="format-specifier">format specifier</GlossaryTerm>, a code that starts with `%`, takes the next value, in order. `%s` prints text, `%d` a whole number, and `%.1f` a decimal number rounded to 1 place.
+
+A number after the `%` sets the width of a column: `%6d` pads a number with spaces on the left, to 6 characters, and `%-7s` pads text on the right. `%%` prints a real percent sign.
+
+<Diagram name="w08-format-fields" alt="The command format with the pattern percent minus 7 s, percent 6 d, um2, percent 5.1 f, percent percent, followed by the values name, area and share. Arrows link each specifier to a box: percent minus 7 s is text, 7 wide, padded on the right; percent 6 d is a whole number, 6 wide, padded on the left; percent 5.1 f is a decimal with 1 place, 5 wide, rounded; percent percent is a real percent sign and uses no value. Below, the result: CORE, 32000 um2, 26.7 percent, in neat columns." />
+
+<WorkedExample
+  code={`set chipArea [expr {400 * 300}]
+foreach {name area} {CORE 32000 SRAM 22400 ADC 9600 SENSOR 8000 PADS 8000} {
+    set share [expr {100.0 * $area / $chipArea}]
+    puts [format "%-7s %6d um2 %5.1f%%" $name $area $share]
+}`}
+  notes={{
+    1: 'The area of the whole chip: 120000 µm².',
+    2: 'Week 5: foreach with two variables takes a name and an area each time.',
+    3: '100.0 makes it a decimal division (Week 2). For CORE: 26.666666666666668',
+    4: 'Name padded to 7, area 6 wide, share rounded to 1 place, then %. Output: CORE     32000 um2  26.7%, and so on down to PADS      8000 um2   6.7%',
+    5: 'The end of the loop.'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`# Must print: 1
+puts [string ___1___ {*_drawing} ACTIVE_drawing]
+# Must print: 0, because the pattern allows exactly one character after VIA
+puts [string match {VIA___2____pin} VIA12_pin]
+# Must print: SRAM share: 18.7%
+puts [format "SRAM share: ___3___%%" [expr {100.0 * 22400 / 120000}]]`}
+  answers={[['match'], ['?'], ['%.1f', '%4.1f', '%5.1f']]}
+  hints={['Which string command tests a text against a pattern?', 'Which glob sign means exactly one character?', 'Which specifier prints a decimal number rounded to 1 place?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set name POLY_drawing
+puts [string match [A-Z]* $name]`}
+  error={`invalid command name "A-Z"`}
+  fix={`set name POLY_drawing
+puts [string match {[A-Z]*} $name]`}
+  why="Without braces, Tcl sees the brackets first and tries to run a command called A-Z, as in Week 3. Braces keep the pattern exactly as you typed it, so string match gets the brackets. Brace every pattern."
+/>
+
+<Trap
+  wrong={`set name VIA1_pin
+puts [string match $name {*_pin}]`}
+  output={`0`}
+  fix={`set name VIA1_pin
+puts [string match {*_pin} $name]`}
+  why="The pattern comes FIRST. Here Tcl uses VIA1_pin as the pattern and checks whether the text *_pin fits it. It does not, so you get 0, with no error to warn you."
+/>
+
+<Trap
+  wrong={`puts [format "%s: %d um2" CORE]`}
+  error={`not enough arguments for all format specifiers`}
+  fix={`puts [format "%s: %d um2" CORE 32000]`}
+  why="Each % code takes one value, in order. Here %s takes CORE, and %d finds nothing left. Count the % codes (not %%) and give that many values."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w08" lesson="b" mode="exit" count={4} require="glob" />
+
+## Cheat card
+
+<CheatCard title="string match, string map, format" lines={[
+  'string match {METAL?_*} $name   1 if it fits, 0 if not (pattern FIRST)',
+  '*  any characters   ?  exactly one   [A-Z]  one from a set',
+  'Glob patterns, not regular expressions (those are Week 15)',
+  'Always brace a pattern: {[A-Z]*}',
+  'string map {- _} $name          replace every - with _',
+  'string map [list NAME $n] $text  pairs from variables',
+  'format "%-7s %6d %5.1f%%" $name $area $share',
+  '%s text  %d whole number  %.1f rounded to 1 place  %% a % sign',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: String comparisons, match (and more)', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl18.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Modifying strings, format', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl19.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: string (see match and map)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm', kind: 'tcl-man' },
+  { title: 'Tcl manual page: format (every specifier)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/format.htm', kind: 'tcl-man' },
+]} />

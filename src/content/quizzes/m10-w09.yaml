@@ -1,0 +1,514 @@
+# Week 9 — Tables of data. Lesson A: dict create / get / set / exists / keys / size, dict for in insertion
+# order (a key set again keeps its place; a new key goes at the end), nested records, the teaching GDS
+# numbers (layer.datatype, datatype 0 = drawing). Lesson B: arrays (set a(key), $a(key), incr a($k)),
+# array size / names, THE ORDER TRAP (array names promises no order), dict or array, passing an array by name.
+# Tags used by the exit quizzes: "order" (Lesson A, require="order"), "array-order" (Lesson B, require="array-order").
+# THE ORDER RULE (user decision): no answer here depends on the order of array names. Every predict-output item
+# that lists an array sorts it with lsort, or reads single elements; the order items are mcq / multi-select.
+# GDS numbers come from src/styles/layers.ts (check-chip checks them). The lab's shapes are not used (rule 21).
+# Every predict-output answer is checked against real tclsh 8.6 and 9.0 by scripts/validate-quizzes.mjs.
+ai_assisted: true
+reviewed_by: ""
+review_date: ""
+questions:
+  # ---------- Lesson A ----------
+  - id: m10-w09-q01
+    type: predict-output
+    lesson: a
+    tags: [order, dict-for, dict-set]
+    review: true
+    prompt: "One key is set twice. What does this print?"
+    code: |
+      set counts [dict create METAL1 12 POLY 5]
+      dict set counts VIA1 7
+      dict set counts METAL1 13
+      dict for {layer n} $counts {
+          puts "$layer $n"
+      }
+    answer: |-
+      METAL1 13
+      POLY 5
+      VIA1 7
+    explanation: >
+      dict for walks the keys in insertion order. VIA1 is new, so it goes at the end. Setting METAL1 again
+      changes its value to 13 but keeps its place: first.
+
+  - id: m10-w09-q02
+    type: predict-output
+    lesson: a
+    tags: [nested-dict, dict-exists]
+    review: true
+    prompt: "A record inside a dict. What does this print?"
+    code: |
+      set layers [dict create]
+      dict set layers POLY number 2
+      dict set layers POLY datatype 0
+      puts [dict get $layers POLY]
+      puts [dict exists $layers METAL1]
+    answer: |-
+      number 2 datatype 0
+      0
+    explanation: >
+      With two keys, dict set fills the field of a record: the record POLY gets number 2, then datatype 0.
+      dict get with one key gives the whole record. METAL1 was never added, so dict exists gives 0.
+
+  - id: m10-w09-q03
+    type: predict-output
+    lesson: a
+    tags: [dict-get, dict-keys]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set gdsNumbers [dict create ACTIVE 1.0 CONTACT 3.0]
+      dict set gdsNumbers VIA1 5.0
+      puts [dict get $gdsNumbers CONTACT]
+      puts [dict keys $gdsNumbers]
+      puts [dict size $gdsNumbers]
+    answer: |-
+      3.0
+      ACTIVE CONTACT VIA1
+      3
+    explanation: >
+      dict get looks up the value of CONTACT. dict keys gives the keys in insertion order, with the new key
+      VIA1 at the end. There are three pairs.
+
+  - id: m10-w09-q04
+    type: mcq
+    lesson: a
+    tags: [order, dict-for]
+    review: true
+    prompt: "In which order does  dict for  walk the pairs of a dict?"
+    choices:
+      - 'The order in which the keys were first added'
+      - 'Alphabetical order of the keys'
+      - 'An order that Tcl does not promise'
+      - 'From the largest value to the smallest'
+    answer: 'The order in which the keys were first added'
+    explanation: >
+      A dict keeps insertion order. That is why a dict is a good choice for a report that must follow the
+      order of a table.
+    distractor_feedback:
+      'Alphabetical order of the keys': 'A dict does not sort its keys. For alphabetical order, use lsort on the keys.'
+      'An order that Tcl does not promise': 'That is true for array names, not for a dict. A dict keeps insertion order.'
+      'From the largest value to the smallest': 'dict for never looks at the values to choose an order.'
+
+  - id: m10-w09-q05
+    type: find-the-bug
+    lesson: a
+    tags: [dict-get, capitals]
+    review: true
+    prompt: 'This stops with  key "metal2" not known in dictionary.  Which line has the bug?'
+    code: |
+      set gdsNumbers [dict create METAL1 4.0 METAL2 6.0]
+      set typed metal2
+      puts [dict get $gdsNumbers $typed]
+    answer: 3
+    explanation: >
+      Keys are exact, and capitals count: metal2 is not METAL2. Clean the name with string toupper, or test
+      with dict exists before dict get.
+
+  - id: m10-w09-q06
+    type: predict-output
+    lesson: a
+    tags: [dict-set, name]
+    review: true
+    prompt: "Look closely at the second line. What does this print?"
+    code: |
+      set gdsNumbers [dict create POLY 2.0]
+      dict set $gdsNumbers TEXT 63.0
+      puts $gdsNumbers
+    answer: "POLY 2.0"
+    explanation: >
+      dict set wants the variable's NAME. With $, Tcl replaces $gdsNumbers with its value first, so dict set
+      fills a new variable with the strange name "POLY 2.0". gdsNumbers itself never changes.
+
+  - id: m10-w09-q07
+    type: mcq
+    lesson: a
+    tags: [datatype, gds]
+    review: true
+    prompt: "In this course, METAL1 is GDS 4.0. What do the two numbers mean?"
+    choices:
+      - 'Layer 4, datatype 0'
+      - 'Layer 4, 0 shapes'
+      - 'Version 4.0 of the layer'
+      - 'The layer is 4.0 µm thick'
+    answer: 'Layer 4, datatype 0'
+    explanation: >
+      A GDS file stores two numbers per shape: the layer and the datatype. In this course, datatype 0 means
+      drawing for every layer. These are teaching numbers, not any factory's.
+    distractor_feedback:
+      'Layer 4, 0 shapes': 'The number pair says where a shape is drawn, not how many shapes there are.'
+      'Version 4.0 of the layer': 'It looks like a version number, but it is two numbers: layer and datatype.'
+      'The layer is 4.0 µm thick': 'GDS stores flat shapes. Thickness is not part of the layer number.'
+
+  - id: m10-w09-q08
+    type: predict-output
+    lesson: a
+    tags: [nested-dict, dict-get]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set layers [dict create]
+      dict set layers VIA1 number 5
+      dict set layers VIA1 purpose drawing
+      dict set layers TEXT number 63
+      puts [dict get $layers TEXT number]
+      puts [dict get $layers VIA1 purpose]
+      puts [dict keys $layers]
+    answer: |-
+      63
+      drawing
+      VIA1 TEXT
+    explanation: >
+      With two keys, dict get goes in through the record, then the field. The outer keys are the records,
+      in insertion order: VIA1, then TEXT.
+
+  - id: m10-w09-q09
+    type: fill-blank
+    lesson: a
+    tags: [dict-exists]
+    review: true
+    prompt: 'Fill the blank so that the test gives 1 or 0 without ever stopping with an error:     if {[dict ___ $gdsNumbers $name]} {…}'
+    answer: ['exists']
+    explanation: >
+      dict exists answers 1 or 0. dict get would stop with an error when the key is missing.
+
+  - id: m10-w09-q10
+    type: mcq
+    lesson: a
+    tags: [dict-for, error]
+    review: false
+    prompt: 'dict for {name} $gdsNumbers {puts $name}  stops with an error. Why?'
+    choices:
+      - 'dict for needs two variable names, one for the key and one for the value'
+      - 'name is not allowed as a variable name'
+      - 'gdsNumbers should be written without $'
+      - 'The body must use both variables'
+    answer: 'dict for needs two variable names, one for the key and one for the value'
+    explanation: >
+      Tcl says: must have exactly two variable names. Write dict for {name gds} $gdsNumbers {…}, even if the
+      body uses only one of them.
+    distractor_feedback:
+      'name is not allowed as a variable name': 'name is a fine variable name. The problem is that there is only one.'
+      'gdsNumbers should be written without $': 'dict for reads the dict, so it takes the VALUE, with $. Only dict set needs the name.'
+      'The body must use both variables': 'The body may use just one. But dict for must be given two names.'
+
+  - id: m10-w09-q11
+    type: predict-output
+    lesson: a
+    tags: [order, dict-set]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set gdsNumbers [dict create METAL2 6.0]
+      dict set gdsNumbers ACTIVE 1.0
+      dict set gdsNumbers METAL2 6.0
+      dict set gdsNumbers POLY 2.0
+      puts [dict keys $gdsNumbers]
+    answer: "METAL2 ACTIVE POLY"
+    explanation: >
+      METAL2 was added first. Setting it again does not move it. ACTIVE and POLY are new, so each goes at
+      the end when it is added.
+
+  - id: m10-w09-q12
+    type: multi-select
+    lesson: a
+    tags: [dict-set, name]
+    review: true
+    prompt: "Which commands take the variable's NAME, without $, because they change the variable? Pick all that apply."
+    choices: ['dict set gdsNumbers VIA1 5.0', 'incr count', 'lappend names CORE', 'dict get $gdsNumbers VIA1', 'dict keys $gdsNumbers']
+    answer: ['dict set gdsNumbers VIA1 5.0', 'incr count', 'lappend names CORE']
+    explanation: >
+      dict set, incr and lappend change a variable, so they need its name. dict get and dict keys only
+      read a value, so they take it with $.
+
+  - id: m10-w09-q13
+    type: order-steps
+    lesson: a
+    tags: [nested-dict, dict-get]
+    review: false
+    prompt: 'layers holds the record {number 6 datatype 0 purpose drawing} for METAL2. Put in order what happens in:   puts [dict get $layers METAL2 number]'
+    steps:
+      - "Replace $layers with its value, the whole table"
+      - "dict get finds the key METAL2 and takes its record"
+      - "In that record, it finds the key number and takes its value, 6"
+      - "puts prints 6"
+    explanation: >
+      Each key goes one level deeper, from the outside in: first the layer, then the field.
+
+  - id: m10-w09-q14
+    type: mcq
+    lesson: a
+    tags: [dictionary]
+    review: false
+    prompt: "What does a dict look like when you print it?"
+    choices:
+      - 'Like a list of pairs: key value key value'
+      - 'Like a table with lines and columns'
+      - 'Only its keys'
+      - 'It cannot be printed'
+    answer: 'Like a list of pairs: key value key value'
+    explanation: >
+      A dict is a value written like a list with an even number of elements. puts $gdsNumbers prints
+      something like ACTIVE 1.0 POLY 2.0.
+    distractor_feedback:
+      'Like a table with lines and columns': 'You can print it as a table with dict for, but puts on its own prints the pairs on one line.'
+      'Only its keys': 'That is dict keys. puts prints keys and values.'
+      'It cannot be printed': 'A dict is a value like any other, so puts prints it.'
+
+  # ---------- Lesson B ----------
+  - id: m10-w09-q15
+    type: mcq
+    lesson: b
+    tags: [array-order, array-names]
+    review: true
+    prompt: "After  array set count {METAL1 12 POLY 5 VIA1 7},  what can you say about the output of  puts [array names count] ?"
+    choices:
+      - 'It lists the three names, in an order that Tcl does not promise'
+      - 'METAL1 POLY VIA1, the order they were given in'
+      - 'METAL1 POLY VIA1, because the names are sorted'
+      - 'METAL1 12 POLY 5 VIA1 7'
+    answer: 'It lists the three names, in an order that Tcl does not promise'
+    explanation: >
+      array names gives every key, but the order is not promised and may differ between Tcl versions.
+      Sort it with lsort [array names count] when the order matters.
+    distractor_feedback:
+      'METAL1 POLY VIA1, the order they were given in': 'That is what a dict would do. An array keeps no order.'
+      'METAL1 POLY VIA1, because the names are sorted': 'array names does not sort. Write lsort [array names count] for that.'
+      'METAL1 12 POLY 5 VIA1 7': 'That would be keys and values, like array get, and in no promised order either. array names gives only the keys.'
+
+  - id: m10-w09-q16
+    type: predict-output
+    lesson: b
+    tags: [array, incr, lsort]
+    review: true
+    prompt: "The names are sorted. What does this print?"
+    code: |
+      foreach layer {VIA1 POLY VIA1 METAL2 VIA1} {
+          incr count($layer)
+      }
+      foreach layer [lsort [array names count]] {
+          puts "$layer: $count($layer)"
+      }
+    answer: |-
+      METAL2: 1
+      POLY: 1
+      VIA1: 3
+    explanation: >
+      incr starts each new element at 0 and adds 1. lsort puts the keys in alphabetical order, so the output
+      is the same every time, whatever order array names gave.
+
+  - id: m10-w09-q17
+    type: mcq
+    lesson: b
+    tags: [dict-or-array, upvar]
+    review: true
+    prompt: "A proc must receive the layer table, add a layer, and give the table back. Which should the table be?"
+    choices:
+      - 'A dict: it is a value, so it can be passed in and returned'
+      - 'An array: it is passed in with $table'
+      - 'Either: they work the same way'
+      - 'Neither: procs cannot change tables'
+    answer: 'A dict: it is a value, so it can be passed in and returned'
+    explanation: >
+      A dict travels like a list: in as an argument, out with return. An array is a family of variables,
+      not a value.
+    distractor_feedback:
+      'An array: it is passed in with $table': '$table is an error for an array: "variable is array". You would have to pass its name and use upvar.'
+      'Either: they work the same way': 'Only a dict is a value. An array needs its name and upvar, and cannot be returned.'
+      'Neither: procs cannot change tables': 'A proc can change its own copy of a dict and return it, or change a caller''s array through upvar.'
+
+  - id: m10-w09-q18
+    type: find-the-bug
+    lesson: b
+    tags: [array, error]
+    review: true
+    prompt: 'This stops with  can''t read "count": variable is array.  Which line has the bug?'
+    code: |
+      foreach layer {POLY POLY TEXT} {
+          incr count($layer)
+      }
+      puts "POLY: $count(POLY)"
+      puts $count
+    answer: 5
+    explanation: >
+      An array is a family of variables, so $count alone means nothing. Read one element, like $count(POLY),
+      or loop over lsort [array names count].
+
+  - id: m10-w09-q19
+    type: predict-output
+    lesson: b
+    tags: [array, array-size]
+    review: true
+    prompt: "What does this print?"
+    code: |
+      set gds(POLY) 2.0
+      set gds(METAL2) 6.0
+      set gds(POLY) 2.0
+      set name METAL2
+      puts $gds($name)
+      puts [array size gds]
+    answer: |-
+      6.0
+      2
+    explanation: >
+      The key can come from a variable: $gds($name) is $gds(METAL2). POLY was set twice, but it is one
+      element, so the array has 2 elements.
+
+  - id: m10-w09-q20
+    type: multi-select
+    lesson: b
+    tags: [array-order, lsort]
+    review: true
+    prompt: "A report must list the counts in the same order every time. Which loops give a fixed order? Pick all that apply."
+    choices:
+      - 'foreach layer [lsort [array names count]] {…}'
+      - 'dict for {name gds} $layerTable {…}'
+      - 'foreach layer [array names count] {…}'
+      - 'foreach {layer n} [array get count] {…}'
+    answer:
+      - 'foreach layer [lsort [array names count]] {…}'
+      - 'dict for {name gds} $layerTable {…}'
+    explanation: >
+      lsort gives a fixed, sorted order, and a dict keeps insertion order. array names and array get both
+      give the elements in an order that is not promised.
+
+  - id: m10-w09-q21
+    type: predict-output
+    lesson: b
+    tags: [array, upvar]
+    review: false
+    prompt: "An array passed by its name. What does this print?"
+    code: |
+      proc addShape {arrayName layer} {
+          upvar 1 $arrayName counts
+          incr counts($layer)
+      }
+      addShape shapes POLY
+      addShape shapes POLY
+      addShape shapes CONTACT
+      puts "POLY: $shapes(POLY), CONTACT: $shapes(CONTACT)"
+    answer: "POLY: 2, CONTACT: 1"
+    explanation: >
+      The proc gets the NAME shapes. upvar links counts to the caller's array, so incr changes the caller's
+      elements directly.
+
+  - id: m10-w09-q22
+    type: mcq
+    lesson: b
+    tags: [dict-or-array]
+    review: true
+    prompt: "Which task suits an array better than a dict?"
+    choices:
+      - 'Counting shapes per layer while reading a layout, one incr at a time'
+      - 'A table that a proc returns'
+      - 'A record inside a record'
+      - 'A report that must keep the order of a table'
+    answer: 'Counting shapes per layer while reading a layout, one incr at a time'
+    explanation: >
+      incr count($layer) changes one counter in place, simply. The other three need a value that can be
+      returned, nested or kept in order: a dict.
+    distractor_feedback:
+      'A table that a proc returns': 'An array cannot be returned: it is not a value. Return a dict.'
+      'A record inside a record': 'Arrays have one level only. Nested records need a dict.'
+      'A report that must keep the order of a table': 'array names keeps no order. A dict keeps insertion order.'
+
+  - id: m10-w09-q23
+    type: predict-output
+    lesson: b
+    tags: [array, capitals]
+    review: false
+    prompt: "What does this print?"
+    code: |
+      set count(METAL1) 4
+      set count(metal1) 9
+      puts [array size count]
+      puts $count(METAL1)
+    answer: |-
+      2
+      4
+    explanation: >
+      Keys are exact, and capitals count, so METAL1 and metal1 are two different elements.
+
+  - id: m10-w09-q24
+    type: fill-blank
+    lesson: b
+    tags: [array-order, lsort]
+    review: true
+    prompt: 'Fill the blank so that the layers come out in the same, sorted order every time:     foreach layer [___ [array names count]] {…}'
+    answer: ['lsort']
+    explanation: >
+      array names promises no order. lsort sorts the keys alphabetically, so the order is fixed.
+
+  - id: m10-w09-q25
+    type: mcq
+    lesson: b
+    tags: [array-order]
+    review: true
+    prompt: "Your script prints the layers with  foreach layer [array names count].  On your computer they come out in the order you want. Is the script right?"
+    choices:
+      - 'No: that order is not promised and may be different with another Tcl version'
+      - 'Yes: if it works once, it always works'
+      - 'Yes: array names always gives insertion order'
+      - 'No: array names gives the values, not the keys'
+    answer: 'No: that order is not promised and may be different with another Tcl version'
+    explanation: >
+      An order that is not promised can change between Tcl versions, or when the array grows. Sort with
+      lsort, or walk a dict that holds the order you want.
+    distractor_feedback:
+      'Yes: if it works once, it always works': 'A lucky order is still luck. Another Tcl, or one more element, can change it.'
+      'Yes: array names always gives insertion order': 'That is what a dict does. Arrays keep no order.'
+      'No: array names gives the values, not the keys': 'array names does give the keys. The problem is their order.'
+
+  - id: m10-w09-q26
+    type: predict-output
+    lesson: b
+    tags: [array, dict, lsort]
+    review: false
+    prompt: "From a dict to an array. What does this print?"
+    code: |
+      set table [dict create TEXT 63.0 ACTIVE 1.0 VIA1 5.0]
+      dict for {name number} $table {
+          set gds($name) $number
+      }
+      puts [lsort [array names gds]]
+      puts [dict keys $table]
+    answer: |-
+      ACTIVE TEXT VIA1
+      TEXT ACTIVE VIA1
+    explanation: >
+      lsort gives the array's keys in alphabetical order. The dict keeps insertion order: TEXT, ACTIVE, VIA1.
+
+  - id: m10-w09-q27
+    type: order-steps
+    lesson: b
+    tags: [array, incr]
+    review: false
+    prompt: 'count does not exist yet. Put in order what happens in:   foreach layer {POLY POLY} {incr count($layer)}'
+    steps:
+      - "layer is POLY: incr finds no element count(POLY), so it starts it at 0 and adds 1"
+      - "layer is POLY again: incr adds 1 to the existing element, which is now 2"
+      - "The loop ends: count has one element, count(POLY), holding 2"
+    explanation: >
+      incr creates a missing element at 0 before adding, so counting needs no setup.
+
+  - id: m10-w09-q28
+    type: mcq
+    lesson: b
+    tags: [array, error]
+    review: false
+    prompt: 'set count(METAL1) 12  then  puts $count(Metal1).  What happens?'
+    choices:
+      - 'An error: no such element in array'
+      - 'It prints 12'
+      - 'It prints an empty line'
+      - 'It prints 0'
+    answer: 'An error: no such element in array'
+    explanation: >
+      Metal1 and METAL1 are different keys. Reading an element that was never set stops the script:
+      can't read "count(Metal1)": no such element in array.
+    distractor_feedback:
+      'It prints 12': 'Keys are exact, and capitals count. Metal1 is not METAL1.'
+      'It prints an empty line': 'Reading a missing element is an error, not an empty value.'
+      'It prints 0': 'Only incr starts a missing element at 0. Reading it is an error.'

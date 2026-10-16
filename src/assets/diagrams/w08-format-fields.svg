@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240">
+  <defs><marker id="w08-arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="20" y="28">format "<tspan class="d-bold d-fg-info">%-7s</tspan> <tspan class="d-bold d-fg-ok">%6d</tspan> um2 <tspan class="d-bold d-fg-warn">%5.1f</tspan><tspan class="d-bold">%%</tspan>" $name $area $share</text>
+  <line class="d-arrow" x1="110" y1="38" x2="80" y2="74" marker-end="url(#w08-arrow2)"/>
+  <line class="d-arrow" x1="168" y1="38" x2="190" y2="74" marker-end="url(#w08-arrow2)"/>
+  <line class="d-arrow" x1="262" y1="38" x2="320" y2="74" marker-end="url(#w08-arrow2)"/>
+  <line class="d-arrow" x1="312" y1="38" x2="440" y2="74" marker-end="url(#w08-arrow2)"/>
+  <rect class="d-box-info" x="20" y="80" width="130" height="64" rx="6"/>
+  <text class="d-txt d-mono d-bold" x="30" y="102">%-7s</text>
+  <text class="d-txt d-small" x="30" y="122">text, 7 wide,</text>
+  <text class="d-txt d-small" x="30" y="138">padded on the right</text>
+  <rect class="d-box-ok" x="160" y="80" width="130" height="64" rx="6"/>
+  <text class="d-txt d-mono d-bold" x="170" y="102">%6d</text>
+  <text class="d-txt d-small" x="170" y="122">whole number,</text>
+  <text class="d-txt d-small" x="170" y="138">6 wide, on the left</text>
+  <rect class="d-box-warn" x="300" y="80" width="130" height="64" rx="6"/>
+  <text class="d-txt d-mono d-bold" x="310" y="102">%5.1f</text>
+  <text class="d-txt d-small" x="310" y="122">decimal, 1 place,</text>
+  <text class="d-txt d-small" x="310" y="138">5 wide, rounded</text>
+  <rect class="d-box-code" x="440" y="80" width="180" height="64" rx="6"/>
+  <text class="d-txt d-mono d-bold" x="450" y="102">%%</text>
+  <text class="d-txt d-small" x="450" y="122">a real % sign</text>
+  <text class="d-txt d-small" x="450" y="138">(no value used)</text>
+  <text class="d-txt d-small d-muted" x="20" y="176">Each % code takes the next value, in order:  $name → %-7s,  $area → %6d,  $share → %5.1f</text>
+  <rect class="d-box-code" x="20" y="190" width="600" height="36" rx="4"/>
+  <text class="d-txt d-mono" x="34" y="214" xml:space="preserve">CORE     32000 um2  26.7%</text>
+</svg>

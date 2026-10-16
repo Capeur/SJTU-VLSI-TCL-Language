@@ -1,14 +1,20 @@
 ---
-title: "Week 9 Lesson A"
+title: "dict: a table of names and values"
+description: "Week 9, Lesson A: building a dict of Lumen-1's teaching layers, reading, changing and testing keys with dict get, dict set and dict exists, walking it in insertion order with dict for, and storing one record per layer in a nested dict."
 milestone: "m10"
 week: 9
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Build a dict and read, change and test it with dict create, dict get, dict set and dict exists
+  - Walk a dict in insertion order with dict for
+  - Store a record inside a dict and read one of its fields
+prerequisites: ["m10-w05-b", "m10-w06-b", "m10-w08-a"]
+glossary: [dictionary, key, insertion-order, datatype, gds, layer]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: Dictionaries", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl23a.html" }
+  - { title: "Tcl manual page: dict", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/dict.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +22,223 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 9 (Tables of data) — content arrives in a later phase.
+{/* Time plan (≈40 min, user request at the P3 Weeks 8-9 outline review):
+    | Section                                                        | min |
+    | Chip story + goals                                             |  3  |
+    | Warm-up                                                        |  3  |
+    | Keys and values: concept + diagram (in the story) + worked ex. 1 |  6  |
+    | dict for walks in order: concept + playground                  |  4  |
+    | Predict → Run → Explain                                        |  3  |
+    | Records inside a dict: concept + diagram + worked example 2    |  6  |
+    | Faded example                                                  |  3  |
+    | Common traps (3)                                               |  4  |
+    | Exit quiz                                                      |  4  |
+    | Cheat card                                                     |  1  |
+    | Total                                                          | 37  |
+    The GDS numbers are the teaching numbers of src/styles/layers.ts (check-chip checks them); datatype 0 = drawing
+    for every layer is a course convention, said once in the story. The lab's shape list is not used here (rule 21). */}
+
+<LessonMeta milestone="m10" week={9} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+People call a layer of {chip.name} by its name, like `METAL1`. The <GlossaryTerm term="gds">GDS</GlossaryTerm> file that goes to the factory knows no names, only two numbers per shape: the layer number and the <GlossaryTerm term="datatype" />. `METAL1` is `4.0`: layer 4, datatype 0. A script needs a table that links the two, like the legend of a city map that links each colour to its meaning. The numbers in this course are teaching numbers, not any factory's, and datatype 0 means `drawing` for every layer.
+
+<Diagram name="w09-dict-table" alt="A two-column table, like a map legend. Left column, the key: the layer names ACTIVE, POLY, CONTACT, METAL1, VIA1, METAL2, TEXT. Right column, the value: their GDS numbers 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 63.0. Notes: each row is one pair, a key then its value; each key appears once; 4.0 means layer 4, datatype 0; these are teaching numbers. Example: dict get gdsNumbers METAL1 gives 4.0." />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Build a dict and read, change and test it with dict create, dict get, dict set and dict exists', 'Walk a dict in insertion order with dict for', 'Store a record inside a dict and read one of its fields']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 8. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w09" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07', 'm10-w08']} mode="warmup" />
+
+## Keys and values
+
+A <GlossaryTerm term="dictionary">dict</GlossaryTerm> is a table of pairs. Each pair has a <GlossaryTerm term="key" />, the name you look things up by, and a value. It is written like a list with an even number of elements: key, value, key, value. Each key appears only once.
+
+`dict get` looks a value up by its key. `dict set` adds a pair, or changes the value of a key that is already there. Like `incr` and `lappend`, `dict set` takes the variable's **name**, without `$`, because it changes the variable. `dict keys` gives the list of keys.
+
+<WorkedExample
+  code={`set gdsNumbers [dict create ACTIVE 1.0 POLY 2.0 METAL1 4.0]
+puts [dict get $gdsNumbers POLY]
+dict set gdsNumbers METAL2 6.0
+puts [dict keys $gdsNumbers]
+puts [dict size $gdsNumbers]
+puts $gdsNumbers`}
+  notes={{
+    1: 'A dict with three pairs: a layer name, then its GDS number.',
+    2: 'Look up the value of the key POLY. Output: 2.0',
+    3: 'Add a pair. The NAME gdsNumbers, without $, because the variable changes.',
+    4: 'The keys, in the order they were added. Output: ACTIVE POLY METAL1 METAL2',
+    5: 'The number of pairs. Output: 4',
+    6: 'A dict is a value you can print, like a list of pairs. Output: ACTIVE 1.0 POLY 2.0 METAL1 4.0 METAL2 6.0'
+  }}
+/>
+
+## dict for walks in order
+
+`dict for {key value} $d {body}` runs the body once per pair, like `foreach` with two variables. It walks the pairs in <GlossaryTerm term="insertion-order">insertion order</GlossaryTerm>: the order in which the keys were first added. That makes a dict a good choice for a report that must keep the order of a table.
+
+Two rules to remember. A new key goes at the end. Setting a key that is already there changes its value but keeps its place.
+
+<TclPlayground client:visible code={`set gdsNumbers [dict create ACTIVE 1.0 POLY 2.0 CONTACT 3.0]
+dict for {name gds} $gdsNumbers {
+    puts "$name is GDS $gds"
+}`} />
+
+## Predict → Run → Explain
+
+Counting shapes per layer in a small layout. One key is set twice. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set shapeCount [dict create METAL1 12 POLY 5]
+dict set shapeCount VIA1 7
+dict set shapeCount METAL1 13
+dict for {layer count} $shapeCount {
+    puts "$layer: $count"
+}`}
+  expected={`METAL1: 13
+POLY: 5
+VIA1: 7`}
+  explanation="METAL1 and POLY come first, because they were added first. VIA1 is new, so it goes at the end. Setting METAL1 again changes its value to 13 but keeps its place: first. dict for follows that insertion order."
+/>
+
+## Records inside a dict
+
+A value can be a dict itself. Then each layer holds a small record with named fields: `{number 2 datatype 0 purpose drawing}`. This is a nested dict, like the nested lists of Week 6.
+
+With several keys, `dict set` and `dict get` go one level deeper per key, from the outside in: `dict set layers POLY number 2` sets the field `number` of the record `POLY`. `dict exists` takes the same keys and gives 1 or 0. Test with it before you read a key that might be missing.
+
+<Diagram name="w09-nested" alt="The dict layers with two keys, POLY and METAL2. The value of each key is a record with three fields: number 2, datatype 0, purpose drawing for POLY; number 6, datatype 0, purpose drawing for METAL2. dict get layers METAL2 number goes in through METAL2, then through number, and gives 6. dict get layers POLY gives the whole record: number 2 datatype 0 purpose drawing." />
+
+<WorkedExample
+  code={`set layers [dict create]
+dict set layers POLY number 2
+dict set layers POLY datatype 0
+dict set layers POLY purpose drawing
+dict set layers METAL2 number 6
+dict set layers METAL2 datatype 0
+dict set layers METAL2 purpose drawing
+puts [dict get $layers POLY]
+puts [dict get $layers METAL2 number]
+puts [dict exists $layers METAL2 purpose]
+puts [dict exists $layers METAL7]`}
+  notes={{
+    1: 'An empty dict.',
+    2: 'Two keys: the record POLY, then its field number. The record is created on the way.',
+    3: 'A second field in the same record.',
+    4: 'A third field. Datatype 0 means drawing in this course.',
+    5: 'The record METAL2, the same way.',
+    6: 'Its datatype.',
+    7: 'Its purpose.',
+    8: 'One key gives the whole record. Output: number 2 datatype 0 purpose drawing',
+    9: 'Two keys give one field. Output: 6',
+    10: 'Does METAL2 have a field purpose? Output: 1',
+    11: 'There is no layer METAL7. dict exists says so without an error. Output: 0'
+  }}
+/>
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`set gdsNumbers [dict create ACTIVE 1.0 POLY 2.0]
+# Must print: 1.0
+puts [dict ___1___ $gdsNumbers ACTIVE]
+# Must print: 0, because CONTACT is not in the table
+puts [dict ___2___ $gdsNumbers CONTACT]
+# Must print ACTIVE 1.0, then POLY 2.0, in table order
+dict for {___3___} $gdsNumbers {
+    puts "$name $gds"
+}`}
+  answers={[['get'], ['exists'], ['name gds']]}
+  hints={['Which dict subcommand looks a value up by its key?', 'Which dict subcommand tests whether a key is there, with 1 or 0?', 'dict for needs two variable names, for the key and the value. Which names does the body use?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set gdsNumbers [dict create METAL1 4.0 METAL2 6.0]
+puts [dict get $gdsNumbers metal1]`}
+  error={`key "metal1" not known in dictionary`}
+  fix={`set gdsNumbers [dict create METAL1 4.0 METAL2 6.0]
+set name metal1
+if {[dict exists $gdsNumbers $name]} {
+    puts [dict get $gdsNumbers $name]
+} else {
+    puts "$name is not a key"
+}`}
+  why="Keys are exact, and capitals count: metal1 is not METAL1. dict get on a key that is not there stops the script. When a key might be missing, test it first with dict exists, or clean the name with string toupper (Week 8)."
+/>
+
+<Trap
+  wrong={`set gdsNumbers [dict create METAL1 4.0]
+dict set $gdsNumbers METAL2 6.0
+puts $gdsNumbers`}
+  output={`METAL1 4.0`}
+  fix={`set gdsNumbers [dict create METAL1 4.0]
+dict set gdsNumbers METAL2 6.0
+puts $gdsNumbers`}
+  why="dict set wants the NAME of the variable. With $, Tcl first replaces $gdsNumbers with its value, so dict set creates a new variable with the strange name 'METAL1 4.0'. gdsNumbers itself never changes, and there is no error to warn you. Write the name without $, as with incr and lappend."
+/>
+
+<Trap
+  wrong={`set gdsNumbers [dict create ACTIVE 1.0 POLY 2.0]
+dict for {name} $gdsNumbers {
+    puts $name
+}`}
+  error={`must have exactly two variable names`}
+  fix={`set gdsNumbers [dict create ACTIVE 1.0 POLY 2.0]
+dict for {name gds} $gdsNumbers {
+    puts $name
+}`}
+  why="dict for always hands over a key AND its value, so it needs two variable names in its first word, even if the body uses only one of them."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w09" lesson="a" mode="exit" count={4} require="order" />
+
+## Cheat card
+
+<CheatCard title="dict: keys, values, records" lines={[
+  'set d [dict create POLY 2.0 METAL1 4.0]   key value key value',
+  'dict get $d POLY        the value of a key (error if missing)',
+  'dict set d METAL2 6.0   add or change a pair (the NAME, no $)',
+  'dict exists $d METAL7   1 or 0, never an error',
+  'dict keys $d / dict size $d   the keys / the number of pairs',
+  'dict for {key value} $d {…}   in insertion order',
+  'A key set again keeps its place; a new key goes at the end',
+  'dict set layers POLY number 2   /   dict get $layers POLY number',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: Dictionaries', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl23a.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: dict (many more subcommands, such as dict incr and dict lappend)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/dict.htm', kind: 'tcl-man' },
+]} />

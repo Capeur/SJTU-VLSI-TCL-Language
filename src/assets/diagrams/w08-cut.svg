@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230">
+  <defs><marker id="w08-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-mono" x="20" y="24">set cut [string first _ $name]     → 4</text>
+  <text class="d-txt d-small d-muted" x="20" y="46">string first gives the position of the first _ , or −1 if there is none.</text>
+  <rect class="d-box-ok" x="20" y="64" width="164" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="102" y="90" text-anchor="middle">P O L Y</text>
+  <rect class="d-box-warn" x="190" y="64" width="38" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="209" y="90" text-anchor="middle">_</text>
+  <rect class="d-box-info" x="234" y="64" width="128" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="298" y="90" text-anchor="middle">p i n</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="40" y="122" text-anchor="middle">0</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="164" y="122" text-anchor="middle">3</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="209" y="122" text-anchor="middle">4 = cut</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="254" y="122" text-anchor="middle">5</text>
+  <text class="d-txt d-mono d-small d-fg-warn" x="342" y="122" text-anchor="middle">end</text>
+  <line class="d-arrow" x1="102" y1="132" x2="102" y2="160" marker-end="url(#w08-arrow1)"/>
+  <line class="d-arrow" x1="298" y1="132" x2="298" y2="160" marker-end="url(#w08-arrow1)"/>
+  <text class="d-txt d-mono d-small" x="20" y="184">string range $name 0 [expr {$cut - 1}]</text>
+  <text class="d-txt d-mono d-bold d-fg-ok" x="20" y="208">→ POLY  (the layer)</text>
+  <text class="d-txt d-mono d-small" x="330" y="184">string range $name [expr {$cut + 1}] end</text>
+  <text class="d-txt d-mono d-bold d-fg-info" x="330" y="208">→ pin  (the purpose)</text>
+</svg>

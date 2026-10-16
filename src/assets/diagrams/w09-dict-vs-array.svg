@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 260">
+  <text class="d-txt d-bold" x="20" y="24">dict: one value, a row in order</text>
+  <text class="d-txt d-small d-muted" x="20" y="44">dict keys and dict for follow the order the keys were added.</text>
+  <rect class="d-box-ok" x="20" y="56" width="140" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="90" y="81" text-anchor="middle">1  ACTIVE 1.0</text>
+  <rect class="d-box-ok" x="170" y="56" width="140" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="240" y="81" text-anchor="middle">2  POLY 2.0</text>
+  <rect class="d-box-ok" x="320" y="56" width="140" height="40" rx="6"/>
+  <text class="d-txt d-mono" x="390" y="81" text-anchor="middle">3  METAL1 4.0</text>
+  <text class="d-txt d-mono" x="480" y="81">…</text>
+
+  <text class="d-txt d-bold" x="20" y="134">array: a bag of separate variables</text>
+  <text class="d-txt d-small d-muted" x="20" y="154">array names gives every name, but in an order that is NOT promised.</text>
+  <rect class="d-box-warn" x="60" y="172" width="120" height="34" rx="6"/>
+  <text class="d-txt d-mono d-small" x="120" y="194" text-anchor="middle">gds(METAL1)</text>
+  <rect class="d-box-warn" x="230" y="206" width="120" height="34" rx="6"/>
+  <text class="d-txt d-mono d-small" x="290" y="228" text-anchor="middle">gds(ACTIVE)</text>
+  <rect class="d-box-warn" x="380" y="168" width="120" height="34" rx="6"/>
+  <text class="d-txt d-mono d-small" x="440" y="190" text-anchor="middle">gds(POLY)</text>
+  <text class="d-txt d-mono d-small" x="380" y="232">lsort [array names gds]</text>
+  <text class="d-txt d-small" x="380" y="250">gives a fixed, sorted order</text>
+</svg>

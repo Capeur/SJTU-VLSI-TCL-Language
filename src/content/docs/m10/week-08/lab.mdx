@@ -1,14 +1,19 @@
 ---
-title: "Week 8 Lab"
+title: "Lab: Check the layer names"
+description: "Week 8 lab: clean a list of layer names typed by people with string trim, string map, toupper and tolower, cut them at the first underscore, check them against Lumen-1's layers, and print a rounded summary with format."
 milestone: "m10"
 week: 8
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Clean and cut text with the string commands, following a fixed set of rules
+  - Check each part against a list, and print a rounded summary with format
+prerequisites: ["m10-w08-a", "m10-w08-b", "m10-w06-a"]
+glossary: [layer-purpose, string, glob-pattern, format-specifier]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: string", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm" }
+  - { title: "Tcl manual page: format", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/format.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,90 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-08/data/expected.txt?raw';
 
-Lab for week 8 (Text handling) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={8} lesson="lab" minutes={60} />
+
+## Goal
+
+**Clean a list of layer names that people typed, check each one, and report how many are valid.**
+
+Why it matters for chips: a teammate collected the layer names used in the settings files of {chip.name}. Some have spaces around them, some use the wrong capitals, one has a dash instead of an underscore, and a few name a layer or a <GlossaryTerm term="layer-purpose">purpose</GlossaryTerm> that does not exist. Before anyone trusts those files, your script cleans every name the same way and flags the bad ones.
+
+## What you'll practise
+
+- [Lesson A: Strings, character by character](/SJTU-VLSI-TCL-Language/m10/week-08/lesson-a/): `string trim`, `string first`, `string range`, `toupper`, `tolower`.
+- [Lesson B: Patterns, swaps and tidy numbers](/SJTU-VLSI-TCL-Language/m10/week-08/lesson-b/): `string match`, `string map`, `format`.
+- [Week 6, Lesson A](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-a/): `lsearch` and its −1.
+
+## Specification
+
+- **Inputs.** The starter gives you three lines. `set rawNames {…}` is the list of names as people typed them; `{ poly_drawing }` is one element with a space on each side. `set knownLayers {…}` lists the layers of {chip.name}. `set knownPurposes {drawing pin}` lists the purposes this check accepts. **Keep these three lines exactly as they are.** The checker changes their values twice and runs your script again.
+- **Our cleaning rules.** These are the rules of this course, for this lab. A real design tool has its own rules, and most tools would simply reject a badly typed name. Apply them to each name, in this order:
+  1. Trim the spaces at both ends, then replace every `-` with `_`.
+  2. If the name has no `_`, it has no purpose. Print `BAD`, the trimmed name **in capitals**, and `: no purpose`. So ` metal2 ` gives `BAD METAL2: no purpose`.
+  3. Otherwise, cut the name at its **first** `_`. The layer is the part before it, in capitals; the purpose is the part after it, in lower case. The clean name is `LAYER_purpose`.
+  4. If the layer is not in `knownLayers`, print `BAD <clean name>: unknown layer <layer>`. Else, if the purpose is not in `knownPurposes`, print `BAD <clean name>: unknown purpose <purpose>`. Else print `OK` and the clean name.
+- **Output.** One line per name, in the order of `rawNames`, then a summary line. The share is 100 × valid ÷ total, rounded to 1 decimal. With the starter's inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- Words, capitals and punctuation must match. Extra spaces are forgiven, so `OK  ` with two spaces (to line up with `BAD`) and `OK ` with one are both fine.
+
+The purposes `drawing` and `pin` are teaching purposes. Real tools have many more.
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-08/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-08" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step, and compare your new lines with the specification. Steps 2 to 4 all go inside the loop of step 1.
+
+1. **Clean.** Put `set valid 0` before the loop. Then `foreach raw $rawNames {…}`: set `name` to the trimmed name, then to `string map {- _} $name`.
+2. **No purpose.** Test `string match *_* $name`. If it gives 0, print the BAD line with `string toupper $name`.
+3. **Cut.** Otherwise, find the first `_` with `string first`, cut out the layer and the purpose with `string range`, and change their case. Glue them back with `"${layer}_$purpose"`.
+4. **Check.** Use `lsearch` on `knownLayers`, then on `knownPurposes`. −1 means "not in the list". On an OK line, `incr valid`.
+5. **Summary.** After the loop, compute the share with `100.0` and print it with `format %.1f`, followed by `%`.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Step 3 in three lines: set cut [string first _ $name], then set layer [string toupper [string range $name 0 [expr {$cut - 1}]]], then the purpose with [expr {$cut + 1}] and end, and string tolower.',
+  'Steps 2 and 4: one if / else for "has a _ or not", and inside the else an if / elseif / else for the layer, the purpose and OK. Test with == -1, as in Week 6.',
+  'Step 5: with 100 * valid / total, Tcl divides whole numbers and drops the decimals (Week 2). Write 100.0. Then [format %.1f $share] rounds it to 1 place. The % sign after it is plain text in your puts.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 10/10` when everything is right. The last two tests change the inputs: first a lower-case name, a name with no purpose and a share that needs rounding, then other purposes and a name with two underscores. They pass only if every line comes from the inputs.
+
+## Stretch goal: too long
+
+Some tools refuse layer names longer than 16 characters. Paste your finished lab script below, then add one more rule before the OK line: if the clean name is longer than 16 characters, print `BAD <clean name>: too long` instead. Test it with a name like `METAL2_drawing_extra`. This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+# Then add the "too long" rule with string length.
+`} />

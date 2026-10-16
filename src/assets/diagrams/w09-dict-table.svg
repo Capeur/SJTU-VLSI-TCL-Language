@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300">
+  <text class="d-txt d-small d-muted" x="20" y="22">The legend of the map: one name for people, one number for the machine.</text>
+  <rect class="d-box-info" x="20" y="34" width="160" height="30" rx="4"/>
+  <text class="d-txt d-bold" x="100" y="54" text-anchor="middle">key: layer name</text>
+  <rect class="d-box-ok" x="186" y="34" width="160" height="30" rx="4"/>
+  <text class="d-txt d-bold" x="266" y="54" text-anchor="middle">value: GDS number</text>
+  <rect class="d-box-code" x="20" y="70" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="88">ACTIVE</text>
+  <rect class="d-box-code" x="186" y="70" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="88">1.0</text>
+  <rect class="d-box-code" x="20" y="100" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="118">POLY</text>
+  <rect class="d-box-code" x="186" y="100" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="118">2.0</text>
+  <rect class="d-box-code" x="20" y="130" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="148">CONTACT</text>
+  <rect class="d-box-code" x="186" y="130" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="148">3.0</text>
+  <rect class="d-box-code" x="20" y="160" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="178">METAL1</text>
+  <rect class="d-box-code" x="186" y="160" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="178">4.0</text>
+  <rect class="d-box-code" x="20" y="190" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="208">VIA1</text>
+  <rect class="d-box-code" x="186" y="190" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="208">5.0</text>
+  <rect class="d-box-code" x="20" y="220" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="238">METAL2</text>
+  <rect class="d-box-code" x="186" y="220" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="238">6.0</text>
+  <rect class="d-box-code" x="20" y="250" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="34" y="268">TEXT</text>
+  <rect class="d-box-code" x="186" y="250" width="160" height="26" rx="3"/>
+  <text class="d-txt d-mono" x="200" y="268">63.0</text>
+  <text class="d-txt d-small" x="370" y="90">Each row is one pair:</text>
+  <text class="d-txt d-small" x="370" y="108">a key, then its value.</text>
+  <text class="d-txt d-small" x="370" y="140">Each key appears once.</text>
+  <text class="d-txt d-small" x="370" y="172">4.0 = layer 4, datatype 0.</text>
+  <text class="d-txt d-small" x="370" y="190">Teaching numbers, not any</text>
+  <text class="d-txt d-small" x="370" y="208">factory's.</text>
+  <text class="d-txt d-mono d-small" x="370" y="250">dict get $gdsNumbers METAL1</text>
+  <text class="d-txt d-mono d-small d-bold" x="370" y="270">→ 4.0</text>
+</svg>

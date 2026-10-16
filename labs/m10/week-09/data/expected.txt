@@ -1,0 +1,11 @@
+Layers: ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT
+METAL1: number 4, datatype 0, purpose drawing
+ACTIVE 1.0: 2
+POLY 2.0: 1
+CONTACT 3.0: 0
+METAL1 4.0: 3
+VIA1 5.0: 1
+METAL2 6.0: 1
+TEXT 63.0: 0
+Unknown: METAL7
+Shapes: 9, on unknown layers: 1

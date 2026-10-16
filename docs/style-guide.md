@@ -43,3 +43,4 @@
 27. **Quiz prompts and feedback quote only error messages that are the same on Tcl 8.6 and 9.0.** Quiz banks have no `VersionNote`; when the wording differs, describe the error in plain words.
 29. **No `\'` inside a JavaScript string in a component prop** (`Goals`, `CheatCard`, notes). The MDX scanners do not read escapes, so a `\'` silently hides the rest of the page from `check-lessons` and snippet extraction. Write a typographic apostrophe (’) or use double quotes around the string.
 30. **Quote a YAML frontmatter goal that contains `: `** (`- "Control what a proc can see: arguments…"`). Unquoted, YAML reads it as a mapping and the build fails.
+31. **Tcl's `${name}` inside a template-literal prop is written `\${name}`** (``code={`puts "\${layer}_$purpose"`}``). Unescaped, JavaScript reads `${layer}` as its own interpolation and the build fails. Plain `"…"` props and inline code need no escape.

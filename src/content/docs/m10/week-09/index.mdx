@@ -1,10 +1,14 @@
 ---
 title: "Week 9: Tables of data"
+description: "Week 9 overview: dicts of keys and values in insertion order, nested records, arrays for counters, the array order trap, choosing dict or array, and a lab that builds Lumen-1's layer table, in about 3 hours."
 milestone: "m10"
 week: 9
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 180
+goals:
+  - Build, read and walk a dict, with records inside it
+  - Count with an array, and never trust the order of array names
+  - Choose a dict or an array, and build the layer table of Lumen-1
+prerequisites: ["m10-w05-b", "m10-w06-b", "m10-w07-b"]
 glossary: []
 tcl_min: "8.6"
 sources: []
@@ -15,6 +19,30 @@ review_date: ""
 sidebar: {"label":"Overview","order":0}
 ---
 
-{/* P0 placeholder */}
+import Goals from '../../../../components/Goals.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Week overview (goals, time plan, links) — content arrives in a later phase.
+A list finds things by position: element 0, element 1. This week your data gets names. A dict finds a value by its key, like `METAL1`, and keeps its keys in order. An array is a family of variables, perfect for counters, but it keeps no order at all, and that is this week's trap. In the lab you build the layer table of {chip.name}: the link between the names people use and the numbers a GDS file stores.
+
+## This week you will
+
+<Goals items={['Build, read and walk a dict, with records inside it', 'Count with an array, and never trust the order of array names', 'Choose a dict or an array, and build the layer table of Lumen-1']} />
+
+## Time plan (about 3 hours)
+
+| Step | Time | What you do |
+|---|---|---|
+| [Lesson A: dict, a table of names and values](/SJTU-VLSI-TCL-Language/m10/week-09/lesson-a/) | 40 min | dict create, get, set, exists, dict for and its order, records inside a dict |
+| [Lesson B: array, and choosing dict or array](/SJTU-VLSI-TCL-Language/m10/week-09/lesson-b/) | 40 min | Arrays, counting, the order trap, dict or array |
+| [Lab: The layer table](/SJTU-VLSI-TCL-Language/m10/week-09/lab/) | 60 min | Build the table, look one layer up, count shapes per layer |
+| [Weekly quiz](/SJTU-VLSI-TCL-Language/m10/week-09/quiz/) and [spaced review](/SJTU-VLSI-TCL-Language/review/) | 20 min | 10 questions, then your review cards |
+
+Try to put a day or two between the lessons and the quiz. A short gap makes the quiz harder, and that is exactly what makes it work.
+
+## Review these first
+
+This week builds on three earlier lessons. If any of these feels shaky, spend five minutes on it before Lesson A:
+
+- [Week 5, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-05/lesson-b/): foreach with two variables. dict for works the same way, with a key and a value.
+- [Week 6, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-b/): nested lists and `split`. A record inside a dict is the same idea, and the lab splits `4.0` at the dot.
+- [Week 7, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-07/lesson-b/): `upvar`. A proc that works on an array gets the array's name and uses upvar.

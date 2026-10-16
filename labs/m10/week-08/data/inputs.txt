@@ -1,0 +1,3 @@
+set rawNames {METAL1_drawing { poly_drawing } METAL2_pin VIA1-drawing METAL7_drawing Metal1_Pin ACTIVE CONTACT_fill}
+set knownLayers {ACTIVE POLY CONTACT METAL1 VIA1 METAL2 TEXT}
+set knownPurposes {drawing pin}

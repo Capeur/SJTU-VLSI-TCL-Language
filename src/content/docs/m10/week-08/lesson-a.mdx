@@ -1,14 +1,21 @@
 ---
-title: "Week 8 Lesson A"
+title: "Strings, character by character"
+description: "Week 8, Lesson A: measuring text with string length, picking characters with string index, cutting a layer name at its underscore with string first and string range, and cleaning names with string trim, toupper and tolower."
 milestone: "m10"
 week: 8
 lesson: "a"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 40
+goals:
+  - Measure a string and pick one character with string length and string index
+  - Cut a name into two parts with string first and string range
+  - Clean a name with string trim, string toupper and string tolower
+prerequisites: ["m10-w03-a", "m10-w06-a", "m10-w07-a"]
+glossary: [string, character, layer-purpose, layer, index]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl tutorial: String subcommands, length, index, range", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl17.html" }
+  - { title: "Tcl tutorial: Modifying strings, tolower, toupper, trim", url: "https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl19.html" }
+  - { title: "Tcl manual page: string", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +23,210 @@ review_date: ""
 sidebar: {"label":"Lesson A","order":1}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import ChipStory from '../../../../components/ChipStory.astro';
+import LayerStack from '../../../../components/LayerStack.astro';
+import Goals from '../../../../components/Goals.astro';
+import Quiz from '../../../../components/Quiz.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import WorkedExample from '../../../../components/WorkedExample.astro';
+import FadedExample from '../../../../components/FadedExample.tsx';
+import PredictOutput from '../../../../components/PredictOutput.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import Trap from '../../../../components/Trap.astro';
+import CheatCard from '../../../../components/CheatCard.astro';
+import FurtherReading from '../../../../components/FurtherReading.astro';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
 
-Lesson A for week 8 (Text handling) — content arrives in a later phase.
+{/* Time plan (≈40 min): story + goals 3 · warm-up 3 · string as characters concept + diagram + worked example 1 6 ·
+    predict 3 · cut at the underscore concept + diagram + worked example 2 6 · clean-up concept + playground 5 ·
+    faded 3 · traps 3 · exit quiz 4 · cheat card 1 = 37 min.
+    Every string length / string index example uses ASCII text only (user decision, P3 Weeks 8-9): µ is one
+    character on screen but outside ASCII, so outputs keep "um". The purposes drawing and pin are teaching purposes.
+    Lessons use other names than the lab's rawNames (style rule 21). */}
+
+<LessonMeta milestone="m10" week={8} lesson="a" minutes={40} />
+
+## Chip story
+
+<ChipStory>
+Every shape of {chip.name} sits on a layer, and people type layer names all the time: in lists, in reports, in settings files. One person writes `METAL2_drawing`, another writes ` metal2_Drawing ` with spaces around it. You see the same layer. Tcl sees two different pieces of text, so `eq` says they differ. This week your scripts learn to read text one character at a time, cut it into parts, and clean it up before they compare. It is like reading street signs: "Main St" and "MAIN ST" are the same street, once you ignore the capitals.
+
+<LayerStack caption={`The teaching layers of ${chip.name}. A name like METAL2_drawing has two parts: the layer, METAL2, and the purpose, drawing.`} />
+</ChipStory>
+
+## You will be able to…
+
+<Goals items={['Measure a string and pick one character with string length and string index', 'Cut a name into two parts with string first and string range', 'Clean a name with string trim, string toupper and string tolower']} />
+
+## Warm-up
+
+Three quick questions from Weeks 1 to 7. Answer from memory first: trying to remember is what makes it stick.
+
+<Quiz bank="m10-w08" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07']} mode="warmup" />
+
+## A string is a row of characters
+
+A piece of text is called a <GlossaryTerm term="string" />. It is a row of <GlossaryTerm term="character">characters</GlossaryTerm>: letters, digits, spaces and signs such as `_`. Like the elements of a list, each character has a position, its <GlossaryTerm term="index" />, counting from 0. `end` is the last one.
+
+The `string` command takes a second word that says what to do. `string length` counts the characters. `string index` picks one. `string range` cuts out a piece, from one index to another, both included, just like `lrange`.
+
+Lists count words; strings count characters. `METAL2_drawing` is one word, so its llength is 1, but it has 14 characters.
+
+<Diagram name="w08-string-indexes" alt="The string METAL2_drawing drawn as 14 boxes, one character each, numbered 0 to 13 from the left; the last one is also labelled end. The underscore at index 6 is highlighted. A bracket under boxes 0 to 5 shows that string range 0 5 gives METAL2. Below: string length gives 14, string index 0 gives M, string index 6 gives the underscore, string index end gives g." />
+
+<WorkedExample
+  code={`set name METAL2_drawing
+puts [string length $name]
+puts [string index $name 0]
+puts [string index $name end]
+puts [string range $name 0 5]
+puts [llength $name]`}
+  notes={{
+    1: 'A layer name, one word with no spaces, so it needs no quotes.',
+    2: 'Count the characters, the underscore included. Output: 14',
+    3: 'Index 0 is the first character. Output: M',
+    4: 'end is the last character. Output: g',
+    5: 'From index 0 to index 5, both included. Output: METAL2',
+    6: 'As a list, it is ONE word. Output: 1'
+  }}
+/>
+
+## Predict → Run → Explain
+
+A shorter name this time. Type your prediction, then run it.
+
+<PredictOutput
+  client:visible
+  code={`set name VIA1_pin
+puts [string index $name 4]
+puts [string range $name end-2 end]
+puts [string length "$name "]`}
+  expected={`_
+pin
+9`}
+  explanation="V I A 1 sit at indexes 0 to 3, so index 4 is the underscore. end-2 is two places before the last character, so the range is the last three characters: pin. The quotes add a space after the name, and a space is a character too: 8 + 1 = 9."
+/>
+
+## Cut at the underscore
+
+A name like `POLY_pin` has two parts. The layer comes first. Then, after the `_`, comes the <GlossaryTerm term="layer-purpose">purpose</GlossaryTerm>: what the shapes are for. `drawing` shapes become the mask; `pin` shapes show where a wire may connect. In this course we use only these two purposes. They are teaching purposes; real tools have many more.
+
+To cut the name, you need the position of the `_`. `string first _ $name` gives the index of the first `_`, or −1 if there is none, just like `lsearch`. The layer ends one place before it; the purpose starts one place after it.
+
+<Diagram name="w08-cut" alt="The string POLY_pin as three parts: POLY at indexes 0 to 3, the underscore at index 4, labelled cut, and pin from index 5 to end. string first finds the underscore at 4. An arrow from POLY points to string range 0 to cut minus 1, which gives POLY, the layer. An arrow from pin points to string range cut plus 1 to end, which gives pin, the purpose." />
+
+<WorkedExample
+  code={`set name POLY_pin
+set cut [string first _ $name]
+set layer [string range $name 0 [expr {$cut - 1}]]
+set purpose [string range $name [expr {$cut + 1}] end]
+puts "cut at $cut"
+puts "layer $layer, purpose $purpose"
+puts [string first _ METAL2]`}
+  notes={{
+    1: 'A name with a layer and a purpose.',
+    2: 'Find the first _: P O L Y are 0 to 3, so the _ is at 4.',
+    3: 'From the start up to ONE BEFORE the _: indexes 0 to 3.',
+    4: 'From ONE AFTER the _ to the end: indexes 5 to 7.',
+    5: 'Output: cut at 4',
+    6: 'Output: layer POLY, purpose pin',
+    7: 'No _ in METAL2, so string first gives -1, like lsearch. Output: -1'
+  }}
+/>
+
+## Clean up a name
+
+Before you compare names, clean them. `string trim` removes the spaces at both ends, but never the ones inside. `string toupper` gives the text in capitals, and `string tolower` in small letters.
+
+Each of these commands gives back a **new** string. The variable keeps its old value until you store the new one with `set`.
+
+To glue a layer and a purpose back together, write `"${layer}_$purpose"`. The braces after `$` show where the variable name ends. Without them, Tcl would look for a variable called `layer_`.
+
+<TclPlayground client:visible code={`set typed "  metal2_DRAWING "
+set clean [string trim $typed]
+puts "|$clean|"
+puts [string toupper $clean]
+puts [string tolower $clean]
+set layer [string toupper metal2]
+set purpose [string tolower DRAWING]
+puts "\${layer}_$purpose"`} />
+
+## Faded example
+
+Fill each blank so that the script does what its comments ask for.
+
+<FadedExample
+  client:visible
+  template={`set name VIA1_drawing
+# Must print: 4
+set cut [string ___1___ _ $name]
+puts $cut
+# Must print: VIA1
+puts [string range $name 0 [expr {$cut ___2___}]]
+# Must print: DRAWING
+puts [string ___3___ [string range $name [expr {$cut + 1}] end]]`}
+  answers={[['first'], ['- 1', '-1'], ['toupper']]}
+  hints={['Which string command finds the position of the first _?', 'The layer stops one place BEFORE the underscore.', 'Which string command gives the text in capitals?']}
+/>
+
+## Common traps
+
+<Trap
+  wrong={`set name POLY_pin
+set cut [string first _ $name]
+puts [string range $name 0 $cut]`}
+  output={`POLY_`}
+  fix={`set name POLY_pin
+set cut [string first _ $name]
+puts [string range $name 0 [expr {$cut - 1}]]`}
+  why="string range includes BOTH ends, like lrange. The cut is the position of the underscore itself, so a range that ends at the cut keeps the underscore. Stop one place before it."
+/>
+
+<Trap
+  wrong={`set layer metal2
+string toupper $layer
+puts $layer`}
+  output={`metal2`}
+  fix={`set layer metal2
+set layer [string toupper $layer]
+puts $layer`}
+  why="string toupper gives back a NEW string, METAL2, but nothing keeps it, so it is thrown away. The variable never changes. Store the result with set, or use it straight away in [ ]."
+/>
+
+<Trap
+  wrong={`set layer METAL2
+set purpose pin
+puts "$layer_$purpose"`}
+  error={`can't read "layer_": no such variable`}
+  fix={`set layer METAL2
+set purpose pin
+puts "\${layer}_$purpose"`}
+  why="A variable name can contain letters, digits and _. So Tcl reads $layer_ as the variable layer_, which does not exist. The error message names it for you. Braces after the $ mark where the name ends: ${layer}_."
+/>
+
+## Exit quiz
+
+<Quiz bank="m10-w08" lesson="a" mode="exit" count={4} />
+
+## Cheat card
+
+<CheatCard title="Strings: length, index, range, first, clean-up" lines={[
+  'string length $s        number of characters (spaces count)',
+  'string index $s 0       first character; end = the last one',
+  'string range $s 0 5     characters 0 to 5, both included',
+  'string first _ $s       index of the first _, or -1',
+  'string trim $s          remove spaces at both ends only',
+  'string toupper $s / string tolower $s   a NEW string; set it to keep it',
+  '"${layer}_$purpose"     braces show where the name ends',
+  'llength counts words; string length counts characters',
+]} />
+
+## Further reading
+
+<FurtherReading links={[
+  { title: 'Tcl tutorial: String subcommands, length, index, range', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl17.html', kind: 'tutorial' },
+  { title: 'Tcl tutorial: Modifying strings, tolower, toupper, trim (format is Lesson B)', url: 'https://www.tcl-lang.org/man/tcl8.5/tutorial/Tcl19.html', kind: 'tutorial' },
+  { title: 'Tcl manual page: string (many more subcommands than you need now)', url: 'https://www.tcl-lang.org/man/tcl8.6/TclCmd/string.htm', kind: 'tcl-man' },
+]} />

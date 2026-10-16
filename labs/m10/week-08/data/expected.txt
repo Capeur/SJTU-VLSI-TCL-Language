@@ -1,0 +1,9 @@
+OK  METAL1_drawing
+OK  POLY_drawing
+OK  METAL2_pin
+OK  VIA1_drawing
+BAD METAL7_drawing: unknown layer METAL7
+OK  METAL1_pin
+BAD ACTIVE: no purpose
+BAD CONTACT_fill: unknown purpose fill
+Valid: 5 of 8 (62.5%)

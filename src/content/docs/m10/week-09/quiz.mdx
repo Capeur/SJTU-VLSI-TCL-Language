@@ -1,14 +1,18 @@
 ---
-title: "Week 9 Quiz"
+title: "Week 9 quiz"
+description: "Week 9 weekly quiz: 10 questions, 7 on dict and array, and 3 from Weeks 1 to 8."
 milestone: "m10"
 week: 9
 lesson: "quiz"
-minutes: 0
-goals: []
-prerequisites: []
+minutes: 20
+goals:
+  - Recall this week's ideas without notes
+  - Keep Weeks 1 to 8 fresh
+prerequisites: ["m10-w09-a", "m10-w09-b"]
 glossary: []
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Dunlosky et al. (2013): which study strategies make the grade", url: "https://www.psychologicalscience.org/news/releases/which-study-strategies-make-the-grade.html" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +20,19 @@ review_date: ""
 sidebar: {"label":"Quiz","order":4}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import Quiz from '../../../../components/Quiz.astro';
 
-Quiz for week 9 (Tables of data) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={9} lesson="quiz" minutes={20} />
+
+Ten questions: about 7 on this week (dict, dict for and its order, nested dicts, arrays, the array order trap, and choosing dict or array) and 3 from Weeks 1 to 8. Answer without your notes. A quiz is practice, not a test: the struggle to remember is what makes the memory stronger.
+
+- After each answer you see why the right answer is right, and why your choice was not.
+- At the end you get your score and can read every explanation again.
+- Every question you miss goes into your [spaced review](/SJTU-VLSI-TCL-Language/review/) deck, so it comes back in a few days.
+
+Nothing is sent anywhere. Your score stays in this browser.
+
+<Quiz bank="m10-w09" earlier={['m10-w01', 'm10-w02', 'm10-w03', 'm10-w04', 'm10-w05', 'm10-w06', 'm10-w07', 'm10-w08']} mode="weekly" count={10} mix={0.7} />
+
+When you are done, press **Try again with new questions** for a different mix. The week has more than 25 questions to draw from.

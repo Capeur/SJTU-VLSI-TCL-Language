@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230">
+  <defs><marker id="w09-arrow1" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" class="d-muted"/></marker></defs>
+  <text class="d-txt d-small d-muted" x="20" y="22">The dict layers: each value is itself a small dict, a record with three fields.</text>
+  <rect class="d-box-info" x="20" y="40" width="110" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="75" y="65" text-anchor="middle">POLY</text>
+  <rect class="d-box-ok" x="150" y="36" width="470" height="48" rx="6"/>
+  <text class="d-txt d-mono" x="166" y="65">number <tspan class="d-bold">2</tspan>   datatype <tspan class="d-bold">0</tspan>   purpose <tspan class="d-bold">drawing</tspan></text>
+  <rect class="d-box-info" x="20" y="100" width="110" height="40" rx="4"/>
+  <text class="d-txt d-mono d-bold" x="75" y="125" text-anchor="middle">METAL2</text>
+  <rect class="d-box-ok" x="150" y="96" width="470" height="48" rx="6"/>
+  <text class="d-txt d-mono" x="166" y="125">number <tspan class="d-bold">6</tspan>   datatype <tspan class="d-bold">0</tspan>   purpose <tspan class="d-bold">drawing</tspan></text>
+  <line class="d-arrow" x1="230" y1="186" x2="230" y2="150" marker-end="url(#w09-arrow1)"/>
+  <text class="d-txt d-mono d-small" x="20" y="204">dict get $layers METAL2 number   → 6</text>
+  <text class="d-txt d-small d-muted" x="20" y="224">One key per level, from the outside in: first the layer, then the field.</text>
+  <text class="d-txt d-mono d-small" x="360" y="204">dict get $layers POLY</text>
+  <text class="d-txt d-mono d-small" x="360" y="224">→ number 2 datatype 0 purpose drawing</text>
+</svg>

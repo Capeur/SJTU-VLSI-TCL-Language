@@ -1,14 +1,19 @@
 ---
-title: "Week 9 Lab"
+title: "Lab: The layer table"
+description: "Week 9 lab: build a nested dict of Lumen-1's teaching layers from their GDS numbers, look one layer up, count shapes per layer with an array, and report in table order, never in array order."
 milestone: "m10"
 week: 9
 lesson: "lab"
-minutes: 0
-goals: []
-prerequisites: []
-glossary: []
+minutes: 60
+goals:
+  - Build a nested dict from a flat table, and read one record from it
+  - Count with an array, and print in a fixed order with dict for and lsort
+prerequisites: ["m10-w09-a", "m10-w09-b", "m10-w06-b"]
+glossary: [dictionary, array, datatype, gds, insertion-order]
 tcl_min: "8.6"
-sources: []
+sources:
+  - { title: "Tcl manual page: dict", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/dict.htm" }
+  - { title: "Tcl manual page: array", url: "https://www.tcl-lang.org/man/tcl8.6/TclCmd/array.htm" }
 runs_in: ["playground"]
 ai_assisted: true
 reviewed_by: ""
@@ -16,6 +21,94 @@ review_date: ""
 sidebar: {"label":"Lab","order":3}
 ---
 
-{/* P0 placeholder */}
+import LessonMeta from '../../../../components/LessonMeta.astro';
+import LabPlayground from '../../../../components/LabPlayground.astro';
+import Hints from '../../../../components/Hints.tsx';
+import TclPlayground from '../../../../components/TclPlayground.tsx';
+import GlossaryTerm from '../../../../components/GlossaryTerm.astro';
+import chip from '../../../../data/lumen-1.json';
+import expected from '../../../../../labs/m10/week-09/data/expected.txt?raw';
 
-Lab for week 9 (Tables of data) — content arrives in a later phase.
+<LessonMeta milestone="m10" week={9} lesson="lab" minutes={60} />
+
+## Goal
+
+**Build the layer table of {chip.name}, look one layer up, and count the shapes of a small layout on each layer.**
+
+Why it matters for chips: a <GlossaryTerm term="gds">GDS</GlossaryTerm> file stores numbers, not names, so every layout tool keeps a table that links the two. In M30 you will draw real shapes with layer numbers like these, and in M40 you will count and check the shapes of whole layouts. This lab builds the table once, with the tools of this week.
+
+## What you'll practise
+
+- [Lesson A: dict, a table of names and values](/SJTU-VLSI-TCL-Language/m10/week-09/lesson-a/): `dict keys`, `dict for`, nested `dict set` / `dict get`, `dict exists`.
+- [Lesson B: array, and choosing dict or array](/SJTU-VLSI-TCL-Language/m10/week-09/lesson-b/): `incr count($layer)`, `lsort [array names …]`.
+- [Week 6, Lesson B](/SJTU-VLSI-TCL-Language/m10/week-06/lesson-b/): `split` and `join`.
+
+## Specification
+
+- **Inputs.** The starter gives you three lines. **Keep them exactly as they are.** The checker changes the last two twice and runs your script again.
+  - `set layerNumbers {…}` is a <GlossaryTerm term="dictionary">dict</GlossaryTerm>: each teaching layer, then its GDS number, `layer.datatype`. These are teaching numbers, not any factory's. In this course, <GlossaryTerm term="datatype" /> 0 means the purpose `drawing` for every layer.
+  - `set shapeLayers {…}` gives the layer of each shape in a small layout, one element per shape. Some shapes may be on layers that are not in the table.
+  - `set lookUp METAL1` is the layer whose record you print.
+- **Output.** With these inputs, your script must print exactly:
+
+<pre class="tc-code" tabindex="0">{expected.trimEnd()}</pre>
+
+- **Line 1** lists the layers in table order.
+- **Line 2** is the record of `lookUp`: `number`, `datatype` and `purpose`. If `lookUp` is not in the table, print `METAL3: not in the table` (with its name).
+- **Then one count line per layer of the table, in table order**, even for a layer with 0 shapes: the name, the GDS number and the number of shapes. **Do not use the order of `array names` for this report:** it is not promised and may differ between Tcl versions. Walk the table with `dict for` instead.
+- **The Unknown line** names each layer that is not in the table once, sorted, with `, ` between them; or `Unknown: none`.
+- **The last line** gives the number of shapes, and how many of them are on unknown layers.
+- Words, capitals and punctuation must match. Extra spaces are forgiven.
+
+## Where to run this
+
+Type your commands under each step comment in the Playground tab. Press **Run** to see your output, and **Check my work** to grade it. If you prefer the terminal, get the lab folder first (see [Setup](/SJTU-VLSI-TCL-Language/setup/)): `labs/m10/week-09/` contains `starter.tcl` and `tests/test.tcl`.
+
+<LabPlayground lab="m10/week-09" />
+
+Your edits in the playground are not saved when you leave the page. Copy your script somewhere safe when you finish.
+
+## Step by step
+
+Press **Run** after every step, and compare your new lines with the specification.
+
+1. **Names.** `dict keys $layerNumbers` gives the layers in table order.
+2. **Records.** Start with `set layers [dict create]`. Walk `layerNumbers` with `dict for {name gds}`. Split `gds` at the dot, then `dict set` the fields `number`, `datatype` and `purpose` of the record `$name`.
+3. **Look up.** If `dict exists $layers $lookUp`, read the three fields with `dict get` and print them. Otherwise print that it is not in the table.
+4. **Count.** Set `count($name)` to 0 for every layer, with `dict for`. Then, for each shape: if its layer is in the table, `incr count($layer)`; if not, remember it with `set unknown($layer) 1` and count it as unknown.
+5. **Report.** Walk `layerNumbers` again with `dict for`, and print one count line per layer.
+6. **Unknown and totals.** `lsort [array names unknown]` gives the unknown layers once each, sorted. If that list is empty, print `Unknown: none`. Then print the totals.
+
+## Hints
+
+Open one hint at a time, only when you are stuck.
+
+<Hints client:visible hints={[
+  'Step 2: inside dict for {name gds} $layerNumbers {…}, write set parts [split $gds .], then dict set layers $name number [lindex $parts 0], the same for datatype with index 1, and dict set layers $name purpose drawing.',
+  'Step 4: an array keeps each key only once, so set unknown($layer) 1 remembers METAL7 once even if it appears twice. array names on an array that was never set gives an empty list, not an error.',
+  'If the checker says your counts are right but in the wrong order, look at the loop that prints them. It must be dict for over layerNumbers, not foreach over array names.',
+]} />
+
+## Check your work
+
+- **Browser:** press **Check my work** in the Playground tab.
+- **Terminal:** in the lab folder, run `tclsh tests/test.tcl`.
+
+You get one line per test:
+
+- `PASS`: this part is right.
+- `FAIL`: you see what was expected, what your script printed, often a hint, and which lesson section to revisit.
+- `TODO`: you have not done this step yet.
+- `NOTE`: the checker could not run a test. It tells you which input line to put back.
+
+The last line is `RESULT: PASS 10/10` when everything is right. The last two tests change the shapes and the layer to look up: first two unknown layers that each appear twice, then no unknown layer at all and a layer that is not in the table. They pass only if every line comes from the inputs.
+
+## Stretch goal: area per layer
+
+Shapes have sizes, not only layers. Paste your finished lab script below. Then change it so that each shape is a pair `{layer {x1 y1 x2 y2}}`, and add a second array, `area($layer)`, that adds up the area of the shapes on each layer (Week 5's rectangle maths). Print the areas in table order too. This part is not graded.
+
+<TclPlayground client:visible code={`# Paste your finished lab script here.
+
+# Then try shapes with rectangles:
+set shapes {{METAL1 {0 0 40 3}} {POLY {10 0 12 20}} {METAL1 {0 10 40 13}}}
+`} />
