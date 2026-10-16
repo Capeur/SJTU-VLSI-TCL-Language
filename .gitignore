@@ -5,3 +5,5 @@ dist/
 node_modules
 snippets/*
 !snippets/.gitkeep
+# Private reference solutions (a separate private repository, cloned here for local checks and by CI)
+solutions/
