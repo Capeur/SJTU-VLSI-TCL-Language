@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+# Read-only token for every job. (No job uses pull_request_target: pull requests from forks never get secrets.)
+permissions:
+  contents: read
+
 jobs:
   site:
     runs-on: ubuntu-latest
@@ -93,16 +97,26 @@ jobs:
     # Tests the M10 capstone grader and exam against the PRIVATE reference solutions
     # (Capeur/SJTU-VLSI-TCL-Language-solutions; decision log, P3 Week 10). Needs the repository secret
     # SOLUTIONS_DEPLOY_KEY: the private half of a READ-ONLY deploy key of that repository. Without it (before
-    # setup, or on a pull request from a fork, which never gets secrets) every step is skipped with a warning
-    # and the job still succeeds.
-    # CI logs of this public repository are public, so the tools print only check names and ok/FAIL, and
-    # every step also filters its output to those lines: no solution, answer or expected line can reach the log.
+    # setup, or on a pull request from a fork, which never gets secrets) the job is skipped with a warning
+    # and still succeeds.
+    # Safety rules (user review, P3 Week 10):
+    #   - read-only token; only official actions, pinned to a full commit SHA; no npm cache, no artifacts;
+    #   - everything that installs or runs third-party code (npm ci, the site build) happens BEFORE the key is
+    #     used; the key is used in ONE step only, the official checkout action, which deletes it at the end of
+    #     that step (persist-credentials: false);
+    #   - CI logs of this public repository are public, so the tools print only check names and ok/FAIL, and
+    #     every step also filters its output to those lines: no solution, answer or expected line can reach the log.
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         tcl: ['8.6', '9.0']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+        with:
+          persist-credentials: false
+      # The secret's value is only tested for being empty, with shell builtins; it is not passed on.
       - name: Is the solutions key set?
         id: key
         env:
@@ -114,17 +128,11 @@ jobs:
           else
             echo "available=true" >> "$GITHUB_OUTPUT"
           fi
-      - name: Check out the private solutions
+      # 1. Third-party code: installs and the build, before the key is used and before solutions/ exists.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
         if: steps.key.outputs.available == 'true'
-        uses: actions/checkout@v4
         with:
-          repository: Capeur/SJTU-VLSI-TCL-Language-solutions
-          ssh-key: ${{ secrets.SOLUTIONS_DEPLOY_KEY }}
-          path: solutions
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        if: steps.key.outputs.available == 'true'
-        with: { node-version: 22, cache: npm }
+          node-version: 22
       - name: Install dependencies
         if: steps.key.outputs.available == 'true'
         run: npm ci
@@ -143,6 +151,19 @@ jobs:
             }
             [ -n "$TCLSH" ] || echo "TCLSH=tclsh9.0" >> "$GITHUB_ENV"
           fi
+      - name: Build the site (for the browser check)
+        if: steps.key.outputs.available == 'true' && matrix.tcl == '8.6'
+        run: npm run build > /dev/null
+      # 2. The only step that sees the key.
+      - name: Check out the private solutions
+        if: steps.key.outputs.available == 'true'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+        with:
+          repository: Capeur/SJTU-VLSI-TCL-Language-solutions
+          ssh-key: ${{ secrets.SOLUTIONS_DEPLOY_KEY }}
+          path: solutions
+          persist-credentials: false
+      # 3. The checks. No install, no build, no key from here on.
       - name: Capstone data files match the reference solution
         if: steps.key.outputs.available == 'true'
         run: |
@@ -158,10 +179,9 @@ jobs:
         run: |
           set -o pipefail
           TCLSH=$TCLSH node solutions/tools/check-exam-answers.mjs 2>&1 | grep -E '^(ok  |FAIL|check-exam-answers:) '
-      - name: Exam and capstone in the browser (Wacl, headless Chrome)
+      - name: Exam and capstone in the built site (Wacl, headless Chrome)
         if: steps.key.outputs.available == 'true' && matrix.tcl == '8.6'
         run: |
           set -o pipefail
-          npm run build > /dev/null
           export CHROME="$(command -v google-chrome || command -v chromium-browser || command -v chromium)"
           node solutions/tools/check-browser.mjs 2>&1 | grep -E '^(ok  |FAIL|check-browser:) '
