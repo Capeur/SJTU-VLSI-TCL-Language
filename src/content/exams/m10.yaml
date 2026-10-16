@@ -6,8 +6,8 @@
 # output_hash is written by `node scripts/check-exam.mjs --write-hashes` from real tclsh output; CI checks it on
 # Tcl 8.6, 9.0 and Wacl. Avoid array order, long decimals and error texts that differ between Tcl versions.
 ai_assisted: true
-reviewed_by: ""
-review_date: ""
+reviewed_by: "David"
+review_date: "2026-10-16"
 title: "M10 exam: Tcl Syntax Core"
 items:
   # ---------- Week 1 ----------
